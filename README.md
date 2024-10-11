@@ -1,6 +1,8 @@
 # Z80Compiler
 Java command line application that disassembles a binary or Intel Hex file to a Z80 assembler file and/or listing file.
 
+Currently the project is work in progress.
+
 ## Development:
 The project was developed using:
 * openjdk 11.0.2
