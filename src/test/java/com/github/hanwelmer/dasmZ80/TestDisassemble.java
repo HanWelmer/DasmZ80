@@ -102,4 +102,16 @@ public class TestDisassemble extends DasmZ80 {
 	assert ("       OUT  (0x12),A\n".equals(result.get(0).toAsmString()));
   }
 
+  @Test
+  public void testBitOperations() {
+	ConfigurationParameters parameters = null;
+	Byte[] bytes = { 0xCB - 256, 0x00 };
+	ByteReader reader = new ReadFromArray(bytes);
+	HashMap<Integer, AssemblyCode> result = disassemble(parameters, reader);
+	assert (result != null);
+	assert (result.size() == 1);
+	assert (result.get(0) != null);
+	assert ("       RLC  B\n".equals(result.get(0).toAsmString()));
+  }
+
 }

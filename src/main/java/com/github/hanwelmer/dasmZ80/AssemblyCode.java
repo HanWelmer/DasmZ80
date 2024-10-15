@@ -86,4 +86,8 @@ public class AssemblyCode {
   public ArrayList<Byte> getBytes() {
 	return bytes;
   }
+
+  public void setMnemonic(String mnemonic) {
+	this.mnemonic = mnemonic;
+  }
 }

@@ -19,11 +19,7 @@ public class Decoder {
 	  throw new RuntimeException(errorMessage);
 	}
 	// TODO
-	if ("<next>".equals(binCode.getMnemonic())) {
-	  String errorMessage = "<next> not yet implemeneted.";
-	  System.out.print(errorMessage);
-	  throw new RuntimeException(errorMessage);
-	} else if ("<skip,next>".equals(binCode.getMnemonic())) {
+	if ("<skip,next>".equals(binCode.getMnemonic())) {
 	  String errorMessage = "<skip,next> not yet implemeneted.";
 	  System.out.print(errorMessage);
 	  throw new RuntimeException(errorMessage);
@@ -31,6 +27,24 @@ public class Decoder {
 
 	AssemblyCode asmCode = new AssemblyCode(address, binCode.getMnemonic());
 	asmCode.addByte(nextByte);
+
+	// Process prefix (0xCB, )
+	if ("<next>".equals(binCode.getMnemonic())) {
+	  nextByte = reader.getNextByte();
+	  key = key * 256 + nextByte;
+	  if (nextByte < 0) {
+		key += 256;
+	  }
+	  binCode = hashMap.get(key);
+	  if (binCode == null) {
+		String errorMessage = String.format("Unsupported code 0x%04X at address 0x%04X", key, address);
+		System.out.print(errorMessage);
+		throw new RuntimeException(errorMessage);
+	  }
+	  asmCode.setMnemonic(binCode.getMnemonic());
+	  asmCode.addByte(nextByte);
+	}
+
 	// Process word constant / address.
 	if (binCode.getMnemonic().contains("@")) {
 	  Byte byte2 = reader.getNextByte();
@@ -72,6 +86,10 @@ public class Decoder {
 	hashMap.put(new Integer(0x10), new BinaryCode(0x10, 2, "10%%", "DJNZ %"));
 	hashMap.put(new Integer(0x76), new BinaryCode(0x76, 1, "76", "HALT"));
 	hashMap.put(new Integer(0xD3), new BinaryCode(0xD3, 2, "D3&&", "OUT  (&),A"));
+	hashMap.put(new Integer(0xCB), new BinaryCode(0xCB, 2, "CB", "<next>"));
+	hashMap.put(new Integer(0xCB00), new BinaryCode(0xCB00, 2, "CB00", "RLC  B"));
+
+	// CB00 CB00 2 RLC B
   }
 
 }
