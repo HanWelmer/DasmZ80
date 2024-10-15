@@ -87,6 +87,10 @@ public class AssemblyCode {
 	return bytes;
   }
 
+  public String getMnemonic() {
+	return mnemonic;
+  }
+
   public void setMnemonic(String mnemonic) {
 	this.mnemonic = mnemonic;
   }
