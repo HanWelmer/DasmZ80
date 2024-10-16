@@ -11,8 +11,8 @@ public class BinFileReader implements ByteReader {
   private FileInputStream fis = null;
 
   @Override
-  public void open(ConfigurationParameters parameters) throws FileNotFoundException {
-	inputFile = new File(parameters.fileName);
+  public void open(String fileName) throws FileNotFoundException {
+	inputFile = new File(fileName);
 	fis = new FileInputStream(inputFile);
   }
 

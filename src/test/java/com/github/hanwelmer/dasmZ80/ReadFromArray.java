@@ -15,7 +15,7 @@ public class ReadFromArray implements ByteReader {
   }
 
   @Override
-  public void open(ConfigurationParameters parameters) {
+  public void open(String fileName) {
   }
 
   @Override

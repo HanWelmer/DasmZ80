@@ -11,8 +11,8 @@ public class AssemblyWriter implements AbstractWriter {
   private BufferedWriter writer = null;
 
   @Override
-  public void open(ConfigurationParameters parameters) throws IOException {
-	file = new File(setAsmExtension(parameters.fileName));
+  public void open(String fileName) throws IOException {
+	file = new File(setExtension(fileName));
 	writer = new BufferedWriter(new FileWriter(file));
   }
 
@@ -34,7 +34,7 @@ public class AssemblyWriter implements AbstractWriter {
 	}
   }
 
-  private String setAsmExtension(String fileName) {
+  private String setExtension(String fileName) {
 	if (fileName.endsWith(".bin")) {
 	  return fileName.replace(".bin", ".asm");
 	} else if (fileName.endsWith(".hex")) {

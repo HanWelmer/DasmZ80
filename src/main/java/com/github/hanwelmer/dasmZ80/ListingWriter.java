@@ -12,8 +12,8 @@ public class ListingWriter implements AbstractWriter {
   private static final String INDENT = "                    ";
 
   @Override
-  public void open(ConfigurationParameters parameters) throws IOException {
-	file = new File(setExtension(parameters.fileName));
+  public void open(String fileName) throws IOException {
+	file = new File(setExtension(fileName));
 	writer = new BufferedWriter(new FileWriter(file));
   }
 

@@ -5,7 +5,7 @@ import java.io.IOException;
 
 public interface ByteReader {
 
-  public void open(ConfigurationParameters parameters) throws FileNotFoundException;
+  public void open(String fileName) throws FileNotFoundException;
 
   public Byte getByte() throws IOException;
 
