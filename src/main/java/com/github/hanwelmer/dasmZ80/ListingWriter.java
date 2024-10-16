@@ -9,7 +9,6 @@ public class ListingWriter implements AbstractWriter {
 
   private File file = null;
   private BufferedWriter writer = null;
-  private static final String INDENT = "                    ";
 
   @Override
   public void open(String fileName) throws IOException {
