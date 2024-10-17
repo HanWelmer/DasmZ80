@@ -15,7 +15,7 @@ public class Decoder {
 
 	BinaryCode binCode = hashMap.get(key);
 	if (binCode == null) {
-	  String errorMessage = String.format("Unsupported code 0x%02X at address 0x%04X", nextByte, address);
+	  String errorMessage = String.format("Unsupported code 0x%02X at address 0x%04X\n", nextByte, address);
 	  System.out.print(errorMessage);
 	  throw new RuntimeException(errorMessage);
 	}
@@ -33,7 +33,7 @@ public class Decoder {
 
 	  binCode = hashMap.get(key);
 	  if (binCode == null) {
-		String errorMessage = String.format("Unsupported code 0x%04X at address 0x%04X", key, address);
+		String errorMessage = String.format("Unsupported code 0x%04X at address 0x%04X\n", key, address);
 		System.out.print(errorMessage);
 		throw new RuntimeException(errorMessage);
 	  }
@@ -49,7 +49,7 @@ public class Decoder {
 
 		binCode = hashMap.get(key);
 		if (binCode == null) {
-		  String errorMessage = String.format("Unsupported code 0x%04X at address 0x%04X", key, address);
+		  String errorMessage = String.format("Unsupported code 0x%04X at address 0x%04X\n", key, address);
 		  System.out.print(errorMessage);
 		  throw new RuntimeException(errorMessage);
 		}
@@ -61,7 +61,7 @@ public class Decoder {
 
 		// Process IX/IY displacement.
 		if (!asmCode.getMnemonic().contains("$")) {
-		  String errorMessage = String.format("Unsupported code 0x%08X at address 0x%04X", key, address);
+		  String errorMessage = String.format("Unsupported code 0x%08X at address 0x%04X\n", key, address);
 		  System.out.print(errorMessage);
 		  throw new RuntimeException(errorMessage);
 		}
