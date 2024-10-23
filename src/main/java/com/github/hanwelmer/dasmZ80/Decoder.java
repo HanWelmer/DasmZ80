@@ -7,7 +7,7 @@ public class Decoder {
 
   private HashMap<Integer, BinaryCode> hashMap = new HashMap<Integer, BinaryCode>(2);
 
-  public AssemblyCode get(int address, Byte nextByte, ByteReader reader) throws IOException {
+  public AssemblyCode get(int address, Byte nextByte, ByteReader reader) throws IOException, IllegalOpcodeException {
 	Integer key = new Integer(nextByte);
 	if (key < 0) {
 	  key += 256;
@@ -16,8 +16,7 @@ public class Decoder {
 	BinaryCode binCode = hashMap.get(key);
 	if (binCode == null) {
 	  String errorMessage = String.format("Unsupported code 0x%02X at address 0x%04X\n", nextByte, address);
-	  System.out.print(errorMessage);
-	  throw new RuntimeException(errorMessage);
+	  throw new IllegalOpcodeException(errorMessage);
 	}
 
 	AssemblyCode asmCode = new AssemblyCode(address, binCode.getMnemonic());
@@ -34,8 +33,7 @@ public class Decoder {
 	  binCode = hashMap.get(key);
 	  if (binCode == null) {
 		String errorMessage = String.format("Unsupported code 0x%04X at address 0x%04X\n", key, address);
-		System.out.print(errorMessage);
-		throw new RuntimeException(errorMessage);
+		throw new IllegalOpcodeException(errorMessage);
 	  }
 
 	  if ("<skip,next>".equals(binCode.getMnemonic())) {
@@ -50,8 +48,7 @@ public class Decoder {
 		binCode = hashMap.get(key);
 		if (binCode == null) {
 		  String errorMessage = String.format("Unsupported code 0x%04X at address 0x%04X\n", key, address);
-		  System.out.print(errorMessage);
-		  throw new RuntimeException(errorMessage);
+		  throw new IllegalOpcodeException(errorMessage);
 		}
 
 		asmCode.setMnemonic(binCode.getMnemonic());
@@ -62,8 +59,7 @@ public class Decoder {
 		// Process IX/IY displacement.
 		if (!asmCode.getMnemonic().contains("$")) {
 		  String errorMessage = String.format("Unsupported code 0x%08X at address 0x%04X\n", key, address);
-		  System.out.print(errorMessage);
-		  throw new RuntimeException(errorMessage);
+		  throw new IllegalOpcodeException(errorMessage);
 		}
 		applyDisplacement(asmCode, byte3);
 	  } else {

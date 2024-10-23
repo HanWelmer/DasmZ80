@@ -36,4 +36,9 @@ public class ReadFromArray implements ByteReader {
   public void close() {
   }
 
+  @Override
+  public void seek(int address) {
+	index = address;
+  }
+
 }

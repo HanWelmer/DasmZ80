@@ -12,4 +12,6 @@ public interface ByteReader {
   public Byte getNextByte() throws IOException;
 
   public void close();
+
+  public void seek(int address) throws IOException;
 }
