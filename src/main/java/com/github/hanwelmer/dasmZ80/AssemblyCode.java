@@ -9,10 +9,6 @@ public class AssemblyCode {
   private String mnemonic;
   private String comment;
 
-  private static final String INDENT8 = "        ";
-  private static final String INDENT20 = "                    ";
-  private static final String INDENT24 = "                        ";
-
   public AssemblyCode(int address, ArrayList<Byte> bytes, String label, String mnemonic, String comment) {
 	this.address = address;
 	this.bytes = bytes;
@@ -42,43 +38,6 @@ public class AssemblyCode {
 	bytes.add(nextByte);
   }
 
-  public String toAsmString() {
-	String result = INDENT8;
-	// label
-	if (label != null && label.length() > 0) {
-	  result = label + ":";
-	}
-
-	// mnemonic
-	if (mnemonic != null && mnemonic.length() > 0) {
-	  result += INDENT8;
-	  result = result.substring(0, 7);
-	  result += mnemonic;
-	}
-
-	// comment
-	if (comment != null && comment.length() > 0) {
-	  result += INDENT24;
-	  result = result.substring(0, 31);
-	  result += comment;
-	}
-
-	result += "\n";
-	return result;
-  }
-
-  public String toLstString() {
-	String result = String.format("%04X:", address);
-	if (bytes != null) {
-	  for (Byte byt : bytes) {
-		result += String.format(" %02X", byt);
-	  }
-	}
-	result += INDENT20;
-	result = result.substring(0, 19);
-	return result + toAsmString();
-  }
-
   public void updateMnemonic(String oldValue, String newValue) {
 	mnemonic = mnemonic.replace(oldValue, newValue);
   }
@@ -93,5 +52,47 @@ public class AssemblyCode {
 
   public void setMnemonic(String mnemonic) {
 	this.mnemonic = mnemonic;
+  }
+
+  public String toString() {
+	// address
+	String result = String.format("%04X: ", address);
+
+	// binary code
+	if (bytes != null) {
+	  for (Byte byt : bytes) {
+		result += String.format("%02X ", byt);
+	  }
+	}
+
+	// label
+	if (label != null && label.length() > 0) {
+	  if (result.length() < 18) {
+		result += String.format("%18s", "");
+		result = result.substring(0, 18);
+	  }
+	  result += label + ":";
+	}
+
+	// mnemonic
+	if (mnemonic != null && mnemonic.length() > 0) {
+	  if (result.length() < 28) {
+		result += String.format("%28s", "");
+		;
+		result = result.substring(0, 28);
+	  }
+	  result += mnemonic;
+	}
+
+	// comment
+	if (comment != null && comment.length() > 0) {
+	  if (result.length() < 50) {
+		result += String.format("%50s", "");
+		result = result.substring(0, 50);
+	  }
+	  result += comment;
+	}
+
+	return result + "\n";
   }
 }

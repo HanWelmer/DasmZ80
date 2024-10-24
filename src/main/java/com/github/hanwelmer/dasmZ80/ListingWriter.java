@@ -18,7 +18,7 @@ public class ListingWriter implements AbstractWriter {
 
   @Override
   public void write(AssemblyCode code) throws IOException {
-	writer.write(code.toLstString());
+	writer.write(code.toString());
   }
 
   @Override

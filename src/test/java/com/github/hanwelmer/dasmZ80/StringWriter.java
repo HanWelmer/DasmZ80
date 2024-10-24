@@ -14,7 +14,7 @@ public class StringWriter implements AbstractWriter {
 
   @Override
   public void write(AssemblyCode code) throws IOException {
-	output.add(code.toAsmString());
+	output.add(code.toString());
   }
 
   @Override
