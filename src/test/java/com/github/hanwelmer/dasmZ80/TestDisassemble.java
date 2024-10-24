@@ -11,8 +11,8 @@ public class TestDisassemble extends DasmZ80 {
 	StringWriter writer = new StringWriter();
 	disassemble("test", reader, writer);
 	assert (writer.output.size() > 0);
-	assert ("                               ;Unprocessed binary code from input file\n".equals(writer.output.get(5)));
-	assert ("                               ;0000: DD DC 34 12\n".equals(writer.output.get(7)));
+	assert ("                               ;Unprocessed binary code from input file\n".equals(writer.output.get(7)));
+	assert ("                               ;0000: DD DC 34 12\n".equals(writer.output.get(9)));
   }
 
   @Test
@@ -24,14 +24,14 @@ public class TestDisassemble extends DasmZ80 {
 	StringWriter writer = new StringWriter();
 	disassemble("test", reader, writer);
 	assert (writer.output.size() > 0);
-	assert ("       NOP\n".equals(writer.output.get(2)));
-	assert ("       LD   (BC),A\n".equals(writer.output.get(3)));
-	assert ("       LD   BC,0x1234\n".equals(writer.output.get(4)));
-	assert ("                               ;Unprocessed binary code from input file\n".equals(writer.output.get(8)));
-	assert ("                               ;0005: DD DC 34 12 09 0A 0B 0C 0D 0E 0F\n".equals(writer.output.get(10)));
+	assert ("       NOP\n".equals(writer.output.get(4)));
+	assert ("       LD   (BC),A\n".equals(writer.output.get(5)));
+	assert ("       LD   BC,0x1234\n".equals(writer.output.get(6)));
+	assert ("                               ;Unprocessed binary code from input file\n".equals(writer.output.get(10)));
+	assert ("                               ;0005: DD DC 34 12 09 0A 0B 0C 0D 0E 0F\n".equals(writer.output.get(12)));
 	assert ("                               ;0010: 10 11 12 13 14 15 16 17 18 19 1A 1B 1C 1D 1E 1F\n"
-	    .equals(writer.output.get(11)));
-	assert ("                               ;0020: 20 21 22\n".equals(writer.output.get(12)));
+	    .equals(writer.output.get(13)));
+	assert ("                               ;0020: 20 21 22\n".equals(writer.output.get(14)));
   }
 
 }

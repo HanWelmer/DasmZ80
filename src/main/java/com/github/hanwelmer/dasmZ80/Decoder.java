@@ -15,7 +15,7 @@ public class Decoder {
 
 	BinaryCode binCode = hashMap.get(key);
 	if (binCode == null) {
-	  String errorMessage = String.format("Unsupported code 0x%02X at address 0x%04X\n", nextByte, address);
+	  String errorMessage = String.format("Unsupported code 0x%02X at address 0x%04X", nextByte, address);
 	  throw new IllegalOpcodeException(errorMessage);
 	}
 
