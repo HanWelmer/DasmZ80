@@ -17,6 +17,11 @@ public class AssemblyCode {
 	this.comment = comment;
   }
 
+  public AssemblyCode(int address, ArrayList<Byte> bytes) {
+	this.address = address;
+	this.bytes = bytes;
+  }
+
   public AssemblyCode(int address, String mnemonic, String comment) {
 	this.address = address;
 	this.label = "";
@@ -56,12 +61,12 @@ public class AssemblyCode {
 
   public String toString() {
 	// address
-	String result = String.format("%04X: ", address);
+	String result = String.format("%04X:", address);
 
 	// binary code
 	if (bytes != null) {
 	  for (Byte byt : bytes) {
-		result += String.format("%02X ", byt);
+		result += String.format(" %02X", byt);
 	  }
 	}
 
