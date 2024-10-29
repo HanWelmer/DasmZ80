@@ -82,19 +82,23 @@ public class DasmZ80 {
 	Decoder decoder = new Decoder();
 	HashMap<Integer, AssemblyCode> decoded = new HashMap<Integer, AssemblyCode>();
 	int address = 0;
+	int lineNr = 0;
 	Byte nextByte = null;
 
 	try {
 	  while ((nextByte = reader.getByte()) != null) {
 		AssemblyCode asmCode = decoder.get(address, nextByte, reader);
-		decoded.put(address, asmCode);
+		decoded.put(++lineNr, asmCode);
 		address += asmCode.getBytes().size();
+		if (asmCode.getMnemonic().startsWith("RET")) {
+		  decoded.put(++lineNr, new AssemblyCode(address, ""));
+		}
 	  }
 	  writeOutput(fileName, writer, address, decoded);
 	} catch (IllegalOpcodeException e) {
 	  System.out.print(e.getMessage() + "\n");
-	  decoded.put(address, new AssemblyCode(address, e.getMessage()));
-	  decoded.put(address, new AssemblyCode(0, ""));
+	  decoded.put(++lineNr, new AssemblyCode(address, e.getMessage()));
+	  decoded.put(++lineNr, new AssemblyCode(0, ""));
 	  writeOutput(fileName, writer, address, decoded);
 	  writeRemainderOfInput(address, reader, writer);
 	} catch (IOException e) {
