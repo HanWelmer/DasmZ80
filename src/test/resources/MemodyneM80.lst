@@ -739,9 +739,9 @@
 0415                    Unsupported code 0xDDDC at address 0x0415
 0415
 0415                    .end
-0415                                          ;
-0415                                          ;Unprocessed binary code from input file
-0415                                          ;
+0415                                        ;
+0415                                        ;Unprocessed binary code from input file
+0415                                        ;
 0415 DDDCCB64 CACE23D1 6ED8CE
 0420 6ED7DCDD D8CACE0A D2CBA0D1 23D0CF24
 0430 D328DCCC CB00CDDA CCD9D7DD DCCADCDD
