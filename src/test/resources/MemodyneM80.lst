@@ -9,20 +9,24 @@
 0008: C1                    POP  BC
 0009: 37                    SCF
 000A: C9                    RET
+000B:
 000B: DD CB 02 F6           SET  6,(IX+2)
 000F: CF                    RST  0x08
 0010: C1                    POP  BC
 0011: F7                    RST  0x30
 0012: C9                    RET
+0013:
 0013: DD 36 48 D8           LD   (IX+72),0xD8
 0017: CF                    RST  0x08
 0018: 22 54 1B              LD   (0x1B54),HL
 001B: C9                    RET
+001C:
 001C: E7                    RST  0x20
 001D: CB EE                 SET  5,(HL)
 001F: CF                    RST  0x08
 0020: 21 03 1B              LD   HL,0x1B03
 0023: C9                    RET
+0024:
 0024: E7                    RST  0x20
 0025: CB 86                 RES  0,(HL)
 0027: CF                    RST  0x08
@@ -31,11 +35,14 @@
 002B: 34                    INC  (HL)
 002C: CB BE                 RES  7,(HL)
 002E: C9                    RET
+002F:
 002F: DE 13                 SBC  A,0x13
 0031: CB BB                 RES  7,E
 0033: C9                    RET
+0034:
 0034: 11 32 04              LD   DE,0x0432
 0037: C9                    RET
+0038:
 0038: DD CB 02 66           BIT  4,(IX+2)
 003C: 28 06                 JR   Z,lbl0044
 003E: CB 21                 SLA  C
@@ -44,6 +51,7 @@
 0043: 7F                    LD   A,A
 0044: ED 43 0D 1B           LD   (0x1B0D),BC
 0048: C9                    RET
+0049:
 0049: B7                    OR   A
 004A: ED 42                 SBC  HL,BC
 004C: 30 04                 JR   NC,lbl0052
@@ -54,10 +62,12 @@
 0054: 2A 54 1B              LD   HL,(0x1B54)
 0057: B7                    OR   A
 0058: C9                    RET
+0059:
 0059: E7                    RST  0x20
 005A: 2B                    DEC  HL
 005B: CB 56                 BIT  2,(HL)
 005D: C0                    RET  NZ
+005E:
 005E: D7                    RST  0x10
 005F: 31 00 1C              LD   SP,0x1C00
 0062: ED 5E                 IM   2
@@ -106,22 +116,28 @@
 00BA: 28 18                 JR   Z,lbl00D4
 00BC: B7                    OR   A
 00BD: F8                    RET  M
+00BE:
 00BE: DD BE 07              CP   (IX+7)
 00C1: C0                    RET  NZ
+00C2:
 00C2: DD 36 0A C7           LD   (IX+10),0xC7
 00C6: C9                    RET
+00C7:
 00C7: DD CB 05 46           BIT  0,(IX+5)
 00CB: 20 0C                 JR   NZ,lbl00D9
 00CD: AF                    XOR  A
 00CE: D3 10                 OUT  (0x10),A
 00D0: DD 35 5D              DEC  (IX+93)
 00D3: C0                    RET  NZ
+00D4:
 00D4: DD 36 0A D9           LD   (IX+10),0xD9
 00D8: C9                    RET
+00D9:
 00D9: DD 36 0A E2           LD   (IX+10),0xE2
 00DD: 3E 28                 LD   A,0x28
 00DF: D3 11                 OUT  (0x11),A
 00E1: C9                    RET
+00E2:
 00E2: 3E AA                 LD   A,0xAA
 00E4: D3 10                 OUT  (0x10),A
 00E6: 16 0A                 LD   D,0x0A
@@ -138,6 +154,7 @@
 00FB: D3 11                 OUT  (0x11),A
 00FD: 77                    LD   (HL),A
 00FE: C9                    RET
+00FF:
 00FF: 21 66 1B              LD   HL,0x1B66
 0102: AF                    XOR  A
 0103: 77                    LD   (HL),A
@@ -148,6 +165,7 @@
 0109: 1A                    LD   A,(DE)
 010A: CD 32 01              CALL 0x0132
 010D: D8                    RET  C
+010E:
 010E: ED 6F                 RLD
 0110: 23                    INC  HL
 0111: ED 6F                 RLD
@@ -160,6 +178,7 @@
 0120: 09                    ADD  HL,BC
 0121: 00                    NOP
 0122: C0                    RET  NZ
+0123:
 0123: 05                    DEC  B
 0124: 8F                    ADC  A,A
 0125: 03                    INC  BC
@@ -175,15 +194,19 @@
 0131: CF                    RST  0x08
 0132: D6 30                 SUB  0x30
 0134: D8                    RET  C
+0135:
 0135: FE 0A                 CP   0x0A
 0137: 3F                    CCF
 0138: F8                    RET  M
+0139:
 0139: D6 07                 SUB  0x07
 013B: FE 0A                 CP   0x0A
 013D: D8                    RET  C
+013E:
 013E: FE 10                 CP   0x10
 0140: 3F                    CCF
 0141: C9                    RET
+0142:
 0142: 09                    ADD  HL,BC
 0143: 00                    NOP
 0144: 09                    ADD  HL,BC
@@ -234,8 +257,10 @@
 0176: 78                    LD   A,B
 0177: 02                    LD   (BC),A
 0178: E0                    RET  PO
+0179:
 0179: 02                    LD   (BC),A
 017A: C0                    RET  NZ
+017B:
 017B: 02                    LD   (BC),A
 017C: 17                    RLA
 017D: 01 2A 01              LD   BC,0x012A
@@ -258,6 +283,7 @@
 0190: 09                    ADD  HL,BC
 0191: 00                    NOP
 0192: E8                    RET  PE
+0193:
 0193: 03                    INC  BC
 0194: 09                    ADD  HL,BC
 0195: 00                    NOP
@@ -274,6 +300,7 @@
 01A0: 09                    ADD  HL,BC
 01A1: 00                    NOP
 01A2: C0                    RET  NZ
+01A3:
 01A3: 05                    DEC  B
 01A4: 8F                    ADC  A,A
 01A5: 03                    INC  BC
@@ -283,6 +310,7 @@
 01A9: 03                    INC  BC
 01AA: DD 36 08 AF           LD   (IX+8),0xAF
 01AE: C9                    RET
+01AF:
 01AF: DD 36 08 C5           LD   (IX+8),0xC5
 01B3: 32 5B 1B              LD   (0x1B5B),A
 01B6: 3E 43                 LD   A,0x43
@@ -292,9 +320,11 @@
 01BE: DD CB 04 66           BIT  4,(IX+4)
 01C2: 20 23                 JR   NZ,lbl01E7
 01C4: C9                    RET
+01C5:
 01C5: 32 5C 1B              LD   (0x1B5C),A
 01C8: DD 36 08 CD           LD   (IX+8),0xCD
 01CC: C9                    RET
+01CD:
 01CD: 2A 5B 1B              LD   HL,(0x1B5B)
 01D0: 45                    LD   B,L
 01D1: 6C                    LD   L,H
@@ -308,10 +338,13 @@
 01E0: 3A 07 1B              LD   A,(0x1B07)
 01E3: B7                    OR   A
 01E4: F8                    RET  M
+01E5:
 01E5: B8                    CP   B
 01E6: C0                    RET  NZ
+01E7:
 01E7: DD 36 08 EB           LD   (IX+8),0xEB
 01EB: C9                    RET
+01EC:
 01EC: F3                    DI
 01ED: 2A 4E 1B              LD   HL,(0x1B4E)
 01F0: 5E                    LD   E,(HL)
@@ -319,14 +352,17 @@
 01F2: CD 69 06              CALL 0x0669
 01F5: ED 53 4E 1B           LD   (0x1B4E),DE
 01F9: D0                    RET  NC
+01FA:
 01FA: 21 06 04              LD   HL,0x0406
 01FD: 22 4E 1B              LD   (0x1B4E),HL
 0200: C9                    RET
+0201:
 0201: 21 62 1B              LD   HL,0x1B62
 0204: AF                    XOR  A
 0205: BE                    CP   (HL)
 0206: 37                    SCF
 0207: C8                    RET  Z
+0208:
 0208: 35                    DEC  (HL)
 0209: 23                    INC  HL
 020A: EF                    RST  0x28
@@ -338,12 +374,14 @@
 0212: 5E                    LD   E,(HL)
 0213: B7                    OR   A
 0214: C9                    RET
+0215:
 0215: DD 36 48 3F           LD   (IX+72),0x3F
 0219: CF                    RST  0x08
 021A: 21 62 1B              LD   HL,0x1B62
 021D: AF                    XOR  A
 021E: B6                    OR   (HL)
 021F: C8                    RET  Z
+0220:
 0220: 35                    DEC  (HL)
 0221: 23                    INC  HL
 0222: EF                    RST  0x28
@@ -354,11 +392,14 @@
 022A: 30 16                 JR   NC,lbl0242
 022C: FE 13                 CP   0x13
 022E: D0                    RET  NC
+022F:
 022F: FE 11                 CP   0x11
 0231: 30 13                 JR   NC,lbl0246
 0233: C9                    RET
+0234:
 0234: FE 55                 CP   0x55
 0236: D0                    RET  NC
+0237:
 0237: FE 40                 CP   0x40
 0239: 30 0B                 JR   NC,lbl0246
 023B: 21 71 11              LD   HL,0x1171
@@ -366,11 +407,13 @@
 023F: 00                    NOP
 0240: B7                    OR   A
 0241: C9                    RET
+0242:
 0242: FE 2E                 CP   0x2E
 0244: 38 F5                 JR   C,lbl023B
 0246: 59                    LD   E,C
 0247: 50                    LD   D,B
 0248: C9                    RET
+0249:
 0249: 21 62 1B              LD   HL,0x1B62
 024C: 7E                    LD   A,(HL)
 024D: 36 00                 LD   (HL),0x00
@@ -381,11 +424,14 @@
 0254: CF                    RST  0x08
 0255: A7                    AND  A
 0256: F0                    RET  P
+0257:
 0257: C6 80                 ADD  A,0x80
 0259: FE 3A                 CP   0x3A
 025B: F8                    RET  M
+025C:
 025C: C6 07                 ADD  A,0x07
 025E: C9                    RET
+025F:
 025F: 2A 52 1B              LD   HL,(0x1B52)
 0262: 22 50 1B              LD   (0x1B50),HL
 0265: 21 00 00              LD   HL,0x0000
@@ -398,6 +444,7 @@
 0273: DB 11                 IN   A,(0x11)
 0275: CB 5F                 BIT  3,A
 0277: C9                    RET
+0278:
 0278: F7                    RST  0x30
 0279: 1A                    LD   A,(DE)
 027A: 06 0A                 LD   B,0x0A
@@ -408,12 +455,14 @@
 0284: CB C6                 SET  0,(HL)
 0286: CD 6F 02              CALL 0x026F
 0289: C0                    RET  NZ
+028A:
 028A: 78                    LD   A,B
 028B: CB 47                 BIT  0,A
 028D: CB 87                 RES  0,A
 028F: 77                    LD   (HL),A
 0290: D3 03                 OUT  (0x03),A
 0292: C0                    RET  NZ
+0293:
 0293: D7                    RST  0x10
 0294: B9                    CP   C
 0295: 03                    INC  BC
@@ -469,6 +518,7 @@
 02CF: 2B                    DEC  HL
 02D0: CB A6                 RES  4,(HL)
 02D2: D8                    RET  C
+02D3:
 02D3: CB E6                 SET  4,(HL)
 02D5: CF                    RST  0x08
 02D6: 9F                    SBC  A,A
@@ -476,6 +526,7 @@
 02D8: 24                    INC  H
 02D9: 00                    NOP
 02DA: D8                    RET  C
+02DB:
 02DB: 06 D8                 LD   B,0xD8
 02DD: 06 15                 LD   B,0x15
 02DF: 02                    LD   (BC),A
@@ -493,8 +544,10 @@
 02FA: CF                    RST  0x08
 02FB: DD 35 5A              DEC  (IX+90)
 02FE: C0                    RET  NZ
+02FF:
 02FF: D7                    RST  0x10
 0300: D8                    RET  C
+0301:
 0301: 06 00                 LD   B,0x00
 0303: 04                    INC  B
 0304: 80                    ADD  A,B
@@ -546,10 +599,13 @@
 033E: DF                    RST  0x18
 033F: 07                    RLCA
 0340: C8                    RET  Z
+0341:
 0341: 07                    RLCA
 0342: C8                    RET  Z
+0343:
 0343: 07                    RLCA
 0344: C8                    RET  Z
+0345:
 0345: 07                    RLCA
 0346: FF                    RST  0x38
 0347: 06 BB                 LD   B,0xBB
@@ -571,13 +627,16 @@
 0365: 20 0B                 JR   NZ,lbl0372
 0367: 35                    DEC  (HL)
 0368: C0                    RET  NZ
+0369:
 0369: DD CB 0E AE           RES  5,(IX+14)
 036D: CB 6F                 BIT  5,A
 036F: C0                    RET  NZ
+0370:
 0370: 34                    INC  (HL)
 0371: D7                    RST  0x10
 0372: CB 6F                 BIT  5,A
 0374: C0                    RET  NZ
+0375:
 0375: 36 19                 LD   (HL),0x19
 0377: D7                    RST  0x10
 0378: E7                    RST  0x20
@@ -602,6 +661,7 @@
 0399: DD 36 4C EF           LD   (IX+76),0xEF
 039D: B7                    OR   A
 039E: C9                    RET
+039F:
 039F: E7                    RST  0x20
 03A0: CB 8E                 RES  1,(HL)
 03A2: DD 36 4C D8           LD   (IX+76),0xD8
@@ -610,6 +670,7 @@
 03AA: FF                    RST  0x38
 03AB: 11 3C 04              LD   DE,0x043C
 03AE: C9                    RET
+03AF:
 03AF: 21 0E 1A              LD   HL,0x1A0E
 03B2: 3E 04                 LD   A,0x04
 03B4: AE                    XOR  (HL)
@@ -628,10 +689,12 @@
 03CD: FF                    RST  0x38
 03CE: 11 07 04              LD   DE,0x0407
 03D1: C9                    RET
+03D2:
 03D2: 01 01 22              LD   BC,0x2201
 03D5: 11 16 04              LD   DE,0x0416
 03D8: FF                    RST  0x38
 03D9: C9                    RET
+03DA:
 03DA: 01 01 26              LD   BC,0x2601
 03DD: 18 F6                 JR   lbl03D5
 03DF: CD FF 00              CALL 0x00FF
@@ -664,14 +727,17 @@
 0406: DF                    RST  0x18
 0407: DC CA CB              CALL C,0xCBCA
 040A: C8                    RET  Z
+040B:
 040B: D1                    POP  DE
 040C: 14                    INC  D
 040D: DB 12                 IN   A,(0x12)
 040F: D8                    RET  C
+0410:
 0410: CE 14                 ADC  A,0x14
 0412: CE 08                 ADC  A,0x08
 0414: D7                    RST  0x10
-0000:
+0415:                       Unsupported code 0xDDDC at address 0x0415
+0415:
 0415:                       .end
 0415:                                             ;
 0415:                                             ;Unprocessed binary code from input file

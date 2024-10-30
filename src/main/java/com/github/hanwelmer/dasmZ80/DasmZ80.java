@@ -96,9 +96,10 @@ public class DasmZ80 {
 	  }
 	  writeOutput(fileName, writer, address, decoded);
 	} catch (IllegalOpcodeException e) {
-	  System.out.print(e.getMessage() + "\n");
-	  decoded.put(++lineNr, new AssemblyCode(address, e.getMessage()));
-	  decoded.put(++lineNr, new AssemblyCode(0, ""));
+	  System.out.print(e.getMessage());
+	  String msg = e.getMessage().trim();
+	  decoded.put(++lineNr, new AssemblyCode(address, msg));
+	  decoded.put(++lineNr, new AssemblyCode(address, ""));
 	  writeOutput(fileName, writer, address, decoded);
 	  writeRemainderOfInput(address, reader, writer);
 	} catch (IOException e) {
