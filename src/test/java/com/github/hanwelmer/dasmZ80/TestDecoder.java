@@ -15,7 +15,7 @@ public class TestDecoder extends Decoder {
 	  AssemblyCode result = get(0, byte0, reader);
 	  assert (result != null);
 	  assert (result.getBytes().size() == bytes.length + 1);
-	  assert ("0000: 00                    NOP\n".equals(result.toString()));
+	  assert ("0000 00                 NOP\n".equals(result.toString()));
 	} catch (IOException e) {
 	  e.printStackTrace();
 	} catch (IllegalOpcodeException e) {
@@ -32,7 +32,7 @@ public class TestDecoder extends Decoder {
 	  AssemblyCode result = get(0, byte0, reader);
 	  assert (result != null);
 	  assert (result.getBytes().size() == bytes.length + 1);
-	  assert ("0000: 76                    HALT\n".equals(result.toString()));
+	  assert ("0000 76                 HALT\n".equals(result.toString()));
 	} catch (IOException e) {
 	  e.printStackTrace();
 	} catch (IllegalOpcodeException e) {
@@ -49,7 +49,7 @@ public class TestDecoder extends Decoder {
 	  AssemblyCode result = get(0, byte0, reader);
 	  assert (result != null);
 	  assert (result.getBytes().size() == bytes.length + 1);
-	  assert ("0000: 02                    LD   (BC),A\n".equals(result.toString()));
+	  assert ("0000 02                 LD   (BC),A\n".equals(result.toString()));
 	} catch (IOException e) {
 	  e.printStackTrace();
 	} catch (IllegalOpcodeException e) {
@@ -66,7 +66,7 @@ public class TestDecoder extends Decoder {
 	  AssemblyCode result = get(0, byte0, reader);
 	  assert (result != null);
 	  assert (result.getBytes().size() == bytes.length + 1);
-	  assert ("0000: 01 34 12              LD   BC,0x1234\n".equals(result.toString()));
+	  assert ("0000 013412             LD   BC,0x1234\n".equals(result.toString()));
 	} catch (IOException e) {
 	  e.printStackTrace();
 	} catch (IllegalOpcodeException e) {
@@ -83,7 +83,7 @@ public class TestDecoder extends Decoder {
 	  AssemblyCode result = get(0, byte0, reader);
 	  assert (result != null);
 	  assert (result.getBytes().size() == bytes.length + 1);
-	  assert ("0000: 01 DE BC              LD   BC,0xBCDE\n".equals(result.toString()));
+	  assert ("0000 01DEBC             LD   BC,0xBCDE\n".equals(result.toString()));
 	} catch (IOException e) {
 	  e.printStackTrace();
 	} catch (IllegalOpcodeException e) {
@@ -100,7 +100,7 @@ public class TestDecoder extends Decoder {
 	  AssemblyCode result = get(0, byte0, reader);
 	  assert (result != null);
 	  assert (result.getBytes().size() == bytes.length + 1);
-	  assert ("0000: 06 12                 LD   B,0x12\n".equals(result.toString()));
+	  assert ("0000 0612               LD   B,0x12\n".equals(result.toString()));
 	} catch (IOException e) {
 	  e.printStackTrace();
 	} catch (IllegalOpcodeException e) {
@@ -117,7 +117,7 @@ public class TestDecoder extends Decoder {
 	  AssemblyCode result = get(0, byte0, reader);
 	  assert (result != null);
 	  assert (result.getBytes().size() == bytes.length + 1);
-	  assert ("0000: 06 AB                 LD   B,0xAB\n".equals(result.toString()));
+	  assert ("0000 06AB               LD   B,0xAB\n".equals(result.toString()));
 	} catch (IOException e) {
 	  e.printStackTrace();
 	} catch (IllegalOpcodeException e) {
@@ -134,7 +134,7 @@ public class TestDecoder extends Decoder {
 	  AssemblyCode result = get(0, byte0, reader);
 	  assert (result != null);
 	  assert (result.getBytes().size() == bytes.length + 1);
-	  assert ("0000: 10 12                 DJNZ lbl0014\n".equals(result.toString()));
+	  assert ("0000 1012               DJNZ lbl0014\n".equals(result.toString()));
 	} catch (IOException e) {
 	  e.printStackTrace();
 	} catch (IllegalOpcodeException e) {
@@ -151,7 +151,7 @@ public class TestDecoder extends Decoder {
 	  AssemblyCode result = get(0, byte0, reader);
 	  assert (result != null);
 	  assert (result.getBytes().size() == bytes.length + 1);
-	  assert ("0000: 10 FE                 DJNZ lbl0000\n".equals(result.toString()));
+	  assert ("0000 10FE               DJNZ lbl0000\n".equals(result.toString()));
 	} catch (IOException e) {
 	  e.printStackTrace();
 	} catch (IllegalOpcodeException e) {
@@ -168,7 +168,7 @@ public class TestDecoder extends Decoder {
 	  AssemblyCode result = get(0, byte0, reader);
 	  assert (result != null);
 	  assert (result.getBytes().size() == bytes.length + 1);
-	  assert ("0000: D3 12                 OUT  (0x12),A\n".equals(result.toString()));
+	  assert ("0000 D312               OUT  (0x12),A\n".equals(result.toString()));
 	} catch (IOException e) {
 	  e.printStackTrace();
 	} catch (IllegalOpcodeException e) {
@@ -185,7 +185,7 @@ public class TestDecoder extends Decoder {
 	  AssemblyCode result = get(0, byte0, reader);
 	  assert (result != null);
 	  assert (result.getBytes().size() == bytes.length + 1);
-	  assert ("0000: D3 AB                 OUT  (0xAB),A\n".equals(result.toString()));
+	  assert ("0000 D3AB               OUT  (0xAB),A\n".equals(result.toString()));
 	} catch (IOException e) {
 	  e.printStackTrace();
 	} catch (IllegalOpcodeException e) {
@@ -202,7 +202,7 @@ public class TestDecoder extends Decoder {
 	  AssemblyCode result = get(0, byte0, reader);
 	  assert (result != null);
 	  assert (result.getBytes().size() == bytes.length + 1);
-	  assert ("0000: CB 00                 RLC  B\n".equals(result.toString()));
+	  assert ("0000 CB00               RLC  B\n".equals(result.toString()));
 	} catch (IOException e) {
 	  e.printStackTrace();
 	} catch (IllegalOpcodeException e) {
@@ -219,7 +219,7 @@ public class TestDecoder extends Decoder {
 	  AssemblyCode result = get(0, byte0, reader);
 	  assert (result != null);
 	  assert (result.getBytes().size() == bytes.length + 1);
-	  assert ("0000: DD 19                 ADD  IX,DE\n".equals(result.toString()));
+	  assert ("0000 DD19               ADD  IX,DE\n".equals(result.toString()));
 	} catch (IOException e) {
 	  e.printStackTrace();
 	} catch (IllegalOpcodeException e) {
@@ -236,7 +236,7 @@ public class TestDecoder extends Decoder {
 	  AssemblyCode result = get(0, byte0, reader);
 	  assert (result != null);
 	  assert (result.getBytes().size() == bytes.length + 1);
-	  assert ("0000: DD 21 34 12           LD   IX,0x1234\n".equals(result.toString()));
+	  assert ("0000 DD213412           LD   IX,0x1234\n".equals(result.toString()));
 	} catch (IOException e) {
 	  e.printStackTrace();
 	} catch (IllegalOpcodeException e) {
@@ -253,7 +253,7 @@ public class TestDecoder extends Decoder {
 	  AssemblyCode result = get(0, byte0, reader);
 	  assert (result != null);
 	  assert (result.getBytes().size() == bytes.length + 1);
-	  assert ("0000: DD 26 12              LD   IXH,0x12\n".equals(result.toString()));
+	  assert ("0000 DD2612             LD   IXH,0x12\n".equals(result.toString()));
 	} catch (IOException e) {
 	  e.printStackTrace();
 	} catch (IllegalOpcodeException e) {
@@ -270,7 +270,7 @@ public class TestDecoder extends Decoder {
 	  AssemblyCode result = get(0, byte0, reader);
 	  assert (result != null);
 	  assert (result.getBytes().size() == bytes.length + 1);
-	  assert ("0000: DD 34 12              INC  (IX+18)\n".equals(result.toString()));
+	  assert ("0000 DD3412             INC  (IX+18)\n".equals(result.toString()));
 	} catch (IOException e) {
 	  e.printStackTrace();
 	} catch (IllegalOpcodeException e) {
@@ -287,7 +287,7 @@ public class TestDecoder extends Decoder {
 	  AssemblyCode result = get(0, byte0, reader);
 	  assert (result != null);
 	  assert (result.getBytes().size() == bytes.length + 1);
-	  assert ("0000: DD 34 FE              INC  (IX-2)\n".equals(result.toString()));
+	  assert ("0000 DD34FE             INC  (IX-2)\n".equals(result.toString()));
 	} catch (IOException e) {
 	  e.printStackTrace();
 	} catch (IllegalOpcodeException e) {
@@ -304,7 +304,7 @@ public class TestDecoder extends Decoder {
 	  AssemblyCode result = get(0, byte0, reader);
 	  assert (result != null);
 	  assert (result.getBytes().size() == bytes.length + 1);
-	  assert ("0000: DD 36 12 34           LD   (IX+18),0x34\n".equals(result.toString()));
+	  assert ("0000 DD361234           LD   (IX+18),0x34\n".equals(result.toString()));
 	} catch (IOException e) {
 	  e.printStackTrace();
 	} catch (IllegalOpcodeException e) {
@@ -321,7 +321,7 @@ public class TestDecoder extends Decoder {
 	  AssemblyCode result = get(0, byte0, reader);
 	  assert (result != null);
 	  assert (result.getBytes().size() == bytes.length + 1);
-	  assert ("0000: ED 40                 IN   B,(C)\n".equals(result.toString()));
+	  assert ("0000 ED40               IN   B,(C)\n".equals(result.toString()));
 	} catch (IOException e) {
 	  e.printStackTrace();
 	} catch (IllegalOpcodeException e) {
@@ -338,7 +338,7 @@ public class TestDecoder extends Decoder {
 	  AssemblyCode result = get(0, byte0, reader);
 	  assert (result != null);
 	  assert (result.getBytes().size() == bytes.length + 1);
-	  assert ("0000: ED 43 34 12           LD   (0x1234),BC\n".equals(result.toString()));
+	  assert ("0000 ED433412           LD   (0x1234),BC\n".equals(result.toString()));
 	} catch (IOException e) {
 	  e.printStackTrace();
 	} catch (IllegalOpcodeException e) {
@@ -355,7 +355,7 @@ public class TestDecoder extends Decoder {
 	  AssemblyCode result = get(0, byte0, reader);
 	  assert (result != null);
 	  assert (result.getBytes().size() == bytes.length + 1);
-	  assert ("0000: FD 26 12              LD   IYH,0x12\n".equals(result.toString()));
+	  assert ("0000 FD2612             LD   IYH,0x12\n".equals(result.toString()));
 	} catch (IOException e) {
 	  e.printStackTrace();
 	} catch (IllegalOpcodeException e) {
@@ -372,7 +372,7 @@ public class TestDecoder extends Decoder {
 	  AssemblyCode result = get(0, byte0, reader);
 	  assert (result != null);
 	  assert (result.getBytes().size() == bytes.length + 1);
-	  assert ("0000: FD 35 00              DEC  (IY+0)\n".equals(result.toString()));
+	  assert ("0000 FD3500             DEC  (IY+0)\n".equals(result.toString()));
 	} catch (IOException e) {
 	  e.printStackTrace();
 	} catch (IllegalOpcodeException e) {
@@ -388,7 +388,7 @@ public class TestDecoder extends Decoder {
 	  AssemblyCode result = get(0, byte0, reader);
 	  assert (result != null);
 	  assert (result.getBytes().size() == bytes.length + 1);
-	  assert ("0000: FD 35 80              DEC  (IY-128)\n".equals(result.toString()));
+	  assert ("0000 FD3580             DEC  (IY-128)\n".equals(result.toString()));
 	} catch (IOException e) {
 	  e.printStackTrace();
 	} catch (IllegalOpcodeException e) {
@@ -405,7 +405,7 @@ public class TestDecoder extends Decoder {
 	  AssemblyCode result = get(0, byte0, reader);
 	  assert (result != null);
 	  assert (result.getBytes().size() == bytes.length + 1);
-	  assert ("0000: FD 36 FF FF           LD   (IY-1),0xFF\n".equals(result.toString()));
+	  assert ("0000 FD36FFFF           LD   (IY-1),0xFF\n".equals(result.toString()));
 	} catch (IOException e) {
 	  e.printStackTrace();
 	} catch (IllegalOpcodeException e) {
@@ -422,7 +422,7 @@ public class TestDecoder extends Decoder {
 	  AssemblyCode result = get(0, byte0, reader);
 	  assert (result != null);
 	  assert (result.getBytes().size() == bytes.length + 1);
-	  assert ("0000: DD CB 12 00           LD   B,RLC (IX+18)\n".equals(result.toString()));
+	  assert ("0000 DDCB1200           LD   B,RLC (IX+18)\n".equals(result.toString()));
 	} catch (IOException e) {
 	  e.printStackTrace();
 	} catch (IllegalOpcodeException e) {
@@ -439,7 +439,7 @@ public class TestDecoder extends Decoder {
 	  AssemblyCode result = get(0, byte0, reader);
 	  assert (result != null);
 	  assert (result.getBytes().size() == bytes.length + 1);
-	  assert ("0000: FD CB 12 01           LD   C,RLC (IY+18)\n".equals(result.toString()));
+	  assert ("0000 FDCB1201           LD   C,RLC (IY+18)\n".equals(result.toString()));
 	} catch (IOException e) {
 	  e.printStackTrace();
 	} catch (IllegalOpcodeException e) {
@@ -456,7 +456,7 @@ public class TestDecoder extends Decoder {
 	  AssemblyCode result = get(0, byte0, reader);
 	  assert (result != null);
 	  assert (result.getBytes().size() == bytes.length + 1);
-	  assert ("0000: FD CB FF 01           LD   C,RLC (IY-1)\n".equals(result.toString()));
+	  assert ("0000 FDCBFF01           LD   C,RLC (IY-1)\n".equals(result.toString()));
 	} catch (IOException e) {
 	  e.printStackTrace();
 	} catch (IllegalOpcodeException e) {
@@ -473,7 +473,7 @@ public class TestDecoder extends Decoder {
 	  AssemblyCode result = get(0, byte0, reader);
 	  assert (result != null);
 	  assert (result.getBytes().size() == bytes.length + 1);
-	  assert ("0000: FD CB FF 80           LD   B,RES 0,(IY-1)\n".equals(result.toString()));
+	  assert ("0000 FDCBFF80           LD   B,RES 0,(IY-1)\n".equals(result.toString()));
 	} catch (IOException e) {
 	  e.printStackTrace();
 	} catch (IllegalOpcodeException e) {

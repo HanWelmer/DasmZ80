@@ -61,39 +61,45 @@ public class AssemblyCode {
 
   public String toString() {
 	// address
-	String result = String.format("%04X:", address);
+	String result = String.format("%04X", address);
 
 	// binary code
 	if (bytes != null) {
+	  int i = 0;
 	  for (Byte byt : bytes) {
-		result += String.format(" %02X", byt);
+		if (i == 0) {
+		  result += " ";
+		  i = 4;
+		}
+		i--;
+		result += String.format("%02X", byt);
 	  }
 	}
 
 	// label
 	if (label != null && label.length() > 0) {
-	  if (result.length() < 18) {
-		result += String.format("%18s", "");
-		result = result.substring(0, 18);
+	  if (result.length() < 14) {
+		result += String.format("%14s", "");
+		result = result.substring(0, 14);
 	  }
 	  result += label + ":";
 	}
 
 	// mnemonic
 	if (mnemonic != null && mnemonic.length() > 0) {
-	  if (result.length() < 28) {
-		result += String.format("%28s", "");
+	  if (result.length() < 24) {
+		result += String.format("%24s", "");
 		;
-		result = result.substring(0, 28);
+		result = result.substring(0, 24);
 	  }
 	  result += mnemonic;
 	}
 
 	// comment
 	if (comment != null && comment.length() > 0) {
-	  if (result.length() < 50) {
-		result += String.format("%50s", "");
-		result = result.substring(0, 50);
+	  if (result.length() < 44) {
+		result += String.format("%44s", "");
+		result = result.substring(0, 44);
 	  }
 	  result += comment;
 	}
