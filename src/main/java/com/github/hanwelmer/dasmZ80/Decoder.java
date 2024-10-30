@@ -9,8 +9,9 @@ public class Decoder {
 
   private HashMap<Integer, BinaryCode> hashMap = new HashMap<Integer, BinaryCode>(2);
 
-  public AssemblyCode get(int address, Byte nextByte, ByteReader reader, Map<Byte, ArrayList<Integer>> portReferences,
-      Map<Integer, ArrayList<Integer>> memoryReferences) throws IOException, IllegalOpcodeException {
+  public AssemblyCode get(int address, Byte nextByte, ByteReader reader,
+      Map<Integer, ArrayList<Integer>> portReferences, Map<Integer, ArrayList<Integer>> memoryReferences)
+      throws IOException, IllegalOpcodeException {
 	Integer key = new Integer(nextByte);
 	if (key < 0) {
 	  key += 256;
@@ -91,7 +92,15 @@ public class Decoder {
 	  asmCode.addByte(byte3);
 	  asmCode.updateMnemonic("@", String.format("0x%02X%02X", byte3, byte2));
 
-	  Integer value = byte3 * 256 + byte2;
+	  Integer value = new Integer(byte3);
+	  if (byte3 < 0) {
+		value += 256;
+	  }
+	  value *= 256;
+	  value += byte2;
+	  if (byte2 < 0) {
+		value += 256;
+	  }
 	  if (memoryReferences.get(value) == null) {
 		memoryReferences.put(value, new ArrayList<Integer>());
 	  }
@@ -116,10 +125,16 @@ public class Decoder {
 	  Byte byte2 = reader.getNextByte();
 	  asmCode.addByte(byte2);
 	  asmCode.updateMnemonic("&", String.format("0x%02X", byte2));
-	  if (portReferences.get(byte2) == null) {
-		portReferences.put(byte2, new ArrayList<Integer>());
+
+	  // address of this instruction to the port reference list.
+	  Integer port = new Integer(byte2);
+	  if (port < 0) {
+		port += 256;
 	  }
-	  portReferences.get(byte2).add(new Integer(address));
+	  if (portReferences.get(port) == null) {
+		portReferences.put(port, new ArrayList<Integer>());
+	  }
+	  portReferences.get(port).add(new Integer(address));
 	}
 
 	return asmCode;

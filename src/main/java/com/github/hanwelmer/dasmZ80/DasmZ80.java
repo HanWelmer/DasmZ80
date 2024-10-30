@@ -82,7 +82,7 @@ public class DasmZ80 {
       AbstractWriter writer) {
 	Decoder decoder = new Decoder();
 	HashMap<Integer, AssemblyCode> decoded = new HashMap<Integer, AssemblyCode>();
-	Map<Byte, ArrayList<Integer>> portReferences = new HashMap<Byte, ArrayList<Integer>>();
+	Map<Integer, ArrayList<Integer>> portReferences = new HashMap<Integer, ArrayList<Integer>>();
 	Map<Integer, ArrayList<Integer>> memoryReferences = new HashMap<Integer, ArrayList<Integer>>();
 	int address = 0;
 	int lineNr = 0;
@@ -168,21 +168,17 @@ public class DasmZ80 {
 	}
   }
 
-  private static void writeReferences(AbstractWriter writer, Map<Byte, ArrayList<Integer>> portReferences,
+  private static void writeReferences(AbstractWriter writer, Map<Integer, ArrayList<Integer>> portReferences,
       Map<Integer, ArrayList<Integer>> memoryReferences) {
 	try {
 	  writer.write("\nI/O-port cross reference list:\n");
-	} catch (IOException e) {
-	  System.out.println("Error writing to output file.");
-	  System.out.println(e.getMessage());
-	  e.printStackTrace();
-	}
-
-	portReferences.forEach((value, references) -> {
-	  try {
-		String msg = String.format("%02X:", value);
+	  // Sort port addresses.
+	  SortedSet<Integer> ports = new TreeSet<>(portReferences.keySet());
+	  // Write references to port addresses.
+	  for (Integer port : ports) {
+		String msg = String.format("%02X:", port);
 		int i = 0;
-		for (Integer reference : references) {
+		for (Integer reference : portReferences.get(port)) {
 		  msg += String.format(" %04X", reference);
 		  if (++i == 8) {
 			i = 0;
@@ -195,26 +191,16 @@ public class DasmZ80 {
 		  msg += "\n";
 		  writer.write(msg);
 		}
-	  } catch (IOException e) {
-		System.out.println("Error writing to output file.");
-		System.out.println(e.getMessage());
-		e.printStackTrace();
 	  }
-	});
 
-	try {
 	  writer.write("\nMemory cross reference list:\n");
-	} catch (IOException e) {
-	  System.out.println("Error writing to output file.");
-	  System.out.println(e.getMessage());
-	  e.printStackTrace();
-	}
-
-	memoryReferences.forEach((value, references) -> {
-	  try {
-		String msg = String.format("%04X:", value);
+	  // Sort memory addresses.
+	  SortedSet<Integer> labels = new TreeSet<>(memoryReferences.keySet());
+	  // Write references to memory addresses.
+	  for (Integer label : labels) {
+		String msg = String.format("%04X:", label);
 		int i = 0;
-		for (Integer reference : references) {
+		for (Integer reference : memoryReferences.get(label)) {
 		  msg += String.format(" %04X", reference);
 		  if (++i == 4) {
 			i = 0;
@@ -227,12 +213,12 @@ public class DasmZ80 {
 		  msg += "\n";
 		  writer.write(msg);
 		}
-	  } catch (IOException e) {
-		System.out.println("Error writing to output file.");
-		System.out.println(e.getMessage());
-		e.printStackTrace();
 	  }
-	});
+	} catch (IOException e) {
+	  System.out.println("Error writing to output file.");
+	  System.out.println(e.getMessage());
+	  e.printStackTrace();
+	}
   }
 
 }

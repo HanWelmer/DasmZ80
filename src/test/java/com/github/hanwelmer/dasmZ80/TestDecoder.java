@@ -9,7 +9,7 @@ import org.junit.Test;
 
 public class TestDecoder extends Decoder {
 
-  private Map<Byte, ArrayList<Integer>> portReferences = new HashMap<Byte, ArrayList<Integer>>();
+  private Map<Integer, ArrayList<Integer>> portReferences = new HashMap<Integer, ArrayList<Integer>>();
   private Map<Integer, ArrayList<Integer>> memoryReferences = new HashMap<Integer, ArrayList<Integer>>();
 
   @Test
