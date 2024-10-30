@@ -44,4 +44,9 @@ public class ListingWriter implements AbstractWriter {
 	}
   }
 
+  @Override
+  public void write(String msg) throws IOException {
+	writer.write(msg);
+  }
+
 }

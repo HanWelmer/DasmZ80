@@ -1,13 +1,16 @@
 package com.github.hanwelmer.dasmZ80;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 public class Decoder {
 
   private HashMap<Integer, BinaryCode> hashMap = new HashMap<Integer, BinaryCode>(2);
 
-  public AssemblyCode get(int address, Byte nextByte, ByteReader reader) throws IOException, IllegalOpcodeException {
+  public AssemblyCode get(int address, Byte nextByte, ByteReader reader, Map<Byte, ArrayList<Integer>> portReferences,
+      Map<Integer, ArrayList<Integer>> memoryReferences) throws IOException, IllegalOpcodeException {
 	Integer key = new Integer(nextByte);
 	if (key < 0) {
 	  key += 256;
@@ -87,6 +90,12 @@ public class Decoder {
 	  asmCode.addByte(byte2);
 	  asmCode.addByte(byte3);
 	  asmCode.updateMnemonic("@", String.format("0x%02X%02X", byte3, byte2));
+
+	  Integer value = byte3 * 256 + byte2;
+	  if (memoryReferences.get(value) == null) {
+		memoryReferences.put(value, new ArrayList<Integer>());
+	  }
+	  memoryReferences.get(value).add(new Integer(address));
 	}
 	// Process relative address.
 	if (asmCode.getMnemonic().contains("%")) {
@@ -95,12 +104,22 @@ public class Decoder {
 	  int targetAddress = address + asmCode.getBytes().size();
 	  targetAddress += (byte2 < 128) ? byte2 : (-byte2);
 	  asmCode.updateMnemonic("%", String.format("lbl%04X", targetAddress));
+
+	  Integer value = address + 2 + byte2;
+	  if (memoryReferences.get(value) == null) {
+		memoryReferences.put(value, new ArrayList<Integer>());
+	  }
+	  memoryReferences.get(value).add(new Integer(address));
 	}
 	// Process IO port.
 	if (asmCode.getMnemonic().contains("&")) {
 	  Byte byte2 = reader.getNextByte();
 	  asmCode.addByte(byte2);
 	  asmCode.updateMnemonic("&", String.format("0x%02X", byte2));
+	  if (portReferences.get(byte2) == null) {
+		portReferences.put(byte2, new ArrayList<Integer>());
+	  }
+	  portReferences.get(byte2).add(new Integer(address));
 	}
 
 	return asmCode;

@@ -49,4 +49,41 @@ public class TestDisassemble extends DasmZ80 {
 	assert ("0020 202122\n".equals(writer.output.get(15)));
   }
 
+  @Test
+  public void testPortReferenceTable() {
+	Byte[] bytes = { 0xDB - 256, 0x12, 0xD3 - 256, 0xFE - 256, 0xD3 - 256, 0x12, 0x00 };
+	ByteReader reader = new ReadFromArray(bytes);
+	StringWriter writer = new StringWriter();
+	disassemble("test", reader, writer);
+	assert (writer.output.size() == 13);
+	assert ("0000 DB12               IN   A,(0x12)\n".equals(writer.output.get(4)));
+	assert ("0002 D3FE               OUT  (0xFE),A\n".equals(writer.output.get(5)));
+	assert ("0004 D312               OUT  (0x12),A\n".equals(writer.output.get(6)));
+	assert ("0006 00                 NOP\n".equals(writer.output.get(7)));
+	assert ("\nI/O-port cross reference list:\n".equals(writer.output.get(9)));
+	assert ("12: 0000 0004\n".equals(writer.output.get(11)));
+	assert ("FE: 0002\n".equals(writer.output.get(10)));
+	assert ("\nMemory cross reference list:\n".equals(writer.output.get(12)));
+  }
+
+  @Test
+  public void testMemoryReferenceTable() {
+	Byte[] bytes = { 0xCD - 256, 0x03, 0x00, 0xC3 - 256, 0x03, 0x00, 0xC2 - 256, 0x03, 0x00, 0x10, 0xF8 - 256, 0x38,
+	    0xF6 - 256, 0x00 };
+	ByteReader reader = new ReadFromArray(bytes);
+	StringWriter writer = new StringWriter();
+	disassemble("test", reader, writer);
+	assert (writer.output.size() == 15);
+	assert ("0000 CD0300             CALL 0x0003\n".equals(writer.output.get(4)));
+	assert ("0003 C30300             JP   0x0003\n".equals(writer.output.get(5)));
+	assert ("0006 C20300             JP   NZ,0x0003\n".equals(writer.output.get(6)));
+	assert ("0009 10F8               DJNZ lbl0003\n".equals(writer.output.get(7)));
+	assert ("000B 38F6               JR   C,lbl0003\n".equals(writer.output.get(8)));
+	assert ("000D 00                 NOP\n".equals(writer.output.get(9)));
+	assert ("\nI/O-port cross reference list:\n".equals(writer.output.get(11)));
+	assert ("\nMemory cross reference list:\n".equals(writer.output.get(12)));
+	assert ("0003: 0000 0003 0006 0009\n".equals(writer.output.get(13)));
+	assert ("      000B\n".equals(writer.output.get(14)));
+  }
+
 }

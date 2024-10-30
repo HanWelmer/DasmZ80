@@ -4,6 +4,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -81,13 +82,15 @@ public class DasmZ80 {
       AbstractWriter writer) {
 	Decoder decoder = new Decoder();
 	HashMap<Integer, AssemblyCode> decoded = new HashMap<Integer, AssemblyCode>();
+	Map<Byte, ArrayList<Integer>> portReferences = new HashMap<Byte, ArrayList<Integer>>();
+	Map<Integer, ArrayList<Integer>> memoryReferences = new HashMap<Integer, ArrayList<Integer>>();
 	int address = 0;
 	int lineNr = 0;
 	Byte nextByte = null;
 
 	try {
 	  while ((nextByte = reader.getByte()) != null) {
-		AssemblyCode asmCode = decoder.get(address, nextByte, reader);
+		AssemblyCode asmCode = decoder.get(address, nextByte, reader, portReferences, memoryReferences);
 		decoded.put(++lineNr, asmCode);
 		address += asmCode.getBytes().size();
 		if (asmCode.getMnemonic().startsWith("RET")) {
@@ -95,6 +98,7 @@ public class DasmZ80 {
 		}
 	  }
 	  writeOutput(fileName, writer, address, decoded);
+	  writeReferences(writer, portReferences, memoryReferences);
 	} catch (IllegalOpcodeException e) {
 	  System.out.print(e.getMessage());
 	  String msg = e.getMessage().trim();
@@ -102,6 +106,7 @@ public class DasmZ80 {
 	  decoded.put(++lineNr, new AssemblyCode(address, ""));
 	  writeOutput(fileName, writer, address, decoded);
 	  writeRemainderOfInput(address, reader, writer);
+	  writeReferences(writer, portReferences, memoryReferences);
 	} catch (IOException e) {
 	  System.out.println("Error reading from input file.");
 	  System.out.println(e.getMessage());
@@ -161,6 +166,73 @@ public class DasmZ80 {
 	  System.out.println(e.getMessage());
 	  e.printStackTrace();
 	}
+  }
+
+  private static void writeReferences(AbstractWriter writer, Map<Byte, ArrayList<Integer>> portReferences,
+      Map<Integer, ArrayList<Integer>> memoryReferences) {
+	try {
+	  writer.write("\nI/O-port cross reference list:\n");
+	} catch (IOException e) {
+	  System.out.println("Error writing to output file.");
+	  System.out.println(e.getMessage());
+	  e.printStackTrace();
+	}
+
+	portReferences.forEach((value, references) -> {
+	  try {
+		String msg = String.format("%02X:", value);
+		int i = 0;
+		for (Integer reference : references) {
+		  msg += String.format(" %04X", reference);
+		  if (++i == 8) {
+			i = 0;
+			msg += "\n";
+			writer.write(msg);
+			msg = String.format("%3s", " ");
+		  }
+		}
+		if (i > 0) {
+		  msg += "\n";
+		  writer.write(msg);
+		}
+	  } catch (IOException e) {
+		System.out.println("Error writing to output file.");
+		System.out.println(e.getMessage());
+		e.printStackTrace();
+	  }
+	});
+
+	try {
+	  writer.write("\nMemory cross reference list:\n");
+	} catch (IOException e) {
+	  System.out.println("Error writing to output file.");
+	  System.out.println(e.getMessage());
+	  e.printStackTrace();
+	}
+
+	memoryReferences.forEach((value, references) -> {
+	  try {
+		String msg = String.format("%04X:", value);
+		int i = 0;
+		for (Integer reference : references) {
+		  msg += String.format(" %04X", reference);
+		  if (++i == 4) {
+			i = 0;
+			msg += "\n";
+			writer.write(msg);
+			msg = String.format("%5s", " ");
+		  }
+		}
+		if (i > 0) {
+		  msg += "\n";
+		  writer.write(msg);
+		}
+	  } catch (IOException e) {
+		System.out.println("Error writing to output file.");
+		System.out.println(e.getMessage());
+		e.printStackTrace();
+	  }
+	});
   }
 
 }

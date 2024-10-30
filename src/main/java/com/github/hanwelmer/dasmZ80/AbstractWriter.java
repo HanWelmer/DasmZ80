@@ -8,5 +8,7 @@ public interface AbstractWriter {
 
   public void write(AssemblyCode code) throws IOException;
 
+  public void write(String msg) throws IOException;
+
   public void close();
 }
