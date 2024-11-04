@@ -1,7 +1,6 @@
 package com.github.hanwelmer.dasmZ80;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -9,8 +8,8 @@ import org.junit.Test;
 
 public class TestDecoder extends Decoder {
 
-  private Map<Integer, ArrayList<Integer>> portReferences = new HashMap<Integer, ArrayList<Integer>>();
-  private Map<Integer, ArrayList<Integer>> memoryReferences = new HashMap<Integer, ArrayList<Integer>>();
+  private Map<Integer, Definition> portReferences = new HashMap<Integer, Definition>();
+  private Map<Integer, Definition> memoryReferences = new HashMap<Integer, Definition>();
 
   @Test
   public void testNop() {

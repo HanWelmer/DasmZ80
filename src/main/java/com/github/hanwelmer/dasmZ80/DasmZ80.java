@@ -82,8 +82,8 @@ public class DasmZ80 {
       AbstractWriter writer) {
 	Decoder decoder = new Decoder();
 	HashMap<Integer, AssemblyCode> decoded = new HashMap<Integer, AssemblyCode>();
-	Map<Integer, ArrayList<Integer>> portReferences = new HashMap<Integer, ArrayList<Integer>>();
-	Map<Integer, ArrayList<Integer>> memoryReferences = new HashMap<Integer, ArrayList<Integer>>();
+	Map<Integer, Definition> portReferences = new HashMap<Integer, Definition>();
+	Map<Integer, Definition> memoryReferences = new HashMap<Integer, Definition>();
 	int address = 0;
 	int lineNr = 0;
 	Byte nextByte = null;
@@ -168,8 +168,8 @@ public class DasmZ80 {
 	}
   }
 
-  private static void writeReferences(AbstractWriter writer, Map<Integer, ArrayList<Integer>> portReferences,
-      Map<Integer, ArrayList<Integer>> memoryReferences) {
+  private static void writeReferences(AbstractWriter writer, Map<Integer, Definition> portReferences,
+      Map<Integer, Definition> memoryReferences) {
 	try {
 	  writer.write("\nI/O-port cross reference list:\n");
 	  // Sort port addresses.
@@ -178,7 +178,7 @@ public class DasmZ80 {
 	  for (Integer port : ports) {
 		String msg = String.format("%02X:", port);
 		int i = 0;
-		for (Integer reference : portReferences.get(port)) {
+		for (Integer reference : portReferences.get(port).getReferences()) {
 		  msg += String.format(" %04X", reference);
 		  if (++i == 8) {
 			i = 0;
@@ -200,7 +200,7 @@ public class DasmZ80 {
 	  for (Integer label : labels) {
 		String msg = String.format("%04X:", label);
 		int i = 0;
-		for (Integer reference : memoryReferences.get(label)) {
+		for (Integer reference : memoryReferences.get(label).getReferences()) {
 		  msg += String.format(" %04X", reference);
 		  if (++i == 4) {
 			i = 0;

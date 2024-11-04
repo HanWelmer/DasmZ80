@@ -1,7 +1,6 @@
 package com.github.hanwelmer.dasmZ80;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -9,9 +8,8 @@ public class Decoder {
 
   private HashMap<Integer, BinaryCode> hashMap = new HashMap<Integer, BinaryCode>(2);
 
-  public AssemblyCode get(int address, Byte nextByte, ByteReader reader,
-      Map<Integer, ArrayList<Integer>> portReferences, Map<Integer, ArrayList<Integer>> memoryReferences)
-      throws IOException, IllegalOpcodeException {
+  public AssemblyCode get(int address, Byte nextByte, ByteReader reader, Map<Integer, Definition> portReferences,
+      Map<Integer, Definition> memoryReferences) throws IOException, IllegalOpcodeException {
 	Integer key = new Integer(nextByte);
 	if (key < 0) {
 	  key += 256;
@@ -102,7 +100,7 @@ public class Decoder {
 		value += 256;
 	  }
 	  if (memoryReferences.get(value) == null) {
-		memoryReferences.put(value, new ArrayList<Integer>());
+		memoryReferences.put(value, new Definition(String.format("lbl%04X", value), value));
 	  }
 	  memoryReferences.get(value).add(new Integer(address));
 	}
@@ -116,7 +114,7 @@ public class Decoder {
 
 	  Integer value = address + 2 + byte2;
 	  if (memoryReferences.get(value) == null) {
-		memoryReferences.put(value, new ArrayList<Integer>());
+		memoryReferences.put(value, new Definition(String.format("lbl%04X", value), value));
 	  }
 	  memoryReferences.get(value).add(new Integer(address));
 	}
@@ -132,7 +130,7 @@ public class Decoder {
 		port += 256;
 	  }
 	  if (portReferences.get(port) == null) {
-		portReferences.put(port, new ArrayList<Integer>());
+		portReferences.put(port, new Definition(String.format("port%02X", port), port));
 	  }
 	  portReferences.get(port).add(new Integer(address));
 	}
