@@ -15,7 +15,6 @@ public class Definition {
   private ArrayList<Integer> references;
 
   public Definition(String name, Integer value) {
-	super();
 	this.name = name;
 	this.value = value;
 	references = new ArrayList<Integer>();
@@ -23,7 +22,14 @@ public class Definition {
 
   public void add(Integer reference) {
 	references.add(reference);
+  }
 
+  public String getName() {
+	return name;
+  }
+
+  public Integer getValue() {
+	return value;
   }
 
   public ArrayList<Integer> getReferences() {

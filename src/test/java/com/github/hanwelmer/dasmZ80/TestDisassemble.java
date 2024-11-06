@@ -25,8 +25,7 @@ public class TestDisassemble extends DasmZ80 {
 	StringWriter writer = new StringWriter();
 	disassemble("test", reader, writer);
 	assert (writer.output.size() > 0);
-	assert ("0000                                        ;Unprocessed binary code from input file\n"
-	    .equals(writer.output.get(8)));
+	assert ("0000                    ;Unprocessed binary code from input file\n".equals(writer.output.get(8)));
 	assert ("0000 DDDC3412\n".equals(writer.output.get(10)));
   }
 
@@ -42,8 +41,7 @@ public class TestDisassemble extends DasmZ80 {
 	assert ("0000 00                 NOP\n".equals(writer.output.get(4)));
 	assert ("0001 02                 LD   (BC),A\n".equals(writer.output.get(5)));
 	assert ("0002 013412             LD   BC,0x1234\n".equals(writer.output.get(6)));
-	assert ("0005                                        ;Unprocessed binary code from input file\n"
-	    .equals(writer.output.get(11)));
+	assert ("0005                    ;Unprocessed binary code from input file\n".equals(writer.output.get(11)));
 	assert ("0005 DDDC3412 090A0B0C 0D0E0F\n".equals(writer.output.get(13)));
 	assert ("0010 10111213 14151617 18191A1B 1C1D1E1F\n".equals(writer.output.get(14)));
 	assert ("0020 202122\n".equals(writer.output.get(15)));
@@ -55,15 +53,18 @@ public class TestDisassemble extends DasmZ80 {
 	ByteReader reader = new ReadFromArray(bytes);
 	StringWriter writer = new StringWriter();
 	disassemble("test", reader, writer);
-	assert (writer.output.size() == 13);
-	assert ("0000 DB12               IN   A,(0x12)\n".equals(writer.output.get(4)));
-	assert ("0002 D3FE               OUT  (0xFE),A\n".equals(writer.output.get(5)));
-	assert ("0004 D312               OUT  (0x12),A\n".equals(writer.output.get(6)));
-	assert ("0006 00                 NOP\n".equals(writer.output.get(7)));
-	assert ("\nI/O-port cross reference list:\n".equals(writer.output.get(9)));
-	assert ("12: 0000 0004\n".equals(writer.output.get(10)));
-	assert ("FE: 0002\n".equals(writer.output.get(11)));
-	assert ("\nMemory cross reference list:\n".equals(writer.output.get(12)));
+	assert (writer.output.size() == 16);
+	assert ("0000                    ;I/O Port definitions\n".equals(writer.output.get(2)));
+	assert ("0000            port12  EQU  12\n".equals(writer.output.get(3)));
+	assert ("0000            portFE  EQU  FE\n".equals(writer.output.get(4)));
+	assert ("0000 DB12               IN   A,(0x12)\n".equals(writer.output.get(7)));
+	assert ("0002 D3FE               OUT  (0xFE),A\n".equals(writer.output.get(8)));
+	assert ("0004 D312               OUT  (0x12),A\n".equals(writer.output.get(9)));
+	assert ("0006 00                 NOP\n".equals(writer.output.get(10)));
+	assert ("\nI/O-port cross reference list:\n".equals(writer.output.get(12)));
+	assert ("12: 0000 0004\n".equals(writer.output.get(13)));
+	assert ("FE: 0002\n".equals(writer.output.get(14)));
+	assert ("\nMemory cross reference list:\n".equals(writer.output.get(15)));
   }
 
   @Test

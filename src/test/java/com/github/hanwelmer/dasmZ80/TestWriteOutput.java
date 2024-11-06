@@ -28,9 +28,8 @@ public class TestWriteOutput extends DasmZ80 {
 	ListingWriter writer = new ListingWriter();
 	try {
 	  writer.open(fileName);
-	  writeOutput(fileName, writer, 3, decoded);
+	  writeOutput(3, decoded, writer);
 	} catch (IOException e) {
-	  // TODO Auto-generated catch block
 	  e.printStackTrace();
 	} finally {
 	  writer.close();
