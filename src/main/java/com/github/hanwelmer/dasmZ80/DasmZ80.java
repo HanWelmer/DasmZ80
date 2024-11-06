@@ -78,23 +78,21 @@ public class DasmZ80 {
 	}
   } // disassemble()
 
-  protected static HashMap<Integer, AssemblyCode> disassemble(String fileName, ByteReader reader,
-      AbstractWriter writer) {
+  protected static void disassemble(String fileName, ByteReader reader, AbstractWriter writer) {
 	Decoder decoder = new Decoder();
-	HashMap<Integer, AssemblyCode> decoded = new HashMap<Integer, AssemblyCode>();
+	ArrayList<AssemblyCode> decoded = new ArrayList<AssemblyCode>();
 	Map<Integer, Definition> portReferences = new HashMap<Integer, Definition>();
 	Map<Integer, Definition> memoryReferences = new HashMap<Integer, Definition>();
 	int address = 0;
-	int lineNr = 0;
 	Byte nextByte = null;
 
 	try {
 	  while ((nextByte = reader.getByte()) != null) {
 		AssemblyCode asmCode = decoder.get(address, nextByte, reader, portReferences, memoryReferences);
-		decoded.put(++lineNr, asmCode);
+		decoded.add(asmCode);
 		address += asmCode.getBytes().size();
 		if (asmCode.getMnemonic().startsWith("RET")) {
-		  decoded.put(++lineNr, new AssemblyCode(address, ""));
+		  decoded.add(new AssemblyCode(address, ""));
 		}
 	  }
 	  writeDefinitions(fileName, writer, portReferences, memoryReferences);
@@ -103,8 +101,8 @@ public class DasmZ80 {
 	} catch (IllegalOpcodeException e) {
 	  System.out.print(e.getMessage());
 	  String msg = e.getMessage().trim();
-	  decoded.put(++lineNr, new AssemblyCode(address, msg));
-	  decoded.put(++lineNr, new AssemblyCode(address, ""));
+	  decoded.add(new AssemblyCode(address, msg));
+	  decoded.add(new AssemblyCode(address, ""));
 	  writeDefinitions(fileName, writer, portReferences, memoryReferences);
 	  writeOutput(address, decoded, writer);
 	  writeRemainderOfInput(address, reader, writer);
@@ -114,7 +112,6 @@ public class DasmZ80 {
 	  System.out.println(e.getMessage());
 	  e.printStackTrace();
 	}
-	return decoded;
   } // disassemble()
 
   private static void writeDefinitions(String fileName, AbstractWriter writer, Map<Integer, Definition> portReferences,
@@ -142,11 +139,10 @@ public class DasmZ80 {
 	}
   } // writeDefinitions()
 
-  protected static void writeOutput(int address, HashMap<Integer, AssemblyCode> decoded, AbstractWriter writer) {
+  protected static void writeOutput(int address, ArrayList<AssemblyCode> decoded, AbstractWriter writer) {
 	try {
-	  SortedSet<Integer> keys = new TreeSet<>(decoded.keySet());
-	  for (Integer key : keys) {
-		writer.write(decoded.get(key));
+	  for (AssemblyCode line : decoded) {
+		writer.write(line);
 	  }
 	  writer.write(new AssemblyCode(address, "end"));
 	} catch (IOException e) {
