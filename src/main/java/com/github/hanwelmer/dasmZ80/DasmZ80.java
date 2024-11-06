@@ -215,16 +215,17 @@ public class DasmZ80 {
 	  // Sort memory addresses.
 	  SortedSet<Integer> labels = new TreeSet<>(memoryReferences.keySet());
 	  // Write references to memory addresses.
-	  for (Integer label : labels) {
-		String msg = String.format("%04X:", label);
+	  for (Integer labelAddress : labels) {
+		Definition labelDefinition = memoryReferences.get(labelAddress);
+		String msg = String.format("%-8s=%04X:", labelDefinition.getName(), labelAddress);
 		int i = 0;
-		for (Integer reference : memoryReferences.get(label).getReferences()) {
+		for (Integer reference : labelDefinition.getReferences()) {
 		  msg += String.format(" %04X", reference);
 		  if (++i == 4) {
 			i = 0;
 			msg += "\n";
 			writer.write(msg);
-			msg = String.format("%5s", " ");
+			msg = String.format("%14s", " ");
 		  }
 		}
 		if (i > 0) {
