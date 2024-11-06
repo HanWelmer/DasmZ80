@@ -126,17 +126,21 @@ public class Decoder {
 	if (asmCode.getMnemonic().contains("&")) {
 	  Byte byte2 = reader.getNextByte();
 	  asmCode.addByte(byte2);
-	  asmCode.updateMnemonic("&", String.format("0x%02X", byte2));
 
-	  // address of this instruction to the port reference list.
-	  Integer port = new Integer(byte2);
-	  if (port < 0) {
-		port += 256;
+	  // add this port address to the port reference list.
+	  Integer portAddress = new Integer(byte2);
+	  String portLabel = String.format("port%02X", portAddress);
+	  if (portAddress < 0) {
+		portAddress += 256;
+		portLabel = "port" + portLabel.substring(portLabel.length() - 2, portLabel.length());
 	  }
-	  if (portReferences.get(port) == null) {
-		portReferences.put(port, new Definition(String.format("port%02X", port), port));
+	  if (portReferences.get(portAddress) == null) {
+		portReferences.put(portAddress, new Definition(portLabel, portAddress));
 	  }
-	  portReferences.get(port).add(new Integer(address));
+	  portReferences.get(portAddress).add(new Integer(address));
+
+	  // use port label in the assembly code.
+	  asmCode.updateMnemonic("&", portLabel);
 	}
 
 	return asmCode;

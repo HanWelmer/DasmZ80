@@ -197,10 +197,11 @@ public class DasmZ80 {
 	  // Sort port addresses.
 	  SortedSet<Integer> ports = new TreeSet<>(portReferences.keySet());
 	  // Write references to port addresses.
-	  for (Integer port : ports) {
-		String msg = String.format("%02X:", port);
+	  for (Integer portAddress : ports) {
+		Definition portDefinition = portReferences.get(portAddress);
+		String msg = String.format("%-8s=%02X:", portDefinition.getName(), portAddress);
 		int i = 0;
-		for (Integer reference : portReferences.get(port).getReferences()) {
+		for (Integer reference : portDefinition.getReferences()) {
 		  msg += String.format(" %04X", reference);
 		  if (++i == 8) {
 			i = 0;
