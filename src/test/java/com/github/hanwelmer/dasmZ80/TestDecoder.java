@@ -193,7 +193,7 @@ public class TestDecoder extends Decoder {
 	  AssemblyCode result = get(0, byte0, reader, portReferences, memoryReferences);
 	  assert (result != null);
 	  assert (result.getBytes().size() == bytes.length + 1);
-	  assert ("0000 D312               OUT  (0x12),A\n".equals(result.toString()));
+	  assert ("0000 D312               OUT  (port12),A\n".equals(result.toString()));
 	} catch (IOException e) {
 	  e.printStackTrace();
 	} catch (IllegalOpcodeException e) {
@@ -212,7 +212,7 @@ public class TestDecoder extends Decoder {
 	  AssemblyCode result = get(0, byte0, reader, portReferences, memoryReferences);
 	  assert (result != null);
 	  assert (result.getBytes().size() == bytes.length + 1);
-	  assert ("0000 D3AB               OUT  (0xAB),A\n".equals(result.toString()));
+	  assert ("0000 D3AB               OUT  (portAB),A\n".equals(result.toString()));
 	} catch (IOException e) {
 	  e.printStackTrace();
 	} catch (IllegalOpcodeException e) {

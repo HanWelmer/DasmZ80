@@ -76,12 +76,14 @@ public class Decoder {
 	  asmCode.addByte(byte2);
 	  applyDisplacement(asmCode, byte2);
 	}
+
 	// Process byte constant.
 	if (asmCode.getMnemonic().contains("#")) {
 	  Byte byte2 = reader.getNextByte();
 	  asmCode.addByte(byte2);
 	  asmCode.updateMnemonic("#", String.format("0x%02X", byte2));
 	}
+
 	// Process word constant / address.
 	if (asmCode.getMnemonic().contains("@")) {
 	  Byte byte2 = reader.getNextByte();
@@ -104,6 +106,7 @@ public class Decoder {
 	  }
 	  memoryReferences.get(value).add(new Integer(address));
 	}
+
 	// Process relative address.
 	if (asmCode.getMnemonic().contains("%")) {
 	  Byte byte2 = reader.getNextByte();
@@ -118,6 +121,7 @@ public class Decoder {
 	  }
 	  memoryReferences.get(value).add(new Integer(address));
 	}
+
 	// Process IO port.
 	if (asmCode.getMnemonic().contains("&")) {
 	  Byte byte2 = reader.getNextByte();

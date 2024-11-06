@@ -57,9 +57,9 @@ public class TestDisassemble extends DasmZ80 {
 	assert ("0000                    ;I/O Port definitions\n".equals(writer.output.get(2)));
 	assert ("0000            port12  EQU  12\n".equals(writer.output.get(3)));
 	assert ("0000            portFE  EQU  FE\n".equals(writer.output.get(4)));
-	assert ("0000 DB12               IN   A,(0x12)\n".equals(writer.output.get(7)));
-	assert ("0002 D3FE               OUT  (0xFE),A\n".equals(writer.output.get(8)));
-	assert ("0004 D312               OUT  (0x12),A\n".equals(writer.output.get(9)));
+	assert ("0000 DB12               IN   A,(port12)\n".equals(writer.output.get(7)));
+	assert ("0002 D3FE               OUT  (portFE),A\n".equals(writer.output.get(8)));
+	assert ("0004 D312               OUT  (port12),A\n".equals(writer.output.get(9)));
 	assert ("0006 00                 NOP\n".equals(writer.output.get(10)));
 	assert ("\nI/O-port cross reference list:\n".equals(writer.output.get(12)));
 	assert ("12: 0000 0004\n".equals(writer.output.get(13)));

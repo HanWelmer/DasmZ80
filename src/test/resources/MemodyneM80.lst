@@ -114,7 +114,7 @@
 00A9 ED52               SBC  HL,DE
 00AB 281A               JR   Z,lbl00C7
 00AD 1A                 LD   A,(DE)
-00AE D310               OUT  (0x10),A
+00AE D310               OUT  (port10),A
 00B0 13                 INC  DE
 00B1 CB8A               RES  1,D
 00B3 ED53561B           LD   (0x1B56),DE
@@ -132,7 +132,7 @@
 00C7 DDCB0546           BIT  0,(IX+5)
 00CB 200C               JR   NZ,lbl00D9
 00CD AF                 XOR  A
-00CE D310               OUT  (0x10),A
+00CE D310               OUT  (port10),A
 00D0 DD355D             DEC  (IX+93)
 00D3 C0                 RET  NZ
 00D4
@@ -141,23 +141,23 @@
 00D9
 00D9 DD360AE2           LD   (IX+10),0xE2
 00DD 3E28               LD   A,0x28
-00DF D311               OUT  (0x11),A
+00DF D311               OUT  (port11),A
 00E1 C9                 RET
 00E2
 00E2 3EAA               LD   A,0xAA
-00E4 D310               OUT  (0x10),A
+00E4 D310               OUT  (port10),A
 00E6 160A               LD   D,0x0A
-00E8 DB11               IN   A,(0x11)
+00E8 DB11               IN   A,(port11)
 00EA CB57               BIT  2,A
 00EC 2003               JR   NZ,lbl00F1
 00EE 15                 DEC  D
 00EF 20F7               JR   NZ,lbl00E8
 00F1 3E2D               LD   A,0x2D
-00F3 D311               OUT  (0x11),A
+00F3 D311               OUT  (port11),A
 00F5 21291B             LD   HL,0x1B29
 00F8 7E                 LD   A,(HL)
 00F9 E6EC               AND  0xEC
-00FB D311               OUT  (0x11),A
+00FB D311               OUT  (port11),A
 00FD 77                 LD   (HL),A
 00FE C9                 RET
 00FF
@@ -320,9 +320,9 @@
 01AF DD3608C5           LD   (IX+8),0xC5
 01B3 325B1B             LD   (0x1B5B),A
 01B6 3E43               LD   A,0x43
-01B8 D311               OUT  (0x11),A
+01B8 D311               OUT  (port11),A
 01BA 3EC9               LD   A,0xC9
-01BC D311               OUT  (0x11),A
+01BC D311               OUT  (port11),A
 01BE DDCB0466           BIT  4,(IX+4)
 01C2 2023               JR   NZ,lbl01E7
 01C4 C9                 RET
@@ -446,8 +446,8 @@
 026A 3A081B             LD   A,(0x1B08)
 026D FEAB               CP   0xAB
 026F 3E10               LD   A,0x10
-0271 D311               OUT  (0x11),A
-0273 DB11               IN   A,(0x11)
+0271 D311               OUT  (port11),A
+0273 DB11               IN   A,(port11)
 0275 CB5F               BIT  3,A
 0277 C9                 RET
 0278
@@ -466,7 +466,7 @@
 028B CB47               BIT  0,A
 028D CB87               RES  0,A
 028F 77                 LD   (HL),A
-0290 D303               OUT  (0x03),A
+0290 D303               OUT  (port03),A
 0292 C0                 RET  NZ
 0293
 0293 D7                 RST  0x10
@@ -513,9 +513,9 @@
 02BF 02                 LD   (BC),A
 02C0 CDFF00             CALL 0x00FF
 02C3 3E57               LD   A,0x57
-02C5 D309               OUT  (0x09),A
+02C5 D309               OUT  (port09),A
 02C7 7E                 LD   A,(HL)
-02C8 D309               OUT  (0x09),A
+02C8 D309               OUT  (port09),A
 02CA CF                 RST  0x08
 02CB F7                 RST  0x30
 02CC 1A                 LD   A,(DE)
@@ -736,7 +736,7 @@
 040B
 040B D1                 POP  DE
 040C 14                 INC  D
-040D DB12               IN   A,(0x12)
+040D DB12               IN   A,(port12)
 040F D8                 RET  C
 0410
 0410 CE14               ADC  A,0x14
@@ -815,8 +815,8 @@
 I/O-port cross reference list:
 03: 0290
 09: 02C5 02C8
-10: 00AE 00CE 00E4
-11: 00DF 00E8 00F3 00FB 01B8 01BC 0271 0273
+port10: 00AE 00CE 00E4
+port11: 00DF 00E8 00F3 00FB 01B8 01BC 0271 0273
 12: 040D
 
 Memory cross reference list:
