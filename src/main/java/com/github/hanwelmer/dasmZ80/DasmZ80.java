@@ -129,12 +129,7 @@ public class DasmZ80 {
 		SortedSet<Integer> keys = new TreeSet<>(portReferences.keySet());
 		for (Integer key : keys) {
 		  Definition def = portReferences.get(key);
-		  msg = String.format("0000%12s%s", " ", def.getName());
-		  if (msg.length() < 23) {
-			String format = "%" + (23 - msg.length()) + "s";
-			msg += String.format(format, " ");
-		  }
-		  writer.write(msg + String.format(" EQU  %02X\n", def.getValue()));
+		  writer.write(String.format("0000%12s%-7s EQU  %02X\n", " ", def.getName(), def.getValue()));
 		}
 	  }
 
