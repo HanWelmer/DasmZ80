@@ -155,7 +155,7 @@ public class TestDecoder extends Decoder {
 	  AssemblyCode result = get(0, byte0, reader, portReferences, memoryReferences);
 	  assert (result != null);
 	  assert (result.getBytes().size() == bytes.length + 1);
-	  assert ("0000 1012               DJNZ lbl0014\n".equals(result.toString()));
+	  assert ("0000 1012               DJNZ lbl0014-$\n".equals(result.toString()));
 	} catch (IOException e) {
 	  e.printStackTrace();
 	} catch (IllegalOpcodeException e) {
@@ -174,7 +174,7 @@ public class TestDecoder extends Decoder {
 	  AssemblyCode result = get(0, byte0, reader, portReferences, memoryReferences);
 	  assert (result != null);
 	  assert (result.getBytes().size() == bytes.length + 1);
-	  assert ("0000 10FE               DJNZ lbl0000\n".equals(result.toString()));
+	  assert ("0000 10FE               DJNZ lbl0000-$\n".equals(result.toString()));
 	} catch (IOException e) {
 	  e.printStackTrace();
 	} catch (IllegalOpcodeException e) {

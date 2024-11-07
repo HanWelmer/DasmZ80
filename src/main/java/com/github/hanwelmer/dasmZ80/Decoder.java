@@ -119,7 +119,7 @@ public class Decoder {
 	  asmCode.addByte(byte2);
 	  int targetAddress = address + asmCode.getBytes().size();
 	  targetAddress += (byte2 < 128) ? byte2 : (-byte2);
-	  asmCode.updateMnemonic("%", String.format("lbl%04X", targetAddress));
+	  asmCode.updateMnemonic("%", String.format("lbl%04X-$", targetAddress));
 
 	  Integer value = address + 2 + byte2;
 	  if (memoryReferences.get(value) == null) {

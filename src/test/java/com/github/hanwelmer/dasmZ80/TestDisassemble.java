@@ -78,8 +78,8 @@ public class TestDisassemble extends DasmZ80 {
 	assert ("0000 CD0300             CALL lbl0003\n".equals(writer.output.get(4)));
 	assert ("0003 C30300   lbl0003:  JP   lbl0003\n".equals(writer.output.get(5)));
 	assert ("0006 C20300             JP   NZ,lbl0003\n".equals(writer.output.get(6)));
-	assert ("0009 10F8               DJNZ lbl0003\n".equals(writer.output.get(7)));
-	assert ("000B 38F6               JR   C,lbl0003\n".equals(writer.output.get(8)));
+	assert ("0009 10F8               DJNZ lbl0003-$\n".equals(writer.output.get(7)));
+	assert ("000B 38F6               JR   C,lbl0003-$\n".equals(writer.output.get(8)));
 	assert ("000D 00                 NOP\n".equals(writer.output.get(9)));
 	assert ("\nI/O-port cross reference list:\n".equals(writer.output.get(11)));
 	assert ("\nMemory cross reference list:\n".equals(writer.output.get(12)));
