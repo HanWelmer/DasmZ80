@@ -87,6 +87,7 @@ public class DasmZ80 {
 	Byte nextByte = null;
 
 	try {
+	  // Disassemble the input file.
 	  while ((nextByte = reader.getByte()) != null) {
 		AssemblyCode asmCode = decoder.get(address, nextByte, reader, portReferences, memoryReferences);
 		decoded.add(asmCode);
@@ -95,6 +96,11 @@ public class DasmZ80 {
 		  decoded.add(new AssemblyCode(address, ""));
 		}
 	  }
+
+	  // Fill in the memory address labels.
+	  fillInLabels(decoded, memoryReferences);
+
+	  // Write everything to the output file.
 	  writeDefinitions(fileName, writer, portReferences, memoryReferences);
 	  writeOutput(address, decoded, writer);
 	  writeReferences(writer, portReferences, memoryReferences);
@@ -103,6 +109,8 @@ public class DasmZ80 {
 	  String msg = e.getMessage().trim();
 	  decoded.add(new AssemblyCode(address, msg));
 	  decoded.add(new AssemblyCode(address, ""));
+
+	  fillInLabels(decoded, memoryReferences);
 	  writeDefinitions(fileName, writer, portReferences, memoryReferences);
 	  writeOutput(address, decoded, writer);
 	  writeRemainderOfInput(address, reader, writer);
@@ -113,6 +121,23 @@ public class DasmZ80 {
 	  e.printStackTrace();
 	}
   } // disassemble()
+
+  private static void fillInLabels(ArrayList<AssemblyCode> decoded, Map<Integer, Definition> memoryReferences) {
+	// Write references to memory addresses.
+	int index = 0;
+	SortedSet<Integer> labels = new TreeSet<>(memoryReferences.keySet());
+	for (Integer labelAddress : labels) {
+	  // Look up the line where the label must be set.
+	  while (index < decoded.size() && decoded.get(index).getAddress() <= labelAddress) {
+		index++;
+	  }
+	  // Set the label.
+	  if (index > 0 && decoded.get(index - 1).getAddress() == labelAddress) {
+		Definition labelDefinition = memoryReferences.get(labelAddress);
+		decoded.get(index - 1).setLabel(labelDefinition.getName());
+	  }
+	}
+  }
 
   private static void writeDefinitions(String fileName, AbstractWriter writer, Map<Integer, Definition> portReferences,
       Map<Integer, Definition> memoryReferences) {

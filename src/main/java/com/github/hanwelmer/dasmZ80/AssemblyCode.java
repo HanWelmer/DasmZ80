@@ -36,6 +36,10 @@ public class AssemblyCode {
 	this.comment = "";
   }
 
+  public int getAddress() {
+	return address;
+  }
+
   public void addByte(Byte nextByte) {
 	if (bytes == null) {
 	  bytes = new ArrayList<Byte>();
@@ -53,6 +57,10 @@ public class AssemblyCode {
 
   public String getMnemonic() {
 	return mnemonic;
+  }
+
+  public void setLabel(String label) {
+	this.label = label;
   }
 
   public void setMnemonic(String mnemonic) {

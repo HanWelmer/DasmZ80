@@ -79,7 +79,7 @@ public class TestDecoder extends Decoder {
 	  AssemblyCode result = get(0, byte0, reader, portReferences, memoryReferences);
 	  assert (result != null);
 	  assert (result.getBytes().size() == bytes.length + 1);
-	  assert ("0000 013412             LD   BC,0x1234\n".equals(result.toString()));
+	  assert ("0000 013412             LD   BC,lbl1234\n".equals(result.toString()));
 	} catch (IOException e) {
 	  e.printStackTrace();
 	} catch (IllegalOpcodeException e) {
@@ -98,7 +98,7 @@ public class TestDecoder extends Decoder {
 	  AssemblyCode result = get(0, byte0, reader, portReferences, memoryReferences);
 	  assert (result != null);
 	  assert (result.getBytes().size() == bytes.length + 1);
-	  assert ("0000 01DEBC             LD   BC,0xBCDE\n".equals(result.toString()));
+	  assert ("0000 01DEBC             LD   BC,lblBCDE\n".equals(result.toString()));
 	} catch (IOException e) {
 	  e.printStackTrace();
 	} catch (IllegalOpcodeException e) {
@@ -269,7 +269,7 @@ public class TestDecoder extends Decoder {
 	  AssemblyCode result = get(0, byte0, reader, portReferences, memoryReferences);
 	  assert (result != null);
 	  assert (result.getBytes().size() == bytes.length + 1);
-	  assert ("0000 DD213412           LD   IX,0x1234\n".equals(result.toString()));
+	  assert ("0000 DD213412           LD   IX,lbl1234\n".equals(result.toString()));
 	} catch (IOException e) {
 	  e.printStackTrace();
 	} catch (IllegalOpcodeException e) {
@@ -383,7 +383,7 @@ public class TestDecoder extends Decoder {
 	  AssemblyCode result = get(0, byte0, reader, portReferences, memoryReferences);
 	  assert (result != null);
 	  assert (result.getBytes().size() == bytes.length + 1);
-	  assert ("0000 ED433412           LD   (0x1234),BC\n".equals(result.toString()));
+	  assert ("0000 ED433412           LD   (lbl1234),BC\n".equals(result.toString()));
 	} catch (IOException e) {
 	  e.printStackTrace();
 	} catch (IllegalOpcodeException e) {

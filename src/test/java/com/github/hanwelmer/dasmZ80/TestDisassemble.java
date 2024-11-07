@@ -40,7 +40,7 @@ public class TestDisassemble extends DasmZ80 {
 	assert (writer.output.size() > 0);
 	assert ("0000 00                 NOP\n".equals(writer.output.get(4)));
 	assert ("0001 02                 LD   (BC),A\n".equals(writer.output.get(5)));
-	assert ("0002 013412             LD   BC,0x1234\n".equals(writer.output.get(6)));
+	assert ("0002 013412             LD   BC,lbl1234\n".equals(writer.output.get(6)));
 	assert ("0005                    ;Unprocessed binary code from input file\n".equals(writer.output.get(11)));
 	assert ("0005 DDDC3412 090A0B0C 0D0E0F\n".equals(writer.output.get(13)));
 	assert ("0010 10111213 14151617 18191A1B 1C1D1E1F\n".equals(writer.output.get(14)));
@@ -75,9 +75,9 @@ public class TestDisassemble extends DasmZ80 {
 	StringWriter writer = new StringWriter();
 	disassemble("test", reader, writer);
 	assert (writer.output.size() == 15);
-	assert ("0000 CD0300             CALL 0x0003\n".equals(writer.output.get(4)));
-	assert ("0003 C30300             JP   0x0003\n".equals(writer.output.get(5)));
-	assert ("0006 C20300             JP   NZ,0x0003\n".equals(writer.output.get(6)));
+	assert ("0000 CD0300             CALL lbl0003\n".equals(writer.output.get(4)));
+	assert ("0003 C30300   lbl0003:  JP   lbl0003\n".equals(writer.output.get(5)));
+	assert ("0006 C20300             JP   NZ,lbl0003\n".equals(writer.output.get(6)));
 	assert ("0009 10F8               DJNZ lbl0003\n".equals(writer.output.get(7)));
 	assert ("000B 38F6               JR   C,lbl0003\n".equals(writer.output.get(8)));
 	assert ("000D 00                 NOP\n".equals(writer.output.get(9)));

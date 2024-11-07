@@ -90,8 +90,9 @@ public class Decoder {
 	  Byte byte3 = reader.getNextByte();
 	  asmCode.addByte(byte2);
 	  asmCode.addByte(byte3);
-	  asmCode.updateMnemonic("@", String.format("0x%02X%02X", byte3, byte2));
 
+	  // Prepare label and value.
+	  String label = String.format("lbl%02X%02X", byte3, byte2);
 	  Integer value = new Integer(byte3);
 	  if (byte3 < 0) {
 		value += 256;
@@ -101,8 +102,13 @@ public class Decoder {
 	  if (byte2 < 0) {
 		value += 256;
 	  }
+
+	  // Put label in assembly code instruction.
+	  asmCode.updateMnemonic("@", label);
+
+	  // add label, value and address to memory references list.
 	  if (memoryReferences.get(value) == null) {
-		memoryReferences.put(value, new Definition(String.format("lbl%04X", value), value));
+		memoryReferences.put(value, new Definition(label, value));
 	  }
 	  memoryReferences.get(value).add(new Integer(address));
 	}
