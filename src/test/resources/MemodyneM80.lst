@@ -8,7 +8,7 @@
 0000            port12  EQU  12
 0000
 0000                    org 0x0000
-0000 185D               JR   lbl005F
+0000 185D     lbl0000:  JR   lbl005F-$
 0002 37                 SCF
 0003 DDCB0EEE           SET  5,(IX+14)
 0007 D7                 RST  0x10
@@ -24,13 +24,13 @@
 0013
 0013 DD3648D8           LD   (IX+72),0xD8
 0017 CF                 RST  0x08
-0018 22541B             LD   (0x1B54),HL
+0018 22541B             LD   (lbl1B54),HL
 001B C9                 RET
 001C
 001C E7                 RST  0x20
 001D CBEE               SET  5,(HL)
 001F CF                 RST  0x08
-0020 21031B             LD   HL,0x1B03
+0020 21031B             LD   HL,lbl1B03
 0023 C9                 RET
 0024
 0024 E7                 RST  0x20
@@ -46,26 +46,26 @@
 0031 CBBB               RES  7,E
 0033 C9                 RET
 0034
-0034 113204             LD   DE,0x0432
+0034 113204             LD   DE,lbl0432
 0037 C9                 RET
 0038
 0038 DDCB0266           BIT  4,(IX+2)
-003C 2806               JR   Z,lbl0044
+003C 2806               JR   Z,lbl0044-$
 003E CB21               SLA  C
 0040 78                 LD   A,B
 0041 EE04               XOR  0x04
 0043 7F                 LD   A,A
-0044 ED430D1B           LD   (0x1B0D),BC
+0044 ED430D1B lbl0044:  LD   (lbl1B0D),BC
 0048 C9                 RET
 0049
 0049 B7                 OR   A
 004A ED42               SBC  HL,BC
-004C 3004               JR   NC,lbl0052
-004E 010002             LD   BC,0x0200
+004C 3004               JR   NC,lbl0052-$
+004E 010002             LD   BC,lbl0200
 0051 09                 ADD  HL,BC
-0052 44                 LD   B,H
+0052 44       lbl0052:  LD   B,H
 0053 4D                 LD   C,L
-0054 2A541B             LD   HL,(0x1B54)
+0054 2A541B   lbl0054:  LD   HL,(lbl1B54)
 0057 B7                 OR   A
 0058 C9                 RET
 0059
@@ -75,51 +75,51 @@
 005D C0                 RET  NZ
 005E
 005E D7                 RST  0x10
-005F 31001C             LD   SP,0x1C00
+005F 31001C   lbl005F:  LD   SP,lbl1C00
 0062 ED5E               IM   2
-0064 11001B             LD   DE,0x1B00
+0064 11001B             LD   DE,lbl1B00
 0067 7A                 LD   A,D
 0068 ED47               LD   I,A
 006A D5                 PUSH DE
 006B DDE1               POP  IX
-006D 210003             LD   HL,0x0300
-0070 015400             LD   BC,0x0054
+006D 210003             LD   HL,lbl0300
+0070 015400             LD   BC,lbl0054
 0073 EDB0               LDIR
 0075 AF                 XOR  A
 0076 06AC               LD   B,0xAC
-0078 12                 LD   (DE),A
+0078 12       lbl0078:  LD   (DE),A
 0079 13                 INC  DE
-007A 10FC               DJNZ lbl0078
-007C 01080C             LD   BC,0x0C08
-007F 210F1B             LD   HL,0x1B0F
-0082 EDA3               OUTI
+007A 10FC               DJNZ lbl0078-$
+007C 01080C             LD   BC,lbl0C08
+007F 210F1B             LD   HL,lbl1B0F
+0082 EDA3     lbl0082:  OUTI
 0084 EDA3               OUTI
 0086 0C                 INC  C
-0087 10F9               DJNZ lbl0082
-0089 CDF202             CALL 0x02F2
-008C 01110C             LD   BC,0x0C11
+0087 10F9               DJNZ lbl0082-$
+0089 CDF202             CALL lbl02F2
+008C 01110C             LD   BC,lbl0C11
 008F EDB3               OTIR
-0091 E7                 RST  0x20
+0091 E7       lbl0091:  RST  0x20
 0092 23                 INC  HL
 0093 F3                 DI
 0094 CB7E               BIT  7,(HL)
 0096 CBBE               RES  7,(HL)
-0098 2A001B             LD   HL,(0x1B00)
-009B C47106             CALL NZ,0x0671
+0098 2A001B             LD   HL,(lbl1B00)
+009B C47106             CALL NZ,lbl0671
 009E FB                 EI
-009F 18F0               JR   lbl0091
-00A1 AF                 XOR  A
-00A2 2A501B             LD   HL,(0x1B50)
-00A5 ED5B561B           LD   DE,(0x1B56)
+009F 18F0               JR   lbl0091-$
+00A1 AF       lbl00A1:  XOR  A
+00A2 2A501B             LD   HL,(lbl1B50)
+00A5 ED5B561B           LD   DE,(lbl1B56)
 00A9 ED52               SBC  HL,DE
-00AB 281A               JR   Z,lbl00C7
+00AB 281A               JR   Z,lbl00C7-$
 00AD 1A                 LD   A,(DE)
 00AE D310               OUT  (port10),A
 00B0 13                 INC  DE
 00B1 CB8A               RES  1,D
-00B3 ED53561B           LD   (0x1B56),DE
+00B3 ED53561B           LD   (lbl1B56),DE
 00B7 DD355D             DEC  (IX+93)
-00BA 2818               JR   Z,lbl00D4
+00BA 2818               JR   Z,lbl00D4-$
 00BC B7                 OR   A
 00BD F8                 RET  M
 00BE
@@ -129,17 +129,17 @@
 00C2 DD360AC7           LD   (IX+10),0xC7
 00C6 C9                 RET
 00C7
-00C7 DDCB0546           BIT  0,(IX+5)
-00CB 200C               JR   NZ,lbl00D9
+00C7 DDCB0546 lbl00C7:  BIT  0,(IX+5)
+00CB 200C               JR   NZ,lbl00D9-$
 00CD AF                 XOR  A
 00CE D310               OUT  (port10),A
 00D0 DD355D             DEC  (IX+93)
 00D3 C0                 RET  NZ
 00D4
-00D4 DD360AD9           LD   (IX+10),0xD9
+00D4 DD360AD9 lbl00D4:  LD   (IX+10),0xD9
 00D8 C9                 RET
 00D9
-00D9 DD360AE2           LD   (IX+10),0xE2
+00D9 DD360AE2 lbl00D9:  LD   (IX+10),0xE2
 00DD 3E28               LD   A,0x28
 00DF D311               OUT  (port11),A
 00E1 C9                 RET
@@ -147,40 +147,40 @@
 00E2 3EAA               LD   A,0xAA
 00E4 D310               OUT  (port10),A
 00E6 160A               LD   D,0x0A
-00E8 DB11               IN   A,(port11)
+00E8 DB11     lbl00E8:  IN   A,(port11)
 00EA CB57               BIT  2,A
-00EC 2003               JR   NZ,lbl00F1
+00EC 2003               JR   NZ,lbl00F1-$
 00EE 15                 DEC  D
-00EF 20F7               JR   NZ,lbl00E8
-00F1 3E2D               LD   A,0x2D
+00EF 20F7               JR   NZ,lbl00E8-$
+00F1 3E2D     lbl00F1:  LD   A,0x2D
 00F3 D311               OUT  (port11),A
-00F5 21291B             LD   HL,0x1B29
+00F5 21291B             LD   HL,lbl1B29
 00F8 7E                 LD   A,(HL)
 00F9 E6EC               AND  0xEC
 00FB D311               OUT  (port11),A
 00FD 77                 LD   (HL),A
 00FE C9                 RET
 00FF
-00FF 21661B             LD   HL,0x1B66
-0102 AF                 XOR  A
+00FF 21661B   lbl00FF:  LD   HL,lbl1B66
+0102 AF       lbl0102:  XOR  A
 0103 77                 LD   (HL),A
 0104 2B                 DEC  HL
 0105 77                 LD   (HL),A
 0106 0604               LD   B,0x04
-0108 F7                 RST  0x30
+0108 F7       lbl0108:  RST  0x30
 0109 1A                 LD   A,(DE)
-010A CD3201             CALL 0x0132
+010A CD3201             CALL lbl0132
 010D D8                 RET  C
 010E
 010E ED6F               RLD
 0110 23                 INC  HL
 0111 ED6F               RLD
 0113 2B                 DEC  HL
-0114 10F2               DJNZ lbl0108
+0114 10F2               DJNZ lbl0108-$
 0116 CF                 RST  0x08
-0117 21011B             LD   HL,0x1B01
+0117 21011B             LD   HL,lbl1B01
 011A DDCB04FE           SET  7,(IX+4)
-011E 18E2               JR   lbl0102
+011E 18E2               JR   lbl0102-$
 0120 09                 ADD  HL,BC
 0121 00                 NOP
 0122 C0                 RET  NZ
@@ -192,13 +192,13 @@
 0127 00                 NOP
 0128 9F                 SBC  A,A
 0129 03                 INC  BC
-012A CDFF00             CALL 0x00FF
+012A CDFF00   lbl012A:  CALL lbl00FF
 012D 7E                 LD   A,(HL)
 012E 23                 INC  HL
 012F 6E                 LD   L,(HL)
 0130 77                 LD   (HL),A
 0131 CF                 RST  0x08
-0132 D630               SUB  0x30
+0132 D630     lbl0132:  SUB  0x30
 0134 D8                 RET  C
 0135
 0135 FE0A               CP   0x0A
@@ -248,11 +248,11 @@
 0163 03                 INC  BC
 0164 34                 INC  (HL)
 0165 00                 NOP
-0166 D203DA             JP   NC,0xDA03
+0166 D203DA             JP   NC,lblDA03
 0169 03                 INC  BC
 016A C5                 PUSH BC
 016B 03                 INC  BC
-016C CA0309             JP   Z,0x0903
+016C CA0309             JP   Z,lbl0903
 016F 00                 NOP
 0170 09                 ADD  HL,BC
 0171 00                 NOP
@@ -269,7 +269,7 @@
 017B
 017B 02                 LD   (BC),A
 017C 17                 RLA
-017D 012A01             LD   BC,0x012A
+017D 012A01             LD   BC,lbl012A
 0180 09                 ADD  HL,BC
 0181 00                 NOP
 0182 49                 LD   C,C
@@ -318,52 +318,52 @@
 01AE C9                 RET
 01AF
 01AF DD3608C5           LD   (IX+8),0xC5
-01B3 325B1B             LD   (0x1B5B),A
+01B3 325B1B             LD   (lbl1B5B),A
 01B6 3E43               LD   A,0x43
 01B8 D311               OUT  (port11),A
 01BA 3EC9               LD   A,0xC9
 01BC D311               OUT  (port11),A
 01BE DDCB0466           BIT  4,(IX+4)
-01C2 2023               JR   NZ,lbl01E7
+01C2 2023               JR   NZ,lbl01E7-$
 01C4 C9                 RET
 01C5
-01C5 325C1B             LD   (0x1B5C),A
+01C5 325C1B             LD   (lbl1B5C),A
 01C8 DD3608CD           LD   (IX+8),0xCD
 01CC C9                 RET
 01CD
-01CD 2A5B1B             LD   HL,(0x1B5B)
+01CD 2A5B1B             LD   HL,(lbl1B5B)
 01D0 45                 LD   B,L
 01D1 6C                 LD   L,H
 01D2 67                 LD   H,A
-01D3 225B1B             LD   (0x1B5B),HL
-01D6 2A581B             LD   HL,(0x1B58)
+01D3 225B1B             LD   (lbl1B5B),HL
+01D6 2A581B             LD   HL,(lbl1B58)
 01D9 70                 LD   (HL),B
 01DA 23                 INC  HL
 01DB CB8C               RES  1,H
-01DD 22581B             LD   (0x1B58),HL
-01E0 3A071B             LD   A,(0x1B07)
+01DD 22581B             LD   (lbl1B58),HL
+01E0 3A071B             LD   A,(lbl1B07)
 01E3 B7                 OR   A
 01E4 F8                 RET  M
 01E5
 01E5 B8                 CP   B
 01E6 C0                 RET  NZ
 01E7
-01E7 DD3608EB           LD   (IX+8),0xEB
+01E7 DD3608EB lbl01E7:  LD   (IX+8),0xEB
 01EB C9                 RET
 01EC
 01EC F3                 DI
-01ED 2A4E1B             LD   HL,(0x1B4E)
+01ED 2A4E1B             LD   HL,(lbl1B4E)
 01F0 5E                 LD   E,(HL)
 01F1 EB                 EX   DE,HL
-01F2 CD6906             CALL 0x0669
-01F5 ED534E1B           LD   (0x1B4E),DE
+01F2 CD6906             CALL lbl0669
+01F5 ED534E1B           LD   (lbl1B4E),DE
 01F9 D0                 RET  NC
 01FA
-01FA 210604             LD   HL,0x0406
-01FD 224E1B             LD   (0x1B4E),HL
-0200 C9                 RET
+01FA 210604             LD   HL,lbl0406
+01FD 224E1B             LD   (lbl1B4E),HL
+0200 C9       lbl0200:  RET
 0201
-0201 21621B             LD   HL,0x1B62
+0201 21621B             LD   HL,lbl1B62
 0204 AF                 XOR  A
 0205 BE                 CP   (HL)
 0206 37                 SCF
@@ -374,16 +374,16 @@
 020A EF                 RST  0x28
 020B 0A                 LD   A,(BC)
 020C FE2E               CP   0x2E
-020E 2003               JR   NZ,lbl0213
+020E 2003               JR   NZ,lbl0213-$
 0210 23                 INC  HL
 0211 50                 LD   D,B
 0212 5E                 LD   E,(HL)
-0213 B7                 OR   A
+0213 B7       lbl0213:  OR   A
 0214 C9                 RET
 0215
 0215 DD36483F           LD   (IX+72),0x3F
 0219 CF                 RST  0x08
-021A 21621B             LD   HL,0x1B62
+021A 21621B             LD   HL,lbl1B62
 021D AF                 XOR  A
 021E B6                 OR   (HL)
 021F C8                 RET  Z
@@ -393,34 +393,34 @@
 0222 EF                 RST  0x28
 0223 0A                 LD   A,(BC)
 0224 FE3A               CP   0x3A
-0226 300C               JR   NC,lbl0234
+0226 300C               JR   NC,lbl0234-$
 0228 FE21               CP   0x21
-022A 3016               JR   NC,lbl0242
+022A 3016               JR   NC,lbl0242-$
 022C FE13               CP   0x13
 022E D0                 RET  NC
 022F
 022F FE11               CP   0x11
-0231 3013               JR   NC,lbl0246
+0231 3013               JR   NC,lbl0246-$
 0233 C9                 RET
 0234
-0234 FE55               CP   0x55
+0234 FE55     lbl0234:  CP   0x55
 0236 D0                 RET  NC
 0237
 0237 FE40               CP   0x40
-0239 300B               JR   NC,lbl0246
-023B 217111             LD   HL,0x1171
+0239 300B               JR   NC,lbl0246-$
+023B 217111   lbl023B:  LD   HL,lbl1171
 023E 2F                 CPL
 023F 00                 NOP
 0240 B7                 OR   A
 0241 C9                 RET
 0242
-0242 FE2E               CP   0x2E
-0244 38F5               JR   C,lbl023B
-0246 59                 LD   E,C
+0242 FE2E     lbl0242:  CP   0x2E
+0244 38F5               JR   C,lbl023B-$
+0246 59       lbl0246:  LD   E,C
 0247 50                 LD   D,B
 0248 C9                 RET
 0249
-0249 21621B             LD   HL,0x1B62
+0249 21621B             LD   HL,lbl1B62
 024C 7E                 LD   A,(HL)
 024D 3600               LD   (HL),0x00
 024F 23                 INC  HL
@@ -438,14 +438,14 @@
 025C C607               ADD  A,0x07
 025E C9                 RET
 025F
-025F 2A521B             LD   HL,(0x1B52)
-0262 22501B             LD   (0x1B50),HL
-0265 210000             LD   HL,0x0000
+025F 2A521B             LD   HL,(lbl1B52)
+0262 22501B             LD   (lbl1B50),HL
+0265 210000             LD   HL,lbl0000
 0268 DF                 RST  0x18
 0269 CF                 RST  0x08
-026A 3A081B             LD   A,(0x1B08)
+026A 3A081B             LD   A,(lbl1B08)
 026D FEAB               CP   0xAB
-026F 3E10               LD   A,0x10
+026F 3E10     lbl026F:  LD   A,0x10
 0271 D311               OUT  (port11),A
 0273 DB11               IN   A,(port11)
 0275 CB5F               BIT  3,A
@@ -454,12 +454,12 @@
 0278 F7                 RST  0x30
 0279 1A                 LD   A,(DE)
 027A 060A               LD   B,0x0A
-027C CDFA05             CALL 0x05FA
+027C CDFA05             CALL lbl05FA
 027F CF                 RST  0x08
-0280 210E1B             LD   HL,0x1B0E
+0280 210E1B             LD   HL,lbl1B0E
 0283 46                 LD   B,(HL)
 0284 CBC6               SET  0,(HL)
-0286 CD6F02             CALL 0x026F
+0286 CD6F02             CALL lbl026F
 0289 C0                 RET  NZ
 028A
 028A 78                 LD   A,B
@@ -480,13 +480,13 @@
 029B 03                 INC  BC
 029C 15                 DEC  D
 029D 05                 DEC  B
-029E 2805               JR   Z,lbl02A5
+029E 2805               JR   Z,lbl02A5-$
 02A0 80                 ADD  A,B
 02A1 02                 LD   (BC),A
 02A2 00                 NOP
 02A3 05                 DEC  B
 02A4 D5                 PUSH DE
-02A5 04                 INC  B
+02A5 04       lbl02A5:  INC  B
 02A6 CF                 RST  0x08
 02A7 05                 DEC  B
 02A8 62                 LD   H,D
@@ -508,10 +508,10 @@
 02B8 59                 LD   E,C
 02B9 00                 NOP
 02BA 09                 ADD  HL,BC
-02BB 00                 NOP
-02BC 01021A             LD   BC,0x1A02
+02BB 00       lbl02BB:  NOP
+02BC 01021A             LD   BC,lbl1A02
 02BF 02                 LD   (BC),A
-02C0 CDFF00             CALL 0x00FF
+02C0 CDFF00             CALL lbl00FF
 02C3 3E57               LD   A,0x57
 02C5 D309               OUT  (port09),A
 02C7 7E                 LD   A,(HL)
@@ -536,23 +536,23 @@
 02DB 06D8               LD   B,0xD8
 02DD 0615               LD   B,0x15
 02DF 02                 LD   (BC),A
-02E0 CDFF00             CALL 0x00FF
+02E0 CDFF00             CALL lbl00FF
 02E3 7E                 LD   A,(HL)
-02E4 320C1B             LD   (0x1B0C),A
+02E4 320C1B             LD   (lbl1B0C),A
 02E7 E640               AND  0x40
-02E9 21211B             LD   HL,0x1B21
+02E9 21211B             LD   HL,lbl1B21
 02EC CBCE               SET  1,(HL)
-02EE 2802               JR   Z,lbl02F2
+02EE 2802               JR   Z,lbl02F2-$
 02F0 CB8E               RES  1,(HL)
-02F2 211A1B             LD   HL,0x1B1A
-02F5 01130A             LD   BC,0x0A13
+02F2 211A1B   lbl02F2:  LD   HL,lbl1B1A
+02F5 01130A             LD   BC,lbl0A13
 02F8 EDB3               OTIR
 02FA CF                 RST  0x08
 02FB DD355A             DEC  (IX+90)
 02FE C0                 RET  NZ
 02FF
 02FF D7                 RST  0x10
-0300 D8                 RET  C
+0300 D8       lbl0300:  RET  C
 0301
 0301 0600               LD   B,0x00
 0303 04                 INC  B
@@ -561,27 +561,27 @@
 0306 0A                 LD   A,(BC)
 0307 FF                 RST  0x38
 0308 EB                 EX   DE,HL
-0309 01A100             LD   BC,0x00A1
+0309 01A100             LD   BC,lbl00A1
 030C 0B                 DEC  BC
 030D 00                 NOP
 030E 00                 NOP
 030F 40                 LD   B,B
 0310 03                 INC  BC
 0311 57                 LD   D,A
-0312 1003               DJNZ lbl0317
+0312 1003               DJNZ lbl0317-$
 0314 03                 INC  BC
 0315 A7                 AND  A
 0316 14                 INC  D
-0317 80                 ADD  A,B
+0317 80       lbl0317:  ADD  A,B
 0318 00                 NOP
 0319 80                 ADD  A,B
 031A 02                 LD   (BC),A
-031B 3004               JR   NC,lbl0321
-031D C403C1             CALL NZ,0xC103
+031B 3004               JR   NC,lbl0321-$
+031D C403C1             CALL NZ,lblC103
 0320 05                 DEC  B
-0321 6E                 LD   L,(HL)
-0322 011F04             LD   BC,0x041F
-0325 3003               JR   NC,lbl032A
+0321 6E       lbl0321:  LD   L,(HL)
+0322 011F04             LD   BC,lbl041F
+0325 3003               JR   NC,lbl032A-$
 0327 D9                 EXX
 0328 05                 DEC  B
 0329 EE01               XOR  0x01
@@ -620,17 +620,17 @@
 034D 0654               LD   B,0x54
 034F 03                 INC  BC
 0350 00                 NOP
-0351 1800               JR   lbl0353
-0353 182E               JR   lbl0383
+0351 1800               JR   lbl0353-$
+0353 182E     lbl0353:  JR   lbl0383-$
 0355 2E2E               LD   L,0x2E
 0357 2E2E               LD   L,0x2E
 0359 2ECD               LD   L,0xCD
 035B 59                 LD   E,C
 035C 00                 NOP
-035D 3A0E1B             LD   A,(0x1B0E)
+035D 3A0E1B             LD   A,(lbl1B0E)
 0360 CB6E               BIT  5,(HL)
-0362 215A1B             LD   HL,0x1B5A
-0365 200B               JR   NZ,lbl0372
+0362 215A1B             LD   HL,lbl1B5A
+0365 200B               JR   NZ,lbl0372-$
 0367 35                 DEC  (HL)
 0368 C0                 RET  NZ
 0369
@@ -640,27 +640,27 @@
 0370
 0370 34                 INC  (HL)
 0371 D7                 RST  0x10
-0372 CB6F               BIT  5,A
+0372 CB6F     lbl0372:  BIT  5,A
 0374 C0                 RET  NZ
 0375
 0375 3619               LD   (HL),0x19
 0377 D7                 RST  0x10
 0378 E7                 RST  0x20
 0379 2B                 DEC  HL
-037A 010021             LD   BC,0x2100
+037A 010021             LD   BC,lbl2100
 037D CB76               BIT  6,(HL)
-037F 2804               JR   Z,lbl0385
+037F 2804               JR   Z,lbl0385-$
 0381 CBB6               RES  6,(HL)
-0383 CBE1               SET  4,C
-0385 CB6E               BIT  5,(HL)
-0387 2004               JR   NZ,lbl038D
+0383 CBE1     lbl0383:  SET  4,C
+0385 CB6E     lbl0385:  BIT  5,(HL)
+0387 2004               JR   NZ,lbl038D-$
 0389 1E3D               LD   E,0x3D
 038B CBC8               SET  1,B
-038D FF                 RST  0x38
+038D FF       lbl038D:  RST  0x38
 038E D7                 RST  0x10
 038F E7                 RST  0x20
 0390 CBCE               SET  1,(HL)
-0392 115604             LD   DE,0x0456
+0392 115604             LD   DE,lbl0456
 0395 3E80               LD   A,0x80
 0397 AE                 XOR  (HL)
 0398 77                 LD   (HL),A
@@ -672,12 +672,12 @@
 03A0 CB8E               RES  1,(HL)
 03A2 DD364CD8           LD   (IX+76),0xD8
 03A6 CF                 RST  0x08
-03A7 010026             LD   BC,0x2600
+03A7 010026             LD   BC,lbl2600
 03AA FF                 RST  0x38
-03AB 113C04             LD   DE,0x043C
+03AB 113C04             LD   DE,lbl043C
 03AE C9                 RET
 03AF
-03AF 210E1A             LD   HL,0x1A0E
+03AF 210E1A             LD   HL,lbl1A0E
 03B2 3E04               LD   A,0x04
 03B4 AE                 XOR  (HL)
 03B5 CB8F               RES  1,A
@@ -686,52 +686,52 @@
 03B9 E7                 RST  0x20
 03BA 23                 INC  HL
 03BB CBE6               SET  4,(HL)
-03BD CDE404             CALL 0x04E4
+03BD CDE404             CALL lbl04E4
 03C0 DDCB0EC6           SET  0,(IX+14)
 03C4 D7                 RST  0x10
-03C5 010120             LD   BC,0x2001
-03C8 1803               JR   lbl03CD
-03CA 010124             LD   BC,0x2401
-03CD FF                 RST  0x38
-03CE 110704             LD   DE,0x0407
+03C5 010120             LD   BC,lbl2001
+03C8 1803               JR   lbl03CD-$
+03CA 010124             LD   BC,lbl2401
+03CD FF       lbl03CD:  RST  0x38
+03CE 110704             LD   DE,lbl0407
 03D1 C9                 RET
 03D2
-03D2 010122             LD   BC,0x2201
-03D5 111604             LD   DE,0x0416
+03D2 010122             LD   BC,lbl2201
+03D5 111604   lbl03D5:  LD   DE,lbl0416
 03D8 FF                 RST  0x38
 03D9 C9                 RET
 03DA
-03DA 010126             LD   BC,0x2601
-03DD 18F6               JR   lbl03D5
-03DF CDFF00             CALL 0x00FF
+03DA 010126             LD   BC,lbl2601
+03DD 18F6               JR   lbl03D5-$
+03DF CDFF00             CALL lbl00FF
 03E2 7E                 LD   A,(HL)
 03E3 23                 INC  HL
 03E4 66                 LD   H,(HL)
 03E5 6F                 LD   L,A
-03E6 1802               JR   lbl03EA
+03E6 1802               JR   lbl03EA-$
 03E8 E7                 RST  0x20
 03E9 2B                 DEC  HL
-03EA 56                 LD   D,(HL)
+03EA 56       lbl03EA:  LD   D,(HL)
 03EB 23                 INC  HL
 03EC 5E                 LD   E,(HL)
-03ED 21651B             LD   HL,0x1B65
-03F0 01BB02             LD   BC,0x02BB
+03ED 21651B             LD   HL,lbl1B65
+03F0 01BB02             LD   BC,lbl02BB
 03F3 E5                 PUSH HL
-03F4 79                 LD   A,C
+03F4 79       lbl03F4:  LD   A,C
 03F5 72                 LD   (HL),D
 03F6 ED67               RRD
 03F8 23                 INC  HL
 03F9 77                 LD   (HL),A
 03FA 53                 LD   D,E
 03FB 23                 INC  HL
-03FC 10F6               DJNZ lbl03F4
+03FC 10F6               DJNZ lbl03F4-$
 03FE D1                 POP  DE
 03FF 1A                 LD   A,(DE)
 0400 0604               LD   B,0x04
-0402 CDFA05             CALL 0x05FA
+0402 CDFA05             CALL lbl05FA
 0405 CF                 RST  0x08
-0406 DF                 RST  0x18
-0407 DCCACB             CALL C,0xCBCA
+0406 DF       lbl0406:  RST  0x18
+0407 DCCACB   lbl0407:  CALL C,lblCBCA
 040A C8                 RET  Z
 040B
 040B D1                 POP  DE
