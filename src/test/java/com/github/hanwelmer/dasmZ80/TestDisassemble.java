@@ -12,9 +12,9 @@ public class TestDisassemble extends DasmZ80 {
 	disassemble("test", reader, writer);
 	assert (writer.output.size() > 0);
 	assert ("0000 C9                 RET\n".equals(writer.output.get(4)));
-	assert ("0001\n".equals(writer.output.get(5)));
+	assert ("\n".equals(writer.output.get(5)));
 	assert ("0001 C0                 RET  NZ\n".equals(writer.output.get(6)));
-	assert ("0002\n".equals(writer.output.get(7)));
+	assert ("\n".equals(writer.output.get(7)));
 	assert ("0002 00                 NOP\n".equals(writer.output.get(8)));
   }
 
@@ -54,9 +54,9 @@ public class TestDisassemble extends DasmZ80 {
 	StringWriter writer = new StringWriter();
 	disassemble("test", reader, writer);
 	assert (writer.output.size() == 16);
-	assert ("0000                    ;I/O Port definitions\n".equals(writer.output.get(2)));
-	assert ("0000            port12  EQU  12\n".equals(writer.output.get(3)));
-	assert ("0000            portFE  EQU  FE\n".equals(writer.output.get(4)));
+	assert ("                        ;I/O Port definitions\n".equals(writer.output.get(2)));
+	assert ("                port12  EQU  12\n".equals(writer.output.get(3)));
+	assert ("                portFE  EQU  FE\n".equals(writer.output.get(4)));
 	assert ("0000 DB12               IN   A,(port12)\n".equals(writer.output.get(7)));
 	assert ("0002 D3FE               OUT  (portFE),A\n".equals(writer.output.get(8)));
 	assert ("0004 D312               OUT  (port12),A\n".equals(writer.output.get(9)));

@@ -71,45 +71,54 @@ public class AssemblyCode {
 	// address
 	String result = String.format("%04X", address);
 
-	// binary code
-	if (bytes != null) {
-	  int i = 0;
-	  for (Byte byt : bytes) {
-		if (i == 0) {
-		  result += " ";
-		  i = 4;
+	if ((mnemonic == null || mnemonic.length() == 0) && (label == null || label.length() == 0) && bytes == null) {
+	  // only a comment or nothing:
+	  if (comment == null || comment.length() == 0) {
+		result = "";
+	  } else {
+		result = String.format("%24s%s", "", comment);
+	  }
+	} else {
+	  // binary code
+	  if (bytes != null) {
+		int i = 0;
+		for (Byte byt : bytes) {
+		  if (i == 0) {
+			result += " ";
+			i = 4;
+		  }
+		  i--;
+		  result += String.format("%02X", byt);
 		}
-		i--;
-		result += String.format("%02X", byt);
 	  }
-	}
 
-	// label
-	if (label != null && label.length() > 0) {
-	  if (result.length() < 14) {
-		result += String.format("%14s", "");
-		result = result.substring(0, 14);
+	  // label
+	  if (label != null && label.length() > 0) {
+		if (result.length() < 14) {
+		  result += String.format("%14s", "");
+		  result = result.substring(0, 14);
+		}
+		result += label + ":";
 	  }
-	  result += label + ":";
-	}
 
-	// mnemonic
-	if (mnemonic != null && mnemonic.length() > 0) {
-	  if (result.length() < 24) {
-		result += String.format("%24s", "");
-		;
-		result = result.substring(0, 24);
+	  // mnemonic
+	  if (mnemonic != null && mnemonic.length() > 0) {
+		if (result.length() < 24) {
+		  result += String.format("%24s", "");
+		  ;
+		  result = result.substring(0, 24);
+		}
+		result += mnemonic;
 	  }
-	  result += mnemonic;
-	}
 
-	// comment
-	if (comment != null && comment.length() > 0) {
-	  if (result.length() < 44) {
-		result += String.format("%44s", "");
-		result = result.substring(0, 44);
+	  // comment
+	  if (comment != null && comment.length() > 0) {
+		if (result.length() < 44) {
+		  result += String.format("%44s", "");
+		  result = result.substring(0, 44);
+		}
+		result += comment;
 	  }
-	  result += comment;
 	}
 
 	return result + "\n";
