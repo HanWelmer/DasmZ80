@@ -1,13 +1,13 @@
-# Z80Compiler
-Java command line application that disassembles a binary or Intel Hex file to a Z80 assembler file and/or listing file.
+# dasmZ80
+Java command line application that disassembles a binary file to a Z80 assembler listing file.
 
-Currently the project is work in progress.
+Currently a first version is available in the download folder. Future updates and/or bug fixes may become available upon request.
 
 ## Development:
 The project was developed using:
 * openjdk 11.0.2
 * Apache Maven 3.6.3
-* Eclipse Java EE IDI Neon.3 Relaese (4.6.3)
+* Eclipse Java EE IDE Neon.3 Release (4.6.3)
 
 ### maven
 * open commandline tool
