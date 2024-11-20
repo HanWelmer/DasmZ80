@@ -33,24 +33,57 @@ public class DasmZ80 {
    */
   public static void main(String[] args) {
 	// process command line options and arguments.
-	if (args.length == 1) {
-	  String fileName = args[args.length - 1];
-	  if (fileName.endsWith(".bin")) {
-		// do the main work.
-		disassemble(fileName);
-	  } else {
+	if (args.length == 0) {
+	  usage();
+	}
+
+	int index = 0;
+	String fileName = "";
+	String symbolsFileName = "";
+	while (index < args.length) {
+	  String arg = args[index];
+	  if ("-s".equals(arg)) {
+		index++;
+		if (index < args.length) {
+		  symbolsFileName = args[index];
+		} else {
+		  usage();
+		}
+	  } else if (arg.startsWith("-")) {
 		usage();
+	  } else {
+		fileName = arg;
 	  }
+	  index++;
+	}
+
+	Map<Integer, Definition> symbols = new HashMap<Integer, Definition>();
+	if (symbolsFileName.endsWith(".sym")) {
+	  // process the symbols file.
+	  symbols = readSymbols(symbolsFileName);
+	} else {
+	  usage();
+	}
+
+	if (fileName.endsWith(".bin")) {
+	  // do the main work.
+	  disassemble(fileName);
 	} else {
 	  usage();
 	}
   } // main()
 
+  private static Map<Integer, Definition> readSymbols(String symbolsFileName) {
+	Map<Integer, Definition> symbols = new HashMap<Integer, Definition>();
+	return symbols;
+  }
+
   private static void usage() {
-	System.out.println("Usage: java -jar dasmZ80.jar filename.ext");
+	System.out.println("Usage: java -jar dasmZ80.jar [-s file.sym] filename.ext");
 	System.out.println(" where filename.ext is file to be disassembled");
-	System.out.println(" which must have extension .bin");
-	System.out.println(" which must be in binary format.");
+	System.out.println("  and -s file.sym is an optional input file with symbol definitions and comments.");
+	System.out.println("File filename must have extension .bin");
+	System.out.println(" and must be in binary format.");
 	System.out.println(" Binary code is assumed to be Z80 compatible.");
 	System.out.println(" Start address is assumed to be 0x0000.");
 	System.exit(1);

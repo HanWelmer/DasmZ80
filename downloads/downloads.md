@@ -17,9 +17,4 @@ Known limitations:
 ## Usage:
 Download one of the executable jar files to a local folder.
 In order to use the disassembler you need a Java runtime.
-
-Open a Windows Command Prompt window, navigate to the local folder and enter:
-
-`java -jar dasmZ80.jar filename.ext`
-
-`where filename.ext is file to be disassembled.`
+See README.md in the root folder for usage instructions.
