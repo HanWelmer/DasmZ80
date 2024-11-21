@@ -8,8 +8,8 @@ public class Decoder {
 
   private HashMap<Integer, BinaryCode> hashMap = new HashMap<Integer, BinaryCode>(2);
 
-  public AssemblyCode get(int address, Byte nextByte, ByteReader reader, Map<Integer, Definition> portReferences,
-      Map<Integer, Definition> memoryReferences) throws IOException, IllegalOpcodeException {
+  public AssemblyCode get(int address, Byte nextByte, ByteReader reader, Map<Integer, Definition> symbols)
+      throws IOException, IllegalOpcodeException {
 	Integer key = new Integer(nextByte);
 	if (key < 0) {
 	  key += 256;
@@ -91,8 +91,7 @@ public class Decoder {
 	  asmCode.addByte(byte2);
 	  asmCode.addByte(byte3);
 
-	  // Prepare label and value.
-	  String label = String.format("lbl%02X%02X", byte3, byte2);
+	  // Prepare value.
 	  Integer value = new Integer(byte3);
 	  if (byte3 < 0) {
 		value += 256;
@@ -103,29 +102,35 @@ public class Decoder {
 		value += 256;
 	  }
 
-	  // Put label in assembly code instruction.
-	  asmCode.updateMnemonic("@", label);
+	  // Get an existing or make a new symbol.
+	  String label = String.format("lbl%02X%02X", byte3, byte2);
+	  Definition symbol = getOrMakeSymbol(symbols, label, value, SymbolType.memoryAddress);
 
-	  // add label, value and address to memory references list.
-	  if (memoryReferences.get(value) == null) {
-		memoryReferences.put(value, new Definition(label, value));
-	  }
-	  memoryReferences.get(value).add(new Integer(address));
+	  // Put label in assembly code instruction.
+	  asmCode.updateMnemonic("@", symbol.getName());
+
+	  // add address as reference to symbol.
+	  symbol.add(new Integer(address));
 	}
 
 	// Process relative address.
 	if (asmCode.getMnemonic().contains("%")) {
 	  Byte byte2 = reader.getNextByte();
 	  asmCode.addByte(byte2);
-	  int targetAddress = address + asmCode.getBytes().size();
-	  targetAddress += (byte2 < 128) ? byte2 : (-byte2);
-	  asmCode.updateMnemonic("%", String.format("lbl%04X-$", targetAddress));
 
-	  Integer value = address + 2 + byte2;
-	  if (memoryReferences.get(value) == null) {
-		memoryReferences.put(value, new Definition(String.format("lbl%04X", value), value));
-	  }
-	  memoryReferences.get(value).add(new Integer(address));
+	  // Prepare value.
+	  int value = address + asmCode.getBytes().size();
+	  value += (byte2 < 128) ? byte2 : (-byte2);
+
+	  // Get an existing or make a new symbol.
+	  String label = String.format("lbl%04X", value);
+	  Definition symbol = getOrMakeSymbol(symbols, label, value, SymbolType.memoryAddress);
+
+	  // Put label in assembly code instruction.
+	  asmCode.updateMnemonic("%", symbol.getName() + "-$");
+
+	  // add address as reference to symbol.
+	  symbol.add(new Integer(address));
 	}
 
 	// Process IO port.
@@ -133,23 +138,38 @@ public class Decoder {
 	  Byte byte2 = reader.getNextByte();
 	  asmCode.addByte(byte2);
 
-	  // add this port address to the port reference list.
-	  Integer portAddress = new Integer(byte2);
-	  String portLabel = String.format("port%02X", portAddress);
-	  if (portAddress < 0) {
-		portAddress += 256;
-		portLabel = "port" + portLabel.substring(portLabel.length() - 2, portLabel.length());
+	  // Prepare value.
+	  Integer value = new Integer(byte2);
+	  if (value < 0) {
+		value += 256;
 	  }
-	  if (portReferences.get(portAddress) == null) {
-		portReferences.put(portAddress, new Definition(portLabel, portAddress));
-	  }
-	  portReferences.get(portAddress).add(new Integer(address));
+
+	  // Get an existing or make a new symbol.
+	  String label = String.format("port%02X", value);
+	  Definition symbol = getOrMakeSymbol(symbols, label, value, SymbolType.portAddress);
 
 	  // use port label in the assembly code.
-	  asmCode.updateMnemonic("&", portLabel);
+	  asmCode.updateMnemonic("&", symbol.getName());
+
+	  // add address as reference to symbol.
+	  symbol.add(new Integer(address));
 	}
 
 	return asmCode;
+  }
+
+  private Definition getOrMakeSymbol(Map<Integer, Definition> symbols, String label, Integer value,
+      SymbolType symbolType) {
+	// If available use symbolType or constant.
+	// If not, add label and value as symbol for the symbolType.
+	Definition symbol = symbols.get(value);
+	if (symbol != null) {
+	  return symbol;
+	}
+
+	symbols.put(value, new Definition(label, symbolType, value));
+	symbol = symbols.get(value);
+	return symbol;
   }
 
   private void applyDisplacement(AssemblyCode asmCode, Byte value) {

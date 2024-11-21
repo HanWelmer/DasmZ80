@@ -25,6 +25,10 @@ import java.util.TreeSet;
 // - Output is to system output (screen or pipe) (no CLI argument yet to define
 // output filename).
 public class DasmZ80 {
+
+  private static int startAddress = 0;
+  private static int finalAddress = 0;
+
   /**
    * The main method. See usage() for a functional description.
    * 
@@ -67,7 +71,7 @@ public class DasmZ80 {
 
 	if (fileName.endsWith(".bin")) {
 	  // do the main work.
-	  disassemble(fileName);
+	  disassemble(fileName, symbols);
 	} else {
 	  usage();
 	}
@@ -89,13 +93,13 @@ public class DasmZ80 {
 	System.exit(1);
   } // usage()
 
-  protected static void disassemble(String fileName) {
+  protected static void disassemble(String fileName, Map<Integer, Definition> symbols) {
 	BinFileReader reader = new BinFileReader();
 	ListingWriter lstWriter = new ListingWriter();
 	try {
 	  reader.open(fileName);
 	  lstWriter.open(fileName);
-	  disassemble(fileName, reader, lstWriter);
+	  disassemble(fileName, reader, lstWriter, symbols);
 	} catch (FileNotFoundException e) {
 	  System.out.println("Error opening file " + fileName);
 	  System.out.println(e.getMessage());
@@ -111,43 +115,43 @@ public class DasmZ80 {
 	}
   } // disassemble()
 
-  protected static void disassemble(String fileName, ByteReader reader, AbstractWriter writer) {
+  protected static void disassemble(String fileName, ByteReader reader, AbstractWriter writer,
+      Map<Integer, Definition> symbols) {
 	Decoder decoder = new Decoder();
 	ArrayList<AssemblyCode> decoded = new ArrayList<AssemblyCode>();
-	Map<Integer, Definition> portReferences = new HashMap<Integer, Definition>();
-	Map<Integer, Definition> memoryReferences = new HashMap<Integer, Definition>();
-	int address = 0;
+	int address = startAddress;
 	Byte nextByte = null;
 
 	try {
 	  // Disassemble the input file.
 	  while ((nextByte = reader.getByte()) != null) {
-		AssemblyCode asmCode = decoder.get(address, nextByte, reader, portReferences, memoryReferences);
+		AssemblyCode asmCode = decoder.get(address, nextByte, reader, symbols);
 		decoded.add(asmCode);
 		address += asmCode.getBytes().size();
 		if (asmCode.getMnemonic().startsWith("RET")) {
 		  decoded.add(new AssemblyCode(address, ""));
 		}
 	  }
+	  finalAddress = address;
 
 	  // Fill in the memory address labels.
-	  fillInLabels(decoded, memoryReferences);
+	  fillInLabels(decoded, symbols);
 
 	  // Write everything to the output file.
-	  writeDefinitions(fileName, writer, portReferences, memoryReferences);
+	  writeDefinitions(fileName, writer, symbols);
 	  writeOutput(address, decoded, writer);
-	  writeReferences(writer, portReferences, memoryReferences);
+	  writeReferences(writer, symbols);
 	} catch (IllegalOpcodeException e) {
 	  System.out.print(e.getMessage());
 	  String msg = e.getMessage().trim();
 	  decoded.add(new AssemblyCode(address, msg));
 	  decoded.add(new AssemblyCode(address, ""));
 
-	  fillInLabels(decoded, memoryReferences);
-	  writeDefinitions(fileName, writer, portReferences, memoryReferences);
+	  fillInLabels(decoded, symbols);
+	  writeDefinitions(fileName, writer, symbols);
 	  writeOutput(address, decoded, writer);
 	  writeRemainderOfInput(address, reader, writer);
-	  writeReferences(writer, portReferences, memoryReferences);
+	  writeReferences(writer, symbols);
 	} catch (IOException e) {
 	  System.out.println("Error reading from input file.");
 	  System.out.println(e.getMessage());
@@ -155,36 +159,70 @@ public class DasmZ80 {
 	}
   } // disassemble()
 
-  private static void fillInLabels(ArrayList<AssemblyCode> decoded, Map<Integer, Definition> memoryReferences) {
+  private static void fillInLabels(ArrayList<AssemblyCode> decoded, Map<Integer, Definition> symbols) {
 	// Write references to memory addresses.
 	int index = 0;
-	SortedSet<Integer> labels = new TreeSet<>(memoryReferences.keySet());
-	for (Integer labelAddress : labels) {
-	  // Look up the line where the label must be set.
-	  while (index < decoded.size() && decoded.get(index).getAddress() <= labelAddress) {
-		index++;
-	  }
-	  // Set the label.
-	  if (index > 0 && decoded.get(index - 1).getAddress() == labelAddress) {
-		Definition labelDefinition = memoryReferences.get(labelAddress);
-		decoded.get(index - 1).setLabel(labelDefinition.getName());
+	SortedSet<Integer> addresses = new TreeSet<>(symbols.keySet());
+	for (Integer labelAddress : addresses) {
+	  Definition symbol = symbols.get(labelAddress);
+	  // only symbols for memory address
+	  if (symbol.getType() == SymbolType.memoryAddress) {
+		// Look up the line where the label must be set.
+		while (index < decoded.size() && decoded.get(index).getAddress() <= labelAddress) {
+		  index++;
+		}
+		// Set the label.
+		if (index > 0 && decoded.get(index - 1).getAddress() == labelAddress) {
+		  decoded.get(index - 1).setLabel(symbol.getName());
+		}
 	  }
 	}
-  }
+  } // fillInLabels()
 
-  private static void writeDefinitions(String fileName, AbstractWriter writer, Map<Integer, Definition> portReferences,
-      Map<Integer, Definition> memoryReferences) {
+  private static void writeDefinitions(String fileName, AbstractWriter writer, Map<Integer, Definition> symbols) {
 	String msg = String.format(";File generated by dasmZ80.jar Z80 disassembler from %s", fileName);
 	try {
 	  writer.write(new AssemblyCode(0, null, msg));
 	  writer.write(new AssemblyCode(0, null, ";"));
 
-	  if (portReferences.size() > 0) {
-		writer.write(new AssemblyCode(0, null, ";I/O Port definitions"));
-		SortedSet<Integer> keys = new TreeSet<>(portReferences.keySet());
+	  if (symbols.size() > 0) {
+		SortedSet<Integer> keys = new TreeSet<>(symbols.keySet());
+
+		boolean done = false;
 		for (Integer key : keys) {
-		  Definition def = portReferences.get(key);
-		  writer.write(String.format("%16s%-7s EQU  %02X\n", " ", def.getName(), def.getValue()));
+		  Definition symbol = symbols.get(key);
+		  if (symbol.getType() == SymbolType.portAddress) {
+			if (!done) {
+			  writer.write(new AssemblyCode(0, null, ";I/O Port definitions"));
+			  done = true;
+			}
+			writer.write(String.format("%16s%-7s EQU  %02X\n", " ", symbol.getName(), symbol.getValue()));
+		  }
+		}
+
+		done = false;
+		for (Integer key : keys) {
+		  Definition symbol = symbols.get(key);
+		  if (symbol.getType() == SymbolType.memoryAddress
+		      && (symbol.getValue() < startAddress || symbol.getValue() > finalAddress)) {
+			if (!done) {
+			  writer.write(new AssemblyCode(0, null, ";Memory addresses"));
+			  done = true;
+			}
+			writer.write(String.format("%16s%-7s EQU  %04X\n", " ", symbol.getName(), symbol.getValue()));
+		  }
+		}
+
+		done = false;
+		for (Integer key : keys) {
+		  Definition symbol = symbols.get(key);
+		  if (symbol.getType() == SymbolType.constant) {
+			if (!done) {
+			  writer.write(new AssemblyCode(0, null, ";Constants"));
+			  done = true;
+			}
+			writer.write(String.format("%16s%-7s EQU  %04X\n", " ", symbol.getName(), symbol.getValue()));
+		  }
 		}
 	  }
 
@@ -239,58 +277,73 @@ public class DasmZ80 {
 	}
   }
 
-  private static void writeReferences(AbstractWriter writer, Map<Integer, Definition> portReferences,
-      Map<Integer, Definition> memoryReferences) {
+  private static void writeReferences(AbstractWriter writer, Map<Integer, Definition> symbols) {
 	try {
-	  writer.write("\nI/O-port cross reference list:\n");
-	  // Sort port addresses.
-	  SortedSet<Integer> ports = new TreeSet<>(portReferences.keySet());
+	  // Sort symbol values.
+	  SortedSet<Integer> symbolValues = new TreeSet<>(symbols.keySet());
+
 	  // Write references to port addresses.
-	  for (Integer portAddress : ports) {
-		Definition portDefinition = portReferences.get(portAddress);
-		String msg = String.format("%-8s=%02X:", portDefinition.getName(), portAddress);
-		int i = 0;
-		for (Integer reference : portDefinition.getReferences()) {
-		  msg += String.format(" %04X", reference);
-		  if (++i == 8) {
-			i = 0;
-			msg += "\n";
-			writer.write(msg);
-			msg = String.format("%3s", " ");
+	  boolean done = false;
+	  for (Integer value : symbolValues) {
+		Definition symbol = symbols.get(value);
+		if (symbol.getType() == SymbolType.portAddress) {
+		  if (!done) {
+			writer.write("\nI/O-port cross reference list:\n");
+			done = true;
 		  }
-		}
-		if (i > 0) {
-		  msg += "\n";
-		  writer.write(msg);
+		  writeReferencesTo(symbol, 2, writer);
 		}
 	  }
 
-	  writer.write("\nMemory cross reference list:\n");
-	  // Sort memory addresses.
-	  SortedSet<Integer> labels = new TreeSet<>(memoryReferences.keySet());
 	  // Write references to memory addresses.
-	  for (Integer labelAddress : labels) {
-		Definition labelDefinition = memoryReferences.get(labelAddress);
-		String msg = String.format("%-8s=%04X:", labelDefinition.getName(), labelAddress);
-		int i = 0;
-		for (Integer reference : labelDefinition.getReferences()) {
-		  msg += String.format(" %04X", reference);
-		  if (++i == 4) {
-			i = 0;
-			msg += "\n";
-			writer.write(msg);
-			msg = String.format("%14s", " ");
+	  done = false;
+	  for (Integer value : symbolValues) {
+		Definition symbol = symbols.get(value);
+		if (symbol.getType() == SymbolType.memoryAddress) {
+		  if (!done) {
+			writer.write("\nMemory cross reference list:\n");
+			done = true;
 		  }
+		  writeReferencesTo(symbol, 4, writer);
 		}
-		if (i > 0) {
-		  msg += "\n";
-		  writer.write(msg);
+	  }
+
+	  // Write references to constants.
+	  done = false;
+	  for (Integer value : symbolValues) {
+		Definition symbol = symbols.get(value);
+		if (symbol.getType() == SymbolType.constant) {
+		  if (!done) {
+			writer.write("\nConstants reference list:\n");
+			done = true;
+		  }
+		  writeReferencesTo(symbol, 4, writer);
 		}
 	  }
 	} catch (IOException e) {
 	  System.out.println("Error writing to output file.");
 	  System.out.println(e.getMessage());
 	  e.printStackTrace();
+	}
+  }
+
+  private static void writeReferencesTo(Definition symbol, int length, AbstractWriter writer) throws IOException {
+	int i = 0;
+	String format1 = "%-8s=%0" + length + "X:";
+	String format2 = "%3" + (length + 1) + "s";
+	String msg = String.format(format1, symbol.getName(), symbol.getValue());
+	for (Integer reference : symbol.getReferences()) {
+	  msg += String.format(" %04X", reference);
+	  if (++i == 8) {
+		i = 0;
+		msg += "\n";
+		writer.write(msg);
+		msg = String.format(format2, " ");
+	  }
+	}
+	if (i > 0) {
+	  msg += "\n";
+	  writer.write(msg);
 	}
   }
 

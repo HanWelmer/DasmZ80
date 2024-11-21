@@ -11,11 +11,13 @@ import java.util.ArrayList;
 public class Definition {
 
   private String name;
+  private SymbolType type;
   private Integer value;
   private ArrayList<Integer> references;
 
-  public Definition(String name, Integer value) {
+  public Definition(String name, SymbolType type, Integer value) {
 	this.name = name;
+	this.type = type;
 	this.value = value;
 	references = new ArrayList<Integer>();
   }
@@ -26,6 +28,10 @@ public class Definition {
 
   public String getName() {
 	return name;
+  }
+
+  public SymbolType getType() {
+	return type;
   }
 
   public Integer getValue() {
