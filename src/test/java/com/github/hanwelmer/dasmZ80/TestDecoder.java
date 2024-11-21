@@ -8,7 +8,7 @@ import org.junit.Test;
 
 public class TestDecoder extends Decoder {
 
-  private Map<Integer, Definition> symbols = new HashMap<Integer, Definition>();
+  private Map<Integer, Symbol> symbols = new HashMap<Integer, Symbol>();
 
   @Test
   public void testNop() {

@@ -8,14 +8,14 @@ import java.util.ArrayList;
  * @author welmerhj
  *
  */
-public class Definition {
+public class Symbol {
 
   private String name;
   private SymbolType type;
   private Integer value;
   private ArrayList<Integer> references;
 
-  public Definition(String name, SymbolType type, Integer value) {
+  public Symbol(String name, SymbolType type, Integer value) {
 	this.name = name;
 	this.type = type;
 	this.value = value;

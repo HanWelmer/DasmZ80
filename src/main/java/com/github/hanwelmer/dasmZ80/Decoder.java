@@ -8,7 +8,7 @@ public class Decoder {
 
   private HashMap<Integer, BinaryCode> hashMap = new HashMap<Integer, BinaryCode>(2);
 
-  public AssemblyCode get(int address, Byte nextByte, ByteReader reader, Map<Integer, Definition> symbols)
+  public AssemblyCode get(int address, Byte nextByte, ByteReader reader, Map<Integer, Symbol> symbols)
       throws IOException, IllegalOpcodeException {
 	Integer key = new Integer(nextByte);
 	if (key < 0) {
@@ -104,7 +104,7 @@ public class Decoder {
 
 	  // Get an existing or make a new symbol.
 	  String label = String.format("lbl%02X%02X", byte3, byte2);
-	  Definition symbol = getOrMakeSymbol(symbols, label, value, SymbolType.memoryAddress);
+	  Symbol symbol = getOrMakeSymbol(symbols, label, value, SymbolType.memoryAddress);
 
 	  // Put label in assembly code instruction.
 	  asmCode.updateMnemonic("@", symbol.getName());
@@ -124,7 +124,7 @@ public class Decoder {
 
 	  // Get an existing or make a new symbol.
 	  String label = String.format("lbl%04X", value);
-	  Definition symbol = getOrMakeSymbol(symbols, label, value, SymbolType.memoryAddress);
+	  Symbol symbol = getOrMakeSymbol(symbols, label, value, SymbolType.memoryAddress);
 
 	  // Put label in assembly code instruction.
 	  asmCode.updateMnemonic("%", symbol.getName() + "-$");
@@ -146,7 +146,7 @@ public class Decoder {
 
 	  // Get an existing or make a new symbol.
 	  String label = String.format("port%02X", value);
-	  Definition symbol = getOrMakeSymbol(symbols, label, value, SymbolType.portAddress);
+	  Symbol symbol = getOrMakeSymbol(symbols, label, value, SymbolType.portAddress);
 
 	  // use port label in the assembly code.
 	  asmCode.updateMnemonic("&", symbol.getName());
@@ -158,16 +158,16 @@ public class Decoder {
 	return asmCode;
   }
 
-  private Definition getOrMakeSymbol(Map<Integer, Definition> symbols, String label, Integer value,
+  private Symbol getOrMakeSymbol(Map<Integer, Symbol> symbols, String label, Integer value,
       SymbolType symbolType) {
 	// If available use symbolType or constant.
 	// If not, add label and value as symbol for the symbolType.
-	Definition symbol = symbols.get(value);
+	Symbol symbol = symbols.get(value);
 	if (symbol != null) {
 	  return symbol;
 	}
 
-	symbols.put(value, new Definition(label, symbolType, value));
+	symbols.put(value, new Symbol(label, symbolType, value));
 	symbol = symbols.get(value);
 	return symbol;
   }

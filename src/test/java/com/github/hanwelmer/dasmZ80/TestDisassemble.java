@@ -7,7 +7,7 @@ import org.junit.Test;
 
 public class TestDisassemble extends DasmZ80 {
 
-  Map<Integer, Definition> symbols = new HashMap<Integer, Definition>();
+  Map<Integer, Symbol> symbols = new HashMap<Integer, Symbol>();
 
   @Test
   public void testReturn() {
@@ -90,9 +90,9 @@ public class TestDisassemble extends DasmZ80 {
   }
 
   public void testPortSymbols() {
-	Map<Integer, Definition> portSymbols = new HashMap<Integer, Definition>();
-	portSymbols.put(12, new Definition("p12", SymbolType.portAddress, 12));
-	portSymbols.put(254, new Definition("pFE", SymbolType.portAddress, 254));
+	Map<Integer, Symbol> portSymbols = new HashMap<Integer, Symbol>();
+	portSymbols.put(12, new Symbol("p12", SymbolType.portAddress, 12));
+	portSymbols.put(254, new Symbol("pFE", SymbolType.portAddress, 254));
 
 	Byte[] bytes = { 0xDB - 256, 0x12, 0xD3 - 256, 0xFE - 256, 0xD3 - 256, 0x12, 0x00 };
 	ByteReader reader = new ReadFromArray(bytes);
@@ -115,8 +115,8 @@ public class TestDisassemble extends DasmZ80 {
 
   @Test
   public void testMemorySymbols() {
-	Map<Integer, Definition> symbols = new HashMap<Integer, Definition>();
-	symbols.put(3, new Definition("loop", SymbolType.memoryAddress, 3));
+	Map<Integer, Symbol> symbols = new HashMap<Integer, Symbol>();
+	symbols.put(3, new Symbol("loop", SymbolType.memoryAddress, 3));
 
 	Byte[] bytes = { 0xCD - 256, 0x03, 0x00, 0xC3 - 256, 0x03, 0x00, 0xC2 - 256, 0x03, 0x00, 0x10, 0xF8 - 256, 0x38,
 	    0xF6 - 256, 0x00 };
