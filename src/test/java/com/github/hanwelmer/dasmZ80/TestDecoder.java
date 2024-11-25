@@ -1,14 +1,10 @@
 package com.github.hanwelmer.dasmZ80;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.junit.Test;
 
 public class TestDecoder extends Decoder {
-
-  private Map<Integer, Symbol> symbols = new HashMap<Integer, Symbol>();
 
   @Test
   public void testNop() {
@@ -16,7 +12,8 @@ public class TestDecoder extends Decoder {
 	  Byte byte0 = 0x00;
 	  Byte[] bytes = {};
 	  ByteReader reader = new ReadFromArray(bytes);
-	  symbols.clear();
+	  Symbols symbols = new Symbols();
+
 	  AssemblyCode result = get(0, byte0, reader, symbols);
 	  assert (result != null);
 	  assert (result.getBytes().size() == bytes.length + 1);
@@ -34,7 +31,8 @@ public class TestDecoder extends Decoder {
 	  Byte byte0 = 0x76;
 	  Byte[] bytes = {};
 	  ByteReader reader = new ReadFromArray(bytes);
-	  symbols.clear();
+	  Symbols symbols = new Symbols();
+
 	  AssemblyCode result = get(0, byte0, reader, symbols);
 	  assert (result != null);
 	  assert (result.getBytes().size() == bytes.length + 1);
@@ -52,7 +50,8 @@ public class TestDecoder extends Decoder {
 	  Byte byte0 = 0x02;
 	  Byte[] bytes = {};
 	  ByteReader reader = new ReadFromArray(bytes);
-	  symbols.clear();
+	  Symbols symbols = new Symbols();
+
 	  AssemblyCode result = get(0, byte0, reader, symbols);
 	  assert (result != null);
 	  assert (result.getBytes().size() == bytes.length + 1);
@@ -70,7 +69,8 @@ public class TestDecoder extends Decoder {
 	  Byte byte0 = 0x01;
 	  Byte[] bytes = { 0x34, 0x12 };
 	  ByteReader reader = new ReadFromArray(bytes);
-	  symbols.clear();
+	  Symbols symbols = new Symbols();
+
 	  AssemblyCode result = get(0, byte0, reader, symbols);
 	  assert (result != null);
 	  assert (result.getBytes().size() == bytes.length + 1);
@@ -88,7 +88,8 @@ public class TestDecoder extends Decoder {
 	  Byte byte0 = 0x01;
 	  Byte[] bytes = { 0xDE - 256, 0xBC - 256 };
 	  ByteReader reader = new ReadFromArray(bytes);
-	  symbols.clear();
+	  Symbols symbols = new Symbols();
+
 	  AssemblyCode result = get(0, byte0, reader, symbols);
 	  assert (result != null);
 	  assert (result.getBytes().size() == bytes.length + 1);
@@ -106,7 +107,8 @@ public class TestDecoder extends Decoder {
 	  Byte byte0 = 0x06;
 	  Byte[] bytes = { 0x12 };
 	  ByteReader reader = new ReadFromArray(bytes);
-	  symbols.clear();
+	  Symbols symbols = new Symbols();
+
 	  AssemblyCode result = get(0, byte0, reader, symbols);
 	  assert (result != null);
 	  assert (result.getBytes().size() == bytes.length + 1);
@@ -124,7 +126,8 @@ public class TestDecoder extends Decoder {
 	  Byte byte0 = 0x06;
 	  Byte[] bytes = { 0xAB - 256 };
 	  ByteReader reader = new ReadFromArray(bytes);
-	  symbols.clear();
+	  Symbols symbols = new Symbols();
+
 	  AssemblyCode result = get(0, byte0, reader, symbols);
 	  assert (result != null);
 	  assert (result.getBytes().size() == bytes.length + 1);
@@ -142,7 +145,8 @@ public class TestDecoder extends Decoder {
 	  Byte byte0 = 0x10;
 	  Byte[] bytes = { 0x12 };
 	  ByteReader reader = new ReadFromArray(bytes);
-	  symbols.clear();
+	  Symbols symbols = new Symbols();
+
 	  AssemblyCode result = get(0, byte0, reader, symbols);
 	  assert (result != null);
 	  assert (result.getBytes().size() == bytes.length + 1);
@@ -160,7 +164,8 @@ public class TestDecoder extends Decoder {
 	  Byte byte0 = 0x10;
 	  Byte[] bytes = { -2 };
 	  ByteReader reader = new ReadFromArray(bytes);
-	  symbols.clear();
+	  Symbols symbols = new Symbols();
+
 	  AssemblyCode result = get(0, byte0, reader, symbols);
 	  assert (result != null);
 	  assert (result.getBytes().size() == bytes.length + 1);
@@ -178,7 +183,8 @@ public class TestDecoder extends Decoder {
 	  Byte byte0 = 0xD3 - 256;
 	  Byte[] bytes = { 0x12 };
 	  ByteReader reader = new ReadFromArray(bytes);
-	  symbols.clear();
+	  Symbols symbols = new Symbols();
+
 	  AssemblyCode result = get(0, byte0, reader, symbols);
 	  assert (result != null);
 	  assert (result.getBytes().size() == bytes.length + 1);
@@ -196,7 +202,8 @@ public class TestDecoder extends Decoder {
 	  Byte byte0 = 0xD3 - 256;
 	  Byte[] bytes = { 0xAB - 256 };
 	  ByteReader reader = new ReadFromArray(bytes);
-	  symbols.clear();
+	  Symbols symbols = new Symbols();
+
 	  AssemblyCode result = get(0, byte0, reader, symbols);
 	  assert (result != null);
 	  assert (result.getBytes().size() == bytes.length + 1);
@@ -214,7 +221,8 @@ public class TestDecoder extends Decoder {
 	  Byte byte0 = 0xCB - 256;
 	  Byte[] bytes = { 0x00 };
 	  ByteReader reader = new ReadFromArray(bytes);
-	  symbols.clear();
+	  Symbols symbols = new Symbols();
+
 	  AssemblyCode result = get(0, byte0, reader, symbols);
 	  assert (result != null);
 	  assert (result.getBytes().size() == bytes.length + 1);
@@ -232,7 +240,8 @@ public class TestDecoder extends Decoder {
 	  Byte byte0 = 0xDD - 256;
 	  Byte[] bytes = { 0x19 };
 	  ByteReader reader = new ReadFromArray(bytes);
-	  symbols.clear();
+	  Symbols symbols = new Symbols();
+
 	  AssemblyCode result = get(0, byte0, reader, symbols);
 	  assert (result != null);
 	  assert (result.getBytes().size() == bytes.length + 1);
@@ -250,7 +259,8 @@ public class TestDecoder extends Decoder {
 	  Byte byte0 = 0xDD - 256;
 	  Byte[] bytes = { 0x21, 0x34, 0x12 };
 	  ByteReader reader = new ReadFromArray(bytes);
-	  symbols.clear();
+	  Symbols symbols = new Symbols();
+
 	  AssemblyCode result = get(0, byte0, reader, symbols);
 	  assert (result != null);
 	  assert (result.getBytes().size() == bytes.length + 1);
@@ -268,7 +278,8 @@ public class TestDecoder extends Decoder {
 	  Byte byte0 = 0xDD - 256;
 	  Byte[] bytes = { 0x26, 0x12 };
 	  ByteReader reader = new ReadFromArray(bytes);
-	  symbols.clear();
+	  Symbols symbols = new Symbols();
+
 	  AssemblyCode result = get(0, byte0, reader, symbols);
 	  assert (result != null);
 	  assert (result.getBytes().size() == bytes.length + 1);
@@ -286,7 +297,8 @@ public class TestDecoder extends Decoder {
 	  Byte byte0 = 0xDD - 256;
 	  Byte[] bytes = { 0x34, 0x12 };
 	  ByteReader reader = new ReadFromArray(bytes);
-	  symbols.clear();
+	  Symbols symbols = new Symbols();
+
 	  AssemblyCode result = get(0, byte0, reader, symbols);
 	  assert (result != null);
 	  assert (result.getBytes().size() == bytes.length + 1);
@@ -304,7 +316,8 @@ public class TestDecoder extends Decoder {
 	  Byte byte0 = 0xDD - 256;
 	  Byte[] bytes = { 0x34, 0xFE - 256 };
 	  ByteReader reader = new ReadFromArray(bytes);
-	  symbols.clear();
+	  Symbols symbols = new Symbols();
+
 	  AssemblyCode result = get(0, byte0, reader, symbols);
 	  assert (result != null);
 	  assert (result.getBytes().size() == bytes.length + 1);
@@ -322,7 +335,8 @@ public class TestDecoder extends Decoder {
 	  Byte byte0 = 0xDD - 256;
 	  Byte[] bytes = { 0x36, 0x12, 0x34 };
 	  ByteReader reader = new ReadFromArray(bytes);
-	  symbols.clear();
+	  Symbols symbols = new Symbols();
+
 	  AssemblyCode result = get(0, byte0, reader, symbols);
 	  assert (result != null);
 	  assert (result.getBytes().size() == bytes.length + 1);
@@ -340,7 +354,8 @@ public class TestDecoder extends Decoder {
 	  Byte byte0 = 0xED - 256;
 	  Byte[] bytes = { 0x40 };
 	  ByteReader reader = new ReadFromArray(bytes);
-	  symbols.clear();
+	  Symbols symbols = new Symbols();
+
 	  AssemblyCode result = get(0, byte0, reader, symbols);
 	  assert (result != null);
 	  assert (result.getBytes().size() == bytes.length + 1);
@@ -358,7 +373,8 @@ public class TestDecoder extends Decoder {
 	  Byte byte0 = 0xED - 256;
 	  Byte[] bytes = { 0x43, 0x34, 0x12 };
 	  ByteReader reader = new ReadFromArray(bytes);
-	  symbols.clear();
+	  Symbols symbols = new Symbols();
+
 	  AssemblyCode result = get(0, byte0, reader, symbols);
 	  assert (result != null);
 	  assert (result.getBytes().size() == bytes.length + 1);
@@ -376,7 +392,8 @@ public class TestDecoder extends Decoder {
 	  Byte byte0 = 0xFD - 256;
 	  Byte[] bytes = { 0x26, 0x12 };
 	  ByteReader reader = new ReadFromArray(bytes);
-	  symbols.clear();
+	  Symbols symbols = new Symbols();
+
 	  AssemblyCode result = get(0, byte0, reader, symbols);
 	  assert (result != null);
 	  assert (result.getBytes().size() == bytes.length + 1);
@@ -394,7 +411,8 @@ public class TestDecoder extends Decoder {
 	  Byte byte0 = 0xFD - 256;
 	  Byte[] bytes = { 0x35, 0x00 };
 	  ByteReader reader = new ReadFromArray(bytes);
-	  symbols.clear();
+	  Symbols symbols = new Symbols();
+
 	  AssemblyCode result = get(0, byte0, reader, symbols);
 	  assert (result != null);
 	  assert (result.getBytes().size() == bytes.length + 1);
@@ -411,7 +429,8 @@ public class TestDecoder extends Decoder {
 	  Byte byte0 = 0xFD - 256;
 	  Byte[] bytes = { 0x35, 0x80 - 256 };
 	  ByteReader reader = new ReadFromArray(bytes);
-	  symbols.clear();
+	  Symbols symbols = new Symbols();
+
 	  AssemblyCode result = get(0, byte0, reader, symbols);
 	  assert (result != null);
 	  assert (result.getBytes().size() == bytes.length + 1);
@@ -429,7 +448,8 @@ public class TestDecoder extends Decoder {
 	  Byte byte0 = 0xFD - 256;
 	  Byte[] bytes = { 0x36, 0xFF - 256, 0xFF - 256 };
 	  ByteReader reader = new ReadFromArray(bytes);
-	  symbols.clear();
+	  Symbols symbols = new Symbols();
+
 	  AssemblyCode result = get(0, byte0, reader, symbols);
 	  assert (result != null);
 	  assert (result.getBytes().size() == bytes.length + 1);
@@ -447,7 +467,8 @@ public class TestDecoder extends Decoder {
 	  Byte byte0 = 0xDD - 256;
 	  Byte[] bytes = { 0xCB - 256, 0x12, 0x00 };
 	  ByteReader reader = new ReadFromArray(bytes);
-	  symbols.clear();
+	  Symbols symbols = new Symbols();
+
 	  AssemblyCode result = get(0, byte0, reader, symbols);
 	  assert (result != null);
 	  assert (result.getBytes().size() == bytes.length + 1);
@@ -465,7 +486,8 @@ public class TestDecoder extends Decoder {
 	  Byte byte0 = 0xFD - 256;
 	  Byte[] bytes = { 0xCB - 256, 0x12, 0x01 };
 	  ByteReader reader = new ReadFromArray(bytes);
-	  symbols.clear();
+	  Symbols symbols = new Symbols();
+
 	  AssemblyCode result = get(0, byte0, reader, symbols);
 	  assert (result != null);
 	  assert (result.getBytes().size() == bytes.length + 1);
@@ -483,7 +505,8 @@ public class TestDecoder extends Decoder {
 	  Byte byte0 = 0xFD - 256;
 	  Byte[] bytes = { 0xCB - 256, 0xFF - 256, 0x01 };
 	  ByteReader reader = new ReadFromArray(bytes);
-	  symbols.clear();
+	  Symbols symbols = new Symbols();
+
 	  AssemblyCode result = get(0, byte0, reader, symbols);
 	  assert (result != null);
 	  assert (result.getBytes().size() == bytes.length + 1);
@@ -501,7 +524,8 @@ public class TestDecoder extends Decoder {
 	  Byte byte0 = 0xFD - 256;
 	  Byte[] bytes = { 0xCB - 256, 0xFF - 256, 0x80 - 256 };
 	  ByteReader reader = new ReadFromArray(bytes);
-	  symbols.clear();
+	  Symbols symbols = new Symbols();
+
 	  AssemblyCode result = get(0, byte0, reader, symbols);
 	  assert (result != null);
 	  assert (result.getBytes().size() == bytes.length + 1);
@@ -519,7 +543,8 @@ public class TestDecoder extends Decoder {
 	  Byte byte0 = 0xDD - 256;
 	  Byte[] bytes = { 0xDC - 256, 0x34, 0x12 };
 	  ByteReader reader = new ReadFromArray(bytes);
-	  symbols.clear();
+	  Symbols symbols = new Symbols();
+
 	  AssemblyCode result = get(0, byte0, reader, symbols);
 	  assert (result == null);
 	} catch (IOException e) {

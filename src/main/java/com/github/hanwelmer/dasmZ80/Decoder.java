@@ -2,13 +2,12 @@ package com.github.hanwelmer.dasmZ80;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.Map;
 
 public class Decoder {
 
   private HashMap<Integer, BinaryCode> hashMap = new HashMap<Integer, BinaryCode>(2);
 
-  public AssemblyCode get(int address, Byte nextByte, ByteReader reader, Map<Integer, Symbol> symbols)
+  public AssemblyCode get(int address, Byte nextByte, ByteReader reader, Symbols symbols)
       throws IOException, IllegalOpcodeException {
 	Integer key = new Integer(nextByte);
 	if (key < 0) {
@@ -104,7 +103,7 @@ public class Decoder {
 
 	  // Get an existing or make a new symbol.
 	  String label = String.format("lbl%02X%02X", byte3, byte2);
-	  Symbol symbol = getOrMakeSymbol(symbols, label, value, SymbolType.memoryAddress);
+	  Symbol symbol = symbols.getOrMakeSymbol(label, SymbolType.memoryAddress, value);
 
 	  // Put label in assembly code instruction.
 	  asmCode.updateMnemonic("@", symbol.getName());
@@ -124,7 +123,7 @@ public class Decoder {
 
 	  // Get an existing or make a new symbol.
 	  String label = String.format("lbl%04X", value);
-	  Symbol symbol = getOrMakeSymbol(symbols, label, value, SymbolType.memoryAddress);
+	  Symbol symbol = symbols.getOrMakeSymbol(label, SymbolType.memoryAddress, value);
 
 	  // Put label in assembly code instruction.
 	  asmCode.updateMnemonic("%", symbol.getName() + "-$");
@@ -146,7 +145,7 @@ public class Decoder {
 
 	  // Get an existing or make a new symbol.
 	  String label = String.format("port%02X", value);
-	  Symbol symbol = getOrMakeSymbol(symbols, label, value, SymbolType.portAddress);
+	  Symbol symbol = symbols.getOrMakeSymbol(label, SymbolType.portAddress, value);
 
 	  // use port label in the assembly code.
 	  asmCode.updateMnemonic("&", symbol.getName());
@@ -156,20 +155,6 @@ public class Decoder {
 	}
 
 	return asmCode;
-  }
-
-  private Symbol getOrMakeSymbol(Map<Integer, Symbol> symbols, String label, Integer value,
-      SymbolType symbolType) {
-	// If available use symbolType or constant.
-	// If not, add label and value as symbol for the symbolType.
-	Symbol symbol = symbols.get(value);
-	if (symbol != null) {
-	  return symbol;
-	}
-
-	symbols.put(value, new Symbol(label, symbolType, value));
-	symbol = symbols.get(value);
-	return symbol;
   }
 
   private void applyDisplacement(AssemblyCode asmCode, Byte value) {
