@@ -47,10 +47,15 @@ public class ReadSymbolsFromArray implements AbstractReader {
 	while (pos < lastLine.length() && Character.isWhitespace(lastLine.charAt(pos))) {
 	  pos++;
 	}
-	// add letters and digits
-	while (pos < lastLine.length() && Character.isUnicodeIdentifierPart(lastLine.charAt(pos))) {
-	  value += lastLine.charAt(pos);
-	  pos++;
+	// treat comments separately
+	if (pos < lastLine.length() && lastLine.charAt(pos) == ';') {
+	  value = lastLine.substring(pos);
+	} else {
+	  // form a single word by adding valid letters and digits
+	  while (pos < lastLine.length() && Character.isUnicodeIdentifierPart(lastLine.charAt(pos))) {
+		value += lastLine.charAt(pos);
+		pos++;
+	  }
 	}
 	return value;
   }

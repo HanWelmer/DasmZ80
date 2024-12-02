@@ -92,6 +92,7 @@ public class DasmZ80 {
   protected static Symbols readSymbols(AbstractReader input) throws IOException {
 	Symbols symbols = new Symbols();
 	SymbolType type = SymbolType.constant;
+	Symbol previousSymbol = null;
 	while (input.ready()) {
 	  String line = input.readLine().trim();
 	  if (line.contains(";I/O Ports:")) {
@@ -102,22 +103,31 @@ public class DasmZ80 {
 		type = SymbolType.constant;
 	  } else {
 		// 0010 name EQU 0x10 ;comment
+		// or:
+		// ;comment
 		String name = input.getWord();
-		if (name.length() == 0 || name.charAt(0) == ';') {
-		  continue;
+		if (name.length() != 0) {
+		  char firstChar = name.charAt(0);
+		  if (firstChar == ';') {
+			previousSymbol.add(name);
+		  } else if (!(Character.isLetter(firstChar) || firstChar != '_')) {
+			throw new IOException(String.format("symbol must begin with a character, received: %s", name));
+		  } else {
+			String equ = input.getWord();
+			if (!"EQU".equals(equ)) {
+			  throw new IOException(String.format("expected EQU, received: %s", equ));
+			}
+			String strValue = input.getWord();
+			if (strValue.length() == 0 || !Character.isDigit(strValue.charAt(0))) {
+			  throw new IOException(String.format("value must begin with a digit, received: %s", strValue));
+			}
+			previousSymbol = symbols.getOrMakeSymbol(name, type, Integer.decode(strValue));
+			String comment = input.getWord();
+			if (comment.length() > 0 && comment.charAt(0) == ';') {
+			  previousSymbol.add(comment);
+			}
+		  }
 		}
-		if (name.length() == 0 || !(Character.isLetter(name.charAt(0)) || name.charAt(0) != '_')) {
-		  throw new IOException(String.format("symbol must begin with a character, received: %s", name));
-		}
-		String equ = input.getWord();
-		if (!"EQU".equals(equ)) {
-		  throw new IOException(String.format("expected EQU, received: %s", equ));
-		}
-		String strValue = input.getWord();
-		if (strValue.length() == 0 || !Character.isDigit(strValue.charAt(0))) {
-		  throw new IOException(String.format("value must begin with a digit, received: %s", strValue));
-		}
-		symbols.getOrMakeSymbol(name, type, Integer.decode(strValue));
 	  }
 	}
 	return symbols;
