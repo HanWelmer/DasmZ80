@@ -109,7 +109,9 @@ public class DasmZ80 {
 		if (name.length() != 0) {
 		  char firstChar = name.charAt(0);
 		  if (firstChar == ';') {
-			previousSymbol.add(name);
+			if (previousSymbol != null) {
+			  previousSymbol.add(name);
+			}
 		  } else if (!(Character.isLetter(firstChar) || firstChar != '_')) {
 			throw new IOException(String.format("symbol must begin with a character, received: %s", name));
 		  } else {
