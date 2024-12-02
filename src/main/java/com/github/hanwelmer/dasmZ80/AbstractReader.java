@@ -12,5 +12,7 @@ public interface AbstractReader {
 
   public String getWord();
 
+  public String getValue();
+
   public void close();
 }

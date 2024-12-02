@@ -105,25 +105,41 @@ public class DasmZ80 {
 		// 0010 name EQU 0x10 ;comment
 		// or:
 		// ;comment
-		String name = input.getWord();
-		if (name.length() != 0) {
-		  char firstChar = name.charAt(0);
+		String firstWord = input.getWord();
+		if (firstWord.length() != 0) {
+		  char firstChar = firstWord.charAt(0);
 		  if (firstChar == ';') {
 			if (previousSymbol != null) {
-			  previousSymbol.add(name);
+			  previousSymbol.add(firstWord);
 			}
-		  } else if (!(Character.isLetter(firstChar) || firstChar != '_')) {
-			throw new IOException(String.format("symbol must begin with a character, received: %s", name));
 		  } else {
+			// value
+			if (firstWord.length() == 0 || !Character.isDigit(firstWord.charAt(0))) {
+			  throw new IOException(String.format("value must begin with a digit, received: %s", firstWord));
+			}
+			Integer value = Integer.decode("0x" + firstWord);
+
+			// name
+			String name = input.getWord();
+			if (!(Character.isLetter(firstChar) || firstChar != '_')) {
+			  throw new IOException(String.format("symbol must begin with a character, received: %s", name));
+			}
+
+			// EQU
 			String equ = input.getWord();
 			if (!"EQU".equals(equ)) {
 			  throw new IOException(String.format("expected EQU, received: %s", equ));
 			}
-			String strValue = input.getWord();
-			if (strValue.length() == 0 || !Character.isDigit(strValue.charAt(0))) {
-			  throw new IOException(String.format("value must begin with a digit, received: %s", strValue));
+
+			// expression
+			String expression = input.getValue();
+			if (expression.length() == 0) {
+			  throw new IOException(String.format("expression expected"));
 			}
-			previousSymbol = symbols.getOrMakeSymbol(name, type, Integer.decode(strValue));
+
+			previousSymbol = symbols.getOrMakeSymbol(name, type, value);
+
+			// comment
 			String comment = input.getWord();
 			if (comment.length() > 0 && comment.charAt(0) == ';') {
 			  previousSymbol.add(comment);

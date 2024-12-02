@@ -31,6 +31,15 @@ public class SymbolFileReader implements AbstractReader {
 
   @Override
   public String getWord() {
+	return getString(true);
+  }
+
+  @Override
+  public String getValue() {
+	return getString(false);
+  }
+
+  private String getString(boolean asIdentifier) {
 	String value = "";
 	// skip spaces
 	while (pos < lastLine.length() && Character.isWhitespace(lastLine.charAt(pos))) {
@@ -40,13 +49,26 @@ public class SymbolFileReader implements AbstractReader {
 	if (pos < lastLine.length() && lastLine.charAt(pos) == ';') {
 	  value = lastLine.substring(pos);
 	} else {
-	  // form a single word by adding valid letters and digits
-	  while (pos < lastLine.length() && Character.isUnicodeIdentifierPart(lastLine.charAt(pos))) {
+	  // form a single word by adding valid letters and digits (asIdentifier) or
+	  // anything until ';' or end of line (otherwise).
+	  while (validChar(asIdentifier)) {
 		value += lastLine.charAt(pos);
 		pos++;
 	  }
 	}
 	return value;
+  }
+
+  private boolean validChar(boolean asIdentifier) {
+	boolean result = pos < lastLine.length();
+	if (result) {
+	  if (asIdentifier) {
+		result = Character.isUnicodeIdentifierPart(lastLine.charAt(pos));
+	  } else {
+		result = (lastLine.charAt(pos) != ';');
+	  }
+	}
+	return result;
   }
 
   @Override
