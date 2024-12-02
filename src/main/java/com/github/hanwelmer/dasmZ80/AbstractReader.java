@@ -10,9 +10,5 @@ public interface AbstractReader {
 
   public String readLine() throws IOException;
 
-  public String getWord();
-
-  public String getValue();
-
   public void close();
 }

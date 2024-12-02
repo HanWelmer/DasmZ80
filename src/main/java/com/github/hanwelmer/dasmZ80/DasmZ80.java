@@ -89,7 +89,7 @@ public class DasmZ80 {
 	return symbols;
   }
 
-  protected static Symbols readSymbols(AbstractReader input) throws IOException {
+  protected static Symbols readSymbols(AbstractSymbolReader input) throws IOException {
 	Symbols symbols = new Symbols();
 	SymbolType type = SymbolType.constant;
 	Symbol previousSymbol = null;
