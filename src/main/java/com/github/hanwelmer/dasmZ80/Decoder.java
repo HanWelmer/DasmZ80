@@ -102,8 +102,9 @@ public class Decoder {
 	  }
 
 	  // Get an existing or make a new symbol.
-	  String label = String.format("lbl%02X%02X", byte3, byte2);
-	  Symbol symbol = symbols.getOrMakeSymbol(label, SymbolType.memoryAddress, value);
+	  String expression = String.format("%02X%02X", byte3, byte2);
+	  String label = "lbl" + expression;
+	  Symbol symbol = symbols.getOrMakeSymbol(label, SymbolType.memoryAddress, value, "0x" + expression);
 
 	  // Put label in assembly code instruction.
 	  asmCode.updateMnemonic("@", symbol.getName());
@@ -122,8 +123,9 @@ public class Decoder {
 	  value += (byte2 < 128) ? byte2 : (-byte2);
 
 	  // Get an existing or make a new symbol.
-	  String label = String.format("lbl%04X", value);
-	  Symbol symbol = symbols.getOrMakeSymbol(label, SymbolType.memoryAddress, value);
+	  String expression = String.format("%04X", value);
+	  String label = "lbl" + expression;
+	  Symbol symbol = symbols.getOrMakeSymbol(label, SymbolType.memoryAddress, value, "0x" + expression);
 
 	  // Put label in assembly code instruction.
 	  asmCode.updateMnemonic("%", symbol.getName() + "-$");
@@ -144,8 +146,9 @@ public class Decoder {
 	  }
 
 	  // Get an existing or make a new symbol.
-	  String label = String.format("port%02X", value);
-	  Symbol symbol = symbols.getOrMakeSymbol(label, SymbolType.portAddress, value);
+	  String expression = String.format("%02X", value);
+	  String label = "port" + expression;
+	  Symbol symbol = symbols.getOrMakeSymbol(label, SymbolType.portAddress, value, "0x" + expression);
 
 	  // use port label in the assembly code.
 	  asmCode.updateMnemonic("&", symbol.getName());

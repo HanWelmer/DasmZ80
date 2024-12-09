@@ -20,15 +20,16 @@ public class Symbols {
    *          type of symbol (see enumeration SymbolType).
    * @param value
    *          8-bit or 16-bit value for the symbol.
+   * @param expression
    * @return existing or newly added symbol with the given name.
    */
-  public Symbol getOrMakeSymbol(String name, SymbolType type, Integer value) {
+  public Symbol getOrMakeSymbol(String name, SymbolType type, Integer value, String expression) {
 	// If available use symbolType or constant.
 	Symbol symbol = symbols.get(value);
 
 	// If not, add label and value as symbol for the symbolType.
 	if (symbol == null) {
-	  symbols.put(value, new Symbol(name, type, value));
+	  symbols.put(value, new Symbol(name, type, value, expression));
 	  symbol = symbols.get(value);
 	}
 	return symbol;

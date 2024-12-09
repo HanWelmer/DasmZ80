@@ -10,7 +10,7 @@ public class TestReadSymbols extends DasmZ80 {
   @Test
   public void testPortSymbols() throws IOException {
 	ReadSymbolsFromArray input = new ReadSymbolsFromArray();
-	input.add(";I/O Ports:");
+	input.add(";I/O addresses:");
 	input.add("0003            port03  EQU  0x03");
 	input.add("00FE            SIO_A_C EQU  0xFE           ;SIO channel A, command register.");
 	input.add(";");
@@ -42,14 +42,15 @@ public class TestReadSymbols extends DasmZ80 {
   @Test
   public void testMemorySymbols() throws IOException {
 	ReadSymbolsFromArray input = new ReadSymbolsFromArray();
-	input.add(";Memory locations:");
+	input.add(";Memory addresses:");
 	input.add(
 	    "1B00            vectors EQU  0x1B00         ;Base address for interrupt vector table. This byte initialised to 0xD8.");
 	input.add("1B01            lbl1B01 EQU  0x1B01");
+	input.add("C103            lblC103 EQU  0xC103");
 	Symbols symbols = readSymbols(input);
 	ArrayList<Symbol> labels = symbols.getSymbolsByType(SymbolType.memoryAddress);
 
-	assert (labels.size() == 2);
+	assert (labels.size() == 3);
 	assert (labels.get(0).getType() == SymbolType.memoryAddress);
 	assert (labels.get(0).getName().equals("vectors"));
 	assert (labels.get(0).getValue().equals(new Integer(0x1B00)));
@@ -59,6 +60,10 @@ public class TestReadSymbols extends DasmZ80 {
 	assert (labels.get(1).getType() == SymbolType.memoryAddress);
 	assert (labels.get(1).getName().equals("lbl1B01"));
 	assert (labels.get(1).getValue().equals(new Integer(0x1B01)));
+
+	assert (labels.get(2).getType() == SymbolType.memoryAddress);
+	assert (labels.get(2).getName().equals("lblC103"));
+	assert (labels.get(2).getValue().equals(new Integer(0xC103)));
   }
 
   @Test
@@ -85,7 +90,7 @@ public class TestReadSymbols extends DasmZ80 {
   public void testMixedSymbols() throws IOException {
 	ReadSymbolsFromArray input = new ReadSymbolsFromArray();
 	input.add("                        ;");
-	input.add("                        ;I/O Ports:");
+	input.add("                        ;I/O addresses:");
 	input.add("0003            port03  EQU  0x03");
 	input.add("00FE            SIO_A_C EQU  0xFE           ;SIO channel A, command register.");
 	input.add("                        ;");
@@ -94,7 +99,7 @@ public class TestReadSymbols extends DasmZ80 {
 	input.add("                        ;");
 	input.add("                        ;0x6E = 0156 -> Reset Rx CRC checker, Reset TxInt Pending, select register 6.");
 	input.add("                        ;");
-	input.add("                        ;Memory locations:");
+	input.add("                        ;Memory addresses:");
 	input.add(
 	    "1B00            vectors EQU  0x1B00         ;Base address for interrupt vector table. This byte initialised to 0xD8.");
 	input.add("1B01            lbl1B01 EQU  0x1B01");
@@ -111,10 +116,12 @@ public class TestReadSymbols extends DasmZ80 {
 	assert (ports.get(0).getType() == SymbolType.portAddress);
 	assert (ports.get(0).getName().equals("port03"));
 	assert (ports.get(0).getValue().equals(new Integer(3)));
+	assert (ports.get(0).getExpression().contentEquals("0x03"));
 
 	assert (ports.get(1).getType() == SymbolType.portAddress);
 	assert (ports.get(1).getName().equals("SIO_A_C"));
 	assert (ports.get(1).getValue().equals(new Integer(254)));
+	assert (ports.get(1).getExpression().contentEquals("0xFE"));
 	assert (ports.get(1).getComments().size() == 6);
 	assert (ports.get(1).getComments().get(0).equals(";SIO channel A, command register."));
 	assert (ports.get(1).getComments().get(1).equals(";"));
@@ -131,12 +138,14 @@ public class TestReadSymbols extends DasmZ80 {
 	assert (labels.get(0).getType() == SymbolType.memoryAddress);
 	assert (labels.get(0).getName().equals("vectors"));
 	assert (labels.get(0).getValue().equals(new Integer(0x1B00)));
+	assert (labels.get(0).getExpression().contentEquals("0x1B00"));
 	assert (labels.get(0).getComments().get(0)
 	    .equals(";Base address for interrupt vector table. This byte initialised to 0xD8."));
 
 	assert (labels.get(1).getType() == SymbolType.memoryAddress);
 	assert (labels.get(1).getName().equals("lbl1B01"));
 	assert (labels.get(1).getValue().equals(new Integer(0x1B01)));
+	assert (labels.get(1).getExpression().contentEquals("0x1B01"));
 
 	ArrayList<Symbol> constants = symbols.getSymbolsByType(SymbolType.constant);
 
@@ -144,10 +153,12 @@ public class TestReadSymbols extends DasmZ80 {
 	assert (constants.get(0).getType() == SymbolType.constant);
 	assert (constants.get(0).getName().equals("c12ports"));
 	assert (constants.get(0).getValue().equals(new Integer(0x0C08)));
+	assert (constants.get(0).getExpression().contentEquals("12 * 256 + 8"));
 	assert (constants.get(0).getComments().get(0).equals(";Initialize 12 ports starting with port18."));
 
 	assert (constants.get(1).getType() == SymbolType.constant);
 	assert (constants.get(1).getName().equals("cIniP11"));
 	assert (constants.get(1).getValue().equals(new Integer(0x0C11)));
+	assert (constants.get(1).getExpression().contentEquals("12 * 256 + 11"));
   }
 }

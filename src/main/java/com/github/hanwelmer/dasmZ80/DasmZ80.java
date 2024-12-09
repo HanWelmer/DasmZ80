@@ -22,8 +22,10 @@ import java.util.ArrayList;
 // output filename).
 public class DasmZ80 {
 
-  private static int startAddress = 0;
-  private static int finalAddress = 0;
+  private static final String IDENTIFY_IO = ";I/O addresses:";
+  private static final String IDENTIFY_MEMORY = ";Memory addresses:";
+  private static final String IDENTIFY_CONSTANT = ";Constants:";
+  protected static int startAddress = 0;
 
   /**
    * The main method. See usage() for a functional description.
@@ -33,40 +35,41 @@ public class DasmZ80 {
    */
   public static void main(String[] args) {
 	// process command line options and arguments.
-	if (args.length == 0) {
-	  usage();
-	}
-
-	int index = 0;
 	String fileName = "";
 	String symbolsFileName = "";
-	while (index < args.length) {
-	  String arg = args[index];
-	  if ("-s".equals(arg)) {
-		index++;
-		if (index < args.length) {
-		  symbolsFileName = args[index];
-		} else {
-		  usage();
-		}
-	  } else if (arg.startsWith("-")) {
-		usage();
-	  } else {
-		fileName = arg;
-	  }
-	  index++;
+
+	if (args.length != 1 && args.length != 3) {
+	  usage(); // usage exits main.
 	}
 
-	// process the symbols file.
-	if (!symbolsFileName.endsWith(".sym")) {
-	  usage();
+	if (args.length == 1) {
+	  fileName = args[0];
+	} else {
+	  if (!args[0].startsWith("-")) {
+		System.out.println("Expected an option, with '-' prefix.");
+		usage(); // usage exits main.
+	  }
+	  if (!"-s".equals(args[0])) {
+		System.out.println("Expected '-s' option.");
+		usage(); // usage exits main.
+	  }
+
+	  symbolsFileName = args[1];
+	  fileName = args[2];
+	  // check symbols file extension.
+	  if (!symbolsFileName.endsWith(".sym")) {
+		System.out.println("Symbols file must have '.sym' extension.");
+		usage(); // usage exits main.
+	  }
+	}
+
+	// check symbols file extension.
+	if (!fileName.endsWith(".bin")) {
+	  System.out.println("File to be disassembled must have '.bin' extension.");
+	  usage(); // usage exits main.
 	}
 
 	// do the main work.
-	if (!fileName.endsWith(".bin")) {
-	  usage();
-	}
-
 	Symbols symbols = readSymbols(symbolsFileName);
 	disassemble(fileName, symbols);
   } // main()
@@ -89,32 +92,44 @@ public class DasmZ80 {
 	return symbols;
   }
 
+  private static void usage() {
+	System.out.println("Usage: java -jar dasmZ80.jar [-s file.sym] filename.ext");
+	System.out.println(" where filename.ext is file to be disassembled");
+	System.out.println("  and -s file.sym is an optional input file with symbol definitions and comments.");
+	System.out.println("File filename must have extension .bin");
+	System.out.println(" and must be in binary format.");
+	System.out.println(" Binary code is assumed to be Z80 compatible.");
+	System.out.println(" Start address is assumed to be 0x0000.");
+	System.exit(1);
+  } // usage()
+
   protected static Symbols readSymbols(AbstractSymbolReader input) throws IOException {
 	Symbols symbols = new Symbols();
 	SymbolType type = SymbolType.constant;
 	Symbol previousSymbol = null;
 	while (input.ready()) {
 	  String line = input.readLine().trim();
-	  if (line.contains(";I/O Ports:")) {
+	  if (line.contains(IDENTIFY_IO)) {
 		type = SymbolType.portAddress;
-	  } else if (line.contains(";Memory locations:")) {
+	  } else if (line.contains(IDENTIFY_MEMORY)) {
 		type = SymbolType.memoryAddress;
-	  } else if (line.contains(";Constants:")) {
+	  } else if (line.contains(IDENTIFY_CONSTANT)) {
 		type = SymbolType.constant;
 	  } else {
-		// 0010 name EQU 0x10 ;comment
+		// 0010 name EQU expression;comment
 		// or:
 		// ;comment
 		String firstWord = input.getWord();
 		if (firstWord.length() != 0) {
 		  char firstChar = firstWord.charAt(0);
 		  if (firstChar == ';') {
-			if (previousSymbol != null) {
+			if (previousSymbol != null && previousSymbol.getComments().size() > 0) {
 			  previousSymbol.add(firstWord);
 			}
 		  } else {
 			// value
-			if (firstWord.length() == 0 || !Character.isDigit(firstWord.charAt(0))) {
+			if (firstWord.length() == 0 || !(Character.isDigit(firstWord.charAt(0))
+			    || firstWord.charAt(0) >= 'A' && firstWord.charAt(0) <= 'F')) {
 			  throw new IOException(String.format("value must begin with a digit, received: %s", firstWord));
 			}
 			Integer value = Integer.decode("0x" + firstWord);
@@ -132,12 +147,12 @@ public class DasmZ80 {
 			}
 
 			// expression
-			String expression = input.getValue();
+			String expression = input.getValue().trim();
 			if (expression.length() == 0) {
 			  throw new IOException(String.format("expression expected"));
 			}
 
-			previousSymbol = symbols.getOrMakeSymbol(name, type, value);
+			previousSymbol = symbols.getOrMakeSymbol(name, type, value, expression);
 
 			// comment
 			String comment = input.getWord();
@@ -150,17 +165,6 @@ public class DasmZ80 {
 	}
 	return symbols;
   }
-
-  private static void usage() {
-	System.out.println("Usage: java -jar dasmZ80.jar [-s file.sym] filename.ext");
-	System.out.println(" where filename.ext is file to be disassembled");
-	System.out.println("  and -s file.sym is an optional input file with symbol definitions and comments.");
-	System.out.println("File filename must have extension .bin");
-	System.out.println(" and must be in binary format.");
-	System.out.println(" Binary code is assumed to be Z80 compatible.");
-	System.out.println(" Start address is assumed to be 0x0000.");
-	System.exit(1);
-  } // usage()
 
   protected static void disassemble(String fileName, Symbols symbols) {
 	BinFileReader reader = new BinFileReader();
@@ -200,13 +204,12 @@ public class DasmZ80 {
 		  decoded.add(new AssemblyCode(address, ""));
 		}
 	  }
-	  finalAddress = address;
 
 	  // Fill in the memory address labels.
 	  fillInLabels(decoded, symbols);
 
 	  // Write everything to the output file.
-	  writeDefinitions(fileName, writer, symbols);
+	  writeDefinitions(fileName, writer, symbols, address);
 	  writeOutput(address, decoded, writer);
 	  writeReferences(writer, symbols);
 	} catch (IllegalOpcodeException e) {
@@ -216,7 +219,7 @@ public class DasmZ80 {
 	  decoded.add(new AssemblyCode(address, ""));
 
 	  fillInLabels(decoded, symbols);
-	  writeDefinitions(fileName, writer, symbols);
+	  writeDefinitions(fileName, writer, symbols, address);
 	  writeOutput(address, decoded, writer);
 	  writeRemainderOfInput(address, reader, writer);
 	  writeReferences(writer, symbols);
@@ -242,18 +245,18 @@ public class DasmZ80 {
 	}
   } // fillInLabels()
 
-  private static void writeDefinitions(String fileName, AbstractWriter writer, Symbols symbols) {
+  protected static void writeDefinitions(String fileName, AbstractWriter writer, Symbols symbols, int finalAddress) {
 	String msg = String.format(";File generated by dasmZ80.jar Z80 disassembler from %s", fileName);
 	try {
 	  writer.write(new AssemblyCode(0, null, msg));
-	  writer.write(new AssemblyCode(0, null, ";"));
 
 	  ArrayList<Symbol> symbolList = symbols.getSymbolsByType(SymbolType.portAddress);
 	  if (symbolList.size() > 0) {
-		writer.write(new AssemblyCode(0, null, ";I/O Port definitions"));
+		writer.write(new AssemblyCode(0, null, ";"));
+		writer.write(new AssemblyCode(0, null, IDENTIFY_IO));
 	  }
 	  for (Symbol symbol : symbolList) {
-		writer.write(String.format("%16s%-7s EQU  %02X\n", " ", symbol.getName(), symbol.getValue()));
+		writer.write(symbol.toString());
 	  }
 
 	  symbolList = symbols.getSymbolsByType(SymbolType.memoryAddress);
@@ -263,19 +266,21 @@ public class DasmZ80 {
 		// disassembled code.
 		if (symbol.getValue() < startAddress || symbol.getValue() > finalAddress) {
 		  if (!done) {
-			writer.write(new AssemblyCode(0, null, ";Memory addresses"));
+			writer.write(new AssemblyCode(0, null, ";"));
+			writer.write(new AssemblyCode(0, null, IDENTIFY_MEMORY));
 			done = true;
 		  }
-		  writer.write(String.format("%16s%-7s EQU  %04X\n", " ", symbol.getName(), symbol.getValue()));
+		  writer.write(symbol.toString());
 		}
 	  }
 
 	  symbolList = symbols.getSymbolsByType(SymbolType.constant);
 	  if (symbolList.size() > 0) {
-		writer.write(new AssemblyCode(0, null, ";Constants"));
+		writer.write(new AssemblyCode(0, null, ";"));
+		writer.write(new AssemblyCode(0, null, IDENTIFY_CONSTANT));
 	  }
 	  for (Symbol symbol : symbolList) {
-		writer.write(String.format("%16s%-7s EQU  %04X\n", " ", symbol.getName(), symbol.getValue()));
+		writer.write(symbol.toString());
 	  }
 
 	  writer.write(new AssemblyCode(0, null, ";"));
@@ -334,7 +339,7 @@ public class DasmZ80 {
 	  // Write references to port addresses.
 	  ArrayList<Symbol> symbolList = symbols.getSymbolsByType(SymbolType.portAddress);
 	  if (symbolList.size() > 0) {
-		writer.write("\nI/O-port cross reference list:\n");
+		writer.write("\nI/O address cross reference list:\n");
 	  }
 	  for (Symbol symbol : symbolList) {
 		writeReferencesTo(symbol, 2, writer);
@@ -343,7 +348,7 @@ public class DasmZ80 {
 	  // Write references to memory addresses.
 	  symbolList = symbols.getSymbolsByType(SymbolType.memoryAddress);
 	  if (symbolList.size() > 0) {
-		writer.write("\nMemory cross reference list:\n");
+		writer.write("\nMemory address cross reference list:\n");
 	  }
 	  for (Symbol symbol : symbolList) {
 		writeReferencesTo(symbol, 4, writer);

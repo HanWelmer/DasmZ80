@@ -31,11 +31,11 @@ where
 * 0x10 is the value assigned to the symbol (decimal or hexadecimal constant expression).
 
 If a line contains:
-`;I/O Ports:`
+`;I/O addresses:`
 then the subsequent symbol definitions are interpreted as symbols for I/O port values until the start of memory symbols or constant symbols or end of file.
 
 If a line contains:
-`;Memory locations:`
+`;Memory addresses:`
 then the subsequent symbol definitions are interpreted as symbols for memory addresses until the start of I/O port values or constant symbols or end of file.
 
 If a line contains:
