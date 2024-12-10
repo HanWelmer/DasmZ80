@@ -95,7 +95,8 @@ public class DasmZ80 {
   private static void usage() {
 	System.out.println("Usage: java -jar dasmZ80.jar [-s file.sym] filename.ext");
 	System.out.println(" where filename.ext is file to be disassembled");
-	System.out.println("  and -s file.sym is an optional input file with symbol definitions and comments.");
+	System.out
+	    .println("  and -s file.sym is an optional input file with symbol definitions, comments and entry points.");
 	System.out.println("File filename must have extension .bin");
 	System.out.println(" and must be in binary format.");
 	System.out.println(" Binary code is assumed to be Z80 compatible.");
