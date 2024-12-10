@@ -95,34 +95,34 @@ public class TestReadSymbols extends DasmZ80 {
 	input.add("0300 final   ENTRY 0x0300       ;comment");
 
 	Symbols symbols = readSymbols(input);
-	ArrayList<Symbol> ports = symbols.getSymbolsByType(SymbolType.entryPoint);
+	ArrayList<Symbol> entries = symbols.getSymbolsByType(SymbolType.entryPoint);
 
-	assert (ports.size() == 4);
-	assert (ports.get(0).getType() == SymbolType.entryPoint);
-	assert (ports.get(0).getName().equals("reset"));
-	assert (ports.get(0).getValue().equals(new Integer(0)));
-	assert (ports.get(0).getExpression().contentEquals("0x0000"));
-	assert (ports.get(0).getComments().size() == 0);
+	assert (entries.size() == 4);
+	assert (entries.get(0).getType() == SymbolType.entryPoint);
+	assert (entries.get(0).getName().equals("reset"));
+	assert (entries.get(0).getValue().equals(new Integer(0)));
+	assert (entries.get(0).getExpression().contentEquals("0x0000"));
+	assert (entries.get(0).getComments().size() == 0);
 
-	assert (ports.get(1).getType() == SymbolType.entryPoint);
-	assert (ports.get(1).getName().equals("hundred"));
-	assert (ports.get(1).getValue().equals(new Integer(256)));
-	assert (ports.get(1).getExpression().contentEquals("base + offset"));
-	assert (ports.get(1).getComments().size() == 0);
+	assert (entries.get(1).getType() == SymbolType.entryPoint);
+	assert (entries.get(1).getName().equals("hundred"));
+	assert (entries.get(1).getValue().equals(new Integer(256)));
+	assert (entries.get(1).getExpression().contentEquals("base + offset"));
+	assert (entries.get(1).getComments().size() == 0);
 
-	assert (ports.get(2).getType() == SymbolType.entryPoint);
-	assert (ports.get(2).getName().equals("more"));
-	assert (ports.get(2).getValue().equals(new Integer(512)));
-	assert (ports.get(2).getExpression().contentEquals("base + offset"));
-	assert (ports.get(2).getComments().size() == 1);
-	assert (ports.get(2).getComments().get(0).equals(";comment"));
+	assert (entries.get(2).getType() == SymbolType.entryPoint);
+	assert (entries.get(2).getName().equals("more"));
+	assert (entries.get(2).getValue().equals(new Integer(512)));
+	assert (entries.get(2).getExpression().contentEquals("base + offset"));
+	assert (entries.get(2).getComments().size() == 1);
+	assert (entries.get(2).getComments().get(0).equals(";comment"));
 
-	assert (ports.get(3).getType() == SymbolType.entryPoint);
-	assert (ports.get(3).getName().equals("final"));
-	assert (ports.get(3).getValue().equals(new Integer(0x0300)));
-	assert (ports.get(3).getExpression().contentEquals("0x0300"));
-	assert (ports.get(3).getComments().size() == 1);
-	assert (ports.get(3).getComments().get(0).equals(";comment"));
+	assert (entries.get(3).getType() == SymbolType.entryPoint);
+	assert (entries.get(3).getName().equals("final"));
+	assert (entries.get(3).getValue().equals(new Integer(0x0300)));
+	assert (entries.get(3).getExpression().contentEquals("0x0300"));
+	assert (entries.get(3).getComments().size() == 1);
+	assert (entries.get(3).getComments().get(0).equals(";comment"));
   }
 
   @Test
@@ -147,6 +147,11 @@ public class TestReadSymbols extends DasmZ80 {
 	input.add("0C08            c12ports EQU 12 * 256 + 8 ;Initialize 12 ports starting with port18.");
 	input.add("0C11            cIniP11 EQU 12 * 256 + 11");
 	input.add("        ;");
+	input.add("        ;Entry points");
+	input.add("0000 reset   ENTRY 0x0000");
+	input.add("0100 hundred ENTRY base + offset");
+	input.add("0200 more    ENTRY base + offset;comment");
+	input.add("0300 final   ENTRY 0x0300       ;comment");
 
 	Symbols symbols = readSymbols(input);
 	ArrayList<Symbol> ports = symbols.getSymbolsByType(SymbolType.portAddress);
