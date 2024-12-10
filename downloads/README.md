@@ -1,6 +1,9 @@
 # dasmZ80 download folder
 This page contains released versions of the Z80 Disassembler.
 
+## Version 1.1.0:
+Added optional input file (extension .sym) with symbolic label and constant definitions. See Usage for more details.  The same limitations apply as for version 1.0.0.
+
 ## Version 1.0.0:
 This is an initial version which suits my personal needs. Future updates and/or bug fixes may become available upon request.
 
