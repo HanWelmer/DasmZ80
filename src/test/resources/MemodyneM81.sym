@@ -153,4 +153,5 @@ DA03            lblDA03 EQU  0xDA03
                         ; IO    : Z80 SIO at 0x10..0x13 ?
                         ;         Z80 CTC at ?
                         ;
-0000                    ENTRY 0x0000        ;entry point after reset.
+                        ;Entry points
+0000            reset   ENTRY 0x0000        ;entry point after reset.

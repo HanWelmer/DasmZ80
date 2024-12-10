@@ -25,9 +25,10 @@ Open a Windows Command Prompt window, navigate to the local folder and enter:
 The symbol file contains label definitions, constant definitions and entry point definitions.
 
 An entry point definition is as follows:
-`0000 ENTRY 0x0000 ;comment`
+`0000 name ENTRY 0x0000 ;comment`
 where 
 * 0000 is the 16-bit hexadecimal value assigned to the entry point
+* name is the name of the entry point (max 8 characters; first character must be a..aA..Z_)
 * ENTRY is the entry point statement
 * 0x0000 is the expression used to calculate the value for the entry point (decimal or hexadecimal constant expression).
 * comment is an optional comment.
@@ -37,7 +38,7 @@ Label and constant definitions are as follows:
 `0010 name EQU 0x10 ;comment`
 where 
 * 0010 is the 16-bit hexadecimal value assigned to the symbol
-* name is the name of the symbol (max 8 characters; first character must be a..aA..Z_
+* name is the name of the symbol (max 8 characters; first character must be a..aA..Z_)
 * EQU is the equate statement
 * 0x10 is the expression used to calculate the value for the symbol (decimal or hexadecimal constant expression).
 * comment is an optional comment.

@@ -141,10 +141,12 @@ public class DasmZ80 {
 			  throw new IOException(String.format("symbol must begin with a character, received: %s", name));
 			}
 
-			// EQU
-			String equ = input.getWord();
-			if (!"EQU".equals(equ)) {
-			  throw new IOException(String.format("expected EQU, received: %s", equ));
+			// EQU or ENTRY
+			String statement = input.getWord();
+			if ("ENTRY".equals(statement)) {
+			  type = SymbolType.entryPoint;
+			} else if (!"EQU".equals(statement)) {
+			  throw new IOException(String.format("expected EQU, received: %s", statement));
 			}
 
 			// expression
