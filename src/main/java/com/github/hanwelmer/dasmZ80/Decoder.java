@@ -5,10 +5,18 @@ import java.util.HashMap;
 
 public class Decoder {
 
+  private ByteReader reader;
   private HashMap<Integer, BinaryCode> hashMap = new HashMap<Integer, BinaryCode>(2);
 
-  public AssemblyCode get(int address, Byte nextByte, ByteReader reader, Symbols symbols)
-      throws IOException, IllegalOpcodeException {
+  public void setReader(ByteReader reader) {
+	this.reader = reader;
+  }
+
+  public AssemblyCode get(int address, Symbols symbols) throws IOException, IllegalOpcodeException {
+	Byte nextByte = reader.getByte(address);
+	if (nextByte == null)
+	  return null;
+
 	Integer key = new Integer(nextByte);
 	if (key < 0) {
 	  key += 256;
@@ -158,7 +166,7 @@ public class Decoder {
 	}
 
 	return asmCode;
-  }
+  } // get()
 
   private void applyDisplacement(AssemblyCode asmCode, Byte value) {
 	if (value >= 0) {
@@ -167,7 +175,7 @@ public class Decoder {
 	  asmCode.updateMnemonic("+", "-");
 	  asmCode.updateMnemonic("$", String.format("%d", -value));
 	}
-  }
+  } // applyDisplacement()
 
   // Constructor
   public Decoder() {
@@ -1313,6 +1321,6 @@ public class Decoder {
 	hashMap.put(new Integer(0xFDCB00FD), new BinaryCode("FDCB$$FD", "LD   L,SET 7,(IY+$)"));
 	hashMap.put(new Integer(0xFDCB00FE), new BinaryCode("FDCB$$FE", "SET  7,(IY+$)"));
 	hashMap.put(new Integer(0xFDCB00FF), new BinaryCode("FDCB$$FF", "LD   A,SET 7,(IY+$)"));
-  }
+  } // Constructor
 
 }

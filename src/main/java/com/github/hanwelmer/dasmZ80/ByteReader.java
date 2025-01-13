@@ -7,11 +7,9 @@ public interface ByteReader {
 
   public void open(String fileName) throws FileNotFoundException;
 
-  public Byte getByte() throws IOException;
+  public Byte getByte(int address) throws IOException;
 
   public Byte getNextByte() throws IOException;
 
   public void close();
-
-  public void seek(int address) throws IOException;
 }

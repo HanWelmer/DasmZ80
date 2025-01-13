@@ -123,6 +123,22 @@ public class TestReadSymbols extends DasmZ80 {
 	assert (entries.get(3).getExpression().contentEquals("0x0300"));
 	assert (entries.get(3).getComments().size() == 1);
 	assert (entries.get(3).getComments().get(0).equals(";comment"));
+
+	// check entry points
+	assert (symbols.getEntryPoints().size() == 4);
+	Symbol entryPoint = symbols.getEntryPoints().get(0);
+	assert (entryPoint != null);
+	assert (entryPoint == entries.get(0));
+	entryPoint = symbols.getEntryPoints().get(0x0100);
+	assert (entryPoint != null);
+	assert (entryPoint == entries.get(1));
+	entryPoint = symbols.getEntryPoints().get(0x0200);
+	assert (entryPoint != null);
+	assert (entryPoint == entries.get(2));
+	entryPoint = symbols.getEntryPoints().get(0x0300);
+	assert (entryPoint != null);
+	assert (entryPoint == entries.get(3));
+
   }
 
   @Test

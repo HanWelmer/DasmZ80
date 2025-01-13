@@ -14,18 +14,18 @@ public class ReadFromArray implements ByteReader {
 	index = 0;
   }
 
-  @Override
   public void open(String fileName) {
   }
 
   @Override
-  public Byte getByte() {
+  public Byte getByte(int address) {
+	index = address;
 	return (index < array.size()) ? array.get(index++) : null;
   }
 
   @Override
   public Byte getNextByte() throws IOException {
-	Byte nextByte = getByte();
+	Byte nextByte = getByte(index);
 	if (nextByte == null) {
 	  throw new IOException("Unexpected end of file.");
 	}
@@ -34,11 +34,6 @@ public class ReadFromArray implements ByteReader {
 
   @Override
   public void close() {
-  }
-
-  @Override
-  public void seek(int address) {
-	index = address;
   }
 
 }

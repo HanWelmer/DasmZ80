@@ -12,7 +12,7 @@ public class ListingWriter implements AbstractWriter {
 
   @Override
   public void open(String fileName) throws IOException {
-	file = new File(setExtension(fileName));
+	file = new File(fileName);
 	writer = new BufferedWriter(new FileWriter(file));
   }
 
@@ -31,16 +31,6 @@ public class ListingWriter implements AbstractWriter {
 	} finally {
 	  writer = null;
 	  file = null;
-	}
-  }
-
-  private String setExtension(String fileName) {
-	if (fileName.endsWith(".bin")) {
-	  return fileName.replace(".bin", ".lst");
-	} else if (fileName.endsWith(".hex")) {
-	  return fileName.replace(".hex", ".lst");
-	} else {
-	  return fileName + ".lst";
 	}
   }
 

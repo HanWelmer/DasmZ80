@@ -3,6 +3,7 @@ package com.github.hanwelmer.dasmZ80;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Z80 disassembler, written in Java.
@@ -26,6 +27,7 @@ public class DasmZ80 {
   private static final String IDENTIFY_MEMORY = ";Memory addresses:";
   private static final String IDENTIFY_CONSTANT = ";Constants:";
   protected static int startAddress = 0;
+  protected static int finalAddress = 0;
 
   /**
    * The main method. See usage() for a functional description.
@@ -70,11 +72,23 @@ public class DasmZ80 {
 	}
 
 	// do the main work.
-	Symbols symbols = readSymbols(symbolsFileName);
-	disassemble(fileName, symbols);
+	Symbols symbols = readSymbolsFile(symbolsFileName);
+	disassembleFile(fileName, symbols);
   } // main()
 
-  private static Symbols readSymbols(String fileName) {
+  private static void usage() {
+	System.out.println("Usage: java -jar dasmZ80.jar [-s file.sym] filename.ext");
+	System.out.println(" where filename.ext is file to be disassembled");
+	System.out
+	    .println("  and -s file.sym is an optional input file with symbol definitions, comments and entry points.");
+	System.out.println("File filename must have extension .bin");
+	System.out.println(" and must be in binary format.");
+	System.out.println(" Binary code is assumed to be Z80 compatible.");
+	System.out.println(" Start address is assumed to be 0x0000.");
+	System.exit(1);
+  } // usage()
+
+  private static Symbols readSymbolsFile(String fileName) {
 	Symbols symbols = new Symbols();
 	SymbolFileReader input = new SymbolFileReader();
 	try {
@@ -90,19 +104,7 @@ public class DasmZ80 {
 	  }
 	}
 	return symbols;
-  }
-
-  private static void usage() {
-	System.out.println("Usage: java -jar dasmZ80.jar [-s file.sym] filename.ext");
-	System.out.println(" where filename.ext is file to be disassembled");
-	System.out
-	    .println("  and -s file.sym is an optional input file with symbol definitions, comments and entry points.");
-	System.out.println("File filename must have extension .bin");
-	System.out.println(" and must be in binary format.");
-	System.out.println(" Binary code is assumed to be Z80 compatible.");
-	System.out.println(" Start address is assumed to be 0x0000.");
-	System.exit(1);
-  } // usage()
+  } // readSymbolsFile()
 
   protected static Symbols readSymbols(AbstractSymbolReader input) throws IOException {
 	Symbols symbols = new Symbols();
@@ -118,6 +120,8 @@ public class DasmZ80 {
 		type = SymbolType.constant;
 	  } else {
 		// 0010 name EQU expression;comment
+		// or:
+		// 0010 name ENTRY expression;comment
 		// or:
 		// ;comment
 		String firstWord = input.getWord();
@@ -167,15 +171,15 @@ public class DasmZ80 {
 	  }
 	}
 	return symbols;
-  }
+  } // readSymbols()
 
-  protected static void disassemble(String fileName, Symbols symbols) {
+  protected static void disassembleFile(String fileName, Symbols symbols) {
 	BinFileReader reader = new BinFileReader();
-	ListingWriter lstWriter = new ListingWriter();
+	ListingWriter writer = new ListingWriter();
 	try {
 	  reader.open(fileName);
-	  lstWriter.open(fileName);
-	  disassemble(fileName, reader, lstWriter, symbols);
+	  writer.open(changeExtension(fileName));
+	  disassembleToWriter(fileName, reader, writer, symbols);
 	} catch (FileNotFoundException e) {
 	  System.out.println("Error opening file " + fileName);
 	  System.out.println(e.getMessage());
@@ -185,58 +189,136 @@ public class DasmZ80 {
 	  e.printStackTrace();
 	} finally {
 	  reader.close();
-	  if (lstWriter != null) {
-		lstWriter.close();
+	  if (writer != null) {
+		writer.close();
 	  }
 	}
-  } // disassemble()
+  } // disassembleFile()
 
-  protected static void disassemble(String fileName, ByteReader reader, AbstractWriter writer, Symbols symbols) {
+  private static String changeExtension(String fileName) {
+	if (fileName.endsWith(".bin")) {
+	  return fileName.replace(".bin", ".lst");
+	} else if (fileName.endsWith(".hex")) {
+	  return fileName.replace(".hex", ".lst");
+	} else {
+	  return fileName + ".lst";
+	}
+  } // changeExtension()
+
+  protected static void disassembleToWriter(String fileName, ByteReader reader, AbstractWriter writer,
+      Symbols symbols) {
+	// Do the actual disassembly.
+	ArrayList<AssemblyCode> decoded = disassembleReader(fileName, reader, symbols);
+
+	// Fill in symbols to memory addresses.
+	fillInLabels(decoded, symbols);
+
+	// Write everything to the output file.
+	writeDefinitions(fileName, writer, symbols);
+	writeOutput(decoded, writer);
+	writeReferences(writer, symbols);
+  } // disassembleToWriter()
+
+  protected static ArrayList<AssemblyCode> disassembleReader(String fileName, ByteReader reader, Symbols symbols) {
 	Decoder decoder = new Decoder();
+	decoder.setReader(reader);
 	ArrayList<AssemblyCode> decoded = new ArrayList<AssemblyCode>();
-	int address = startAddress;
-	Byte nextByte = null;
 
+	// Add default entry point if none are defined
+	HashMap<Integer, Symbol> entryPoints = symbols.getEntryPoints();
+	if (entryPoints.isEmpty()) {
+	  String addr = String.format("%04X", startAddress);
+	  entryPoints.put(startAddress, new Symbol("__start", SymbolType.entryPoint, startAddress, addr));
+	  String msg = String.format("No entry points defined; assuming 0x%s as single entry point", addr);
+	  decoded.add(new AssemblyCode(startAddress, msg));
+	}
+
+	// loop through all entry points
+	HashMap<Integer, Path> paths = new HashMap<Integer, Path>();
 	try {
-	  // Disassemble the input file.
-	  while ((nextByte = reader.getByte()) != null) {
-		AssemblyCode asmCode = decoder.get(address, nextByte, reader, symbols);
-		decoded.add(asmCode);
-		address += asmCode.getBytes().size();
-		if (asmCode.getMnemonic().startsWith("RET")) {
-		  decoded.add(new AssemblyCode(address, ""));
+	  while (!entryPoints.isEmpty()) {
+		// Get first entry point.
+		Object[] keys = entryPoints.keySet().toArray();
+		Symbol point = entryPoints.get(keys[0]);
+		// Eat current entry point.
+		entryPoints.remove(point.getValue());
+		// FIXME skip entry points that are covered by decoded code.
+		if (newEntryPoint(paths, point.getValue())) {
+		  // Add current entry point as symbol to a memory address.
+		  Symbol symbol = symbols.getOrMakeSymbol(point.getName(), SymbolType.memoryAddress, point.getValue(),
+		      point.getExpression());
+		  // Disassemble code path that starts at the entry point.
+		  ArrayList<AssemblyCode> codePath = disassemblePath(point, decoder, entryPoints, symbols);
+		  paths.put(symbol.getValue(), new Path(symbol, codePath));
 		}
 	  }
-
-	  // Fill in the memory address labels.
-	  fillInLabels(decoded, symbols);
-
-	  // Write everything to the output file.
-	  writeDefinitions(fileName, writer, symbols, address);
-	  writeOutput(address, decoded, writer);
-	  writeReferences(writer, symbols);
-	} catch (IllegalOpcodeException e) {
-	  System.out.print(e.getMessage());
-	  String msg = e.getMessage().trim();
-	  decoded.add(new AssemblyCode(address, msg));
-	  decoded.add(new AssemblyCode(address, ""));
-
-	  fillInLabels(decoded, symbols);
-	  writeDefinitions(fileName, writer, symbols, address);
-	  writeOutput(address, decoded, writer);
-	  writeRemainderOfInput(address, reader, writer);
-	  writeReferences(writer, symbols);
 	} catch (IOException e) {
 	  System.out.println("Error reading from input file.");
 	  System.out.println(e.getMessage());
 	  e.printStackTrace();
 	}
+
+	// collate paths into single list of decoded assembler instructions.
+	for (HashMap.Entry<Integer, Path> entry : paths.entrySet()) {
+	  decoded.addAll(entry.getValue().decoded);
+	}
+	return decoded;
+  } // disassembleMemory()
+
+  private static boolean newEntryPoint(HashMap<Integer, Path> paths, Integer value) {
+	if (paths == null) {
+	  return true;
+	}
+
+	boolean found = false;
+	for (HashMap.Entry<Integer, Path> entry : paths.entrySet()) {
+	  Path path = entry.getValue();
+	  if (value >= path.startAddress && value < path.nextAddress) {
+		found = true;
+	  }
+	}
+	return !found;
+  }
+
+  private static ArrayList<AssemblyCode> disassemblePath(Symbol entryPoint, Decoder decoder,
+      HashMap<Integer, Symbol> entryPoints, Symbols symbols) throws IOException {
+	ArrayList<AssemblyCode> decoded = new ArrayList<AssemblyCode>();
+	int address = entryPoint.getValue();
+	AssemblyCode nextInstruction;
+
+	try {
+	  do {
+		nextInstruction = decoder.get(address, symbols);
+		if (nextInstruction == null)
+		  break;
+		decoded.add(nextInstruction);
+		// Determine next address.
+		address += nextInstruction.getBytes().size();
+		// Add jump/call address as another entry point.
+		Integer jumpAddress = nextInstruction.getCallOrJumpAddress();
+		if (jumpAddress != null && symbols.get(jumpAddress) != null) {
+		  String strAddress = String.format("%04X", jumpAddress);
+		  Symbol newSymbol = new Symbol("ep" + strAddress, SymbolType.entryPoint, jumpAddress, strAddress);
+		  entryPoints.put(jumpAddress, newSymbol);
+		}
+	  } while (!nextInstruction.isExit());
+	  // add a blank line after each instruction flow path.
+	  decoded.add(new AssemblyCode(address, "", ";"));
+	} catch (IllegalOpcodeException e) {
+	  decoded.add(new AssemblyCode(address, e.getMessage()));
+	  System.out.print(e.getMessage());
+	}
+	return decoded;
   } // disassemble()
 
   private static void fillInLabels(ArrayList<AssemblyCode> decoded, Symbols symbols) {
-	// Write references to memory addresses.
+	fillInLabelTypes(decoded, symbols, SymbolType.entryPoint);
+	fillInLabelTypes(decoded, symbols, SymbolType.memoryAddress);
+  } // fillInLabels()
+
+  private static void fillInLabelTypes(ArrayList<AssemblyCode> decoded, Symbols symbols, SymbolType symbolType) {
 	int index = 0;
-	for (Symbol symbol : symbols.getSymbolsByType(SymbolType.memoryAddress)) {
+	for (Symbol symbol : symbols.getSymbolsByType(symbolType)) {
 	  // Look up the line where the label must be set.
 	  while (index < decoded.size() && decoded.get(index).getAddress() <= symbol.getValue()) {
 		index++;
@@ -246,9 +328,9 @@ public class DasmZ80 {
 		decoded.get(index - 1).setLabel(symbol.getName());
 	  }
 	}
-  } // fillInLabels()
+  } // fillInLabelTypes()
 
-  protected static void writeDefinitions(String fileName, AbstractWriter writer, Symbols symbols, int finalAddress) {
+  protected static void writeDefinitions(String fileName, AbstractWriter writer, Symbols symbols) {
 	String msg = String.format(";File generated by dasmZ80.jar Z80 disassembler from %s", fileName);
 	try {
 	  writer.write(new AssemblyCode(0, null, msg));
@@ -295,47 +377,23 @@ public class DasmZ80 {
 	}
   } // writeDefinitions()
 
-  protected static void writeOutput(int address, ArrayList<AssemblyCode> decoded, AbstractWriter writer) {
+  protected static void writeOutput(ArrayList<AssemblyCode> decoded, AbstractWriter writer) {
 	try {
+	  int nextAddress = startAddress;
 	  for (AssemblyCode line : decoded) {
 		writer.write(line);
+		nextAddress = line.getAddress();
+		if (line.getBytes() != null) {
+		  nextAddress += line.getBytes().size();
+		}
 	  }
-	  writer.write(new AssemblyCode(address, "end"));
+	  writer.write(new AssemblyCode(nextAddress, "end"));
 	} catch (IOException e) {
 	  System.out.println("Error writing to output file.");
 	  System.out.println(e.getMessage());
 	  e.printStackTrace();
 	}
   } // writeOutput()
-
-  private static void writeRemainderOfInput(int address, ByteReader reader, AbstractWriter writer) {
-	try {
-	  int startOfLine = address;
-	  writer.write(new AssemblyCode(startOfLine, ";"));
-	  writer.write(new AssemblyCode(startOfLine, ";Unprocessed binary code from input file"));
-	  writer.write(new AssemblyCode(startOfLine, ";"));
-
-	  reader.seek(address);
-	  Byte nextByte;
-	  ArrayList<Byte> bytes = new ArrayList<>();
-	  while ((nextByte = reader.getByte()) != null) {
-		bytes.add(nextByte);
-		address++;
-		if (address % 16 == 0) {
-		  writer.write(new AssemblyCode(startOfLine, bytes));
-		  bytes.clear();
-		  startOfLine = address;
-		}
-	  }
-	  if (bytes.size() != 0) {
-		writer.write(new AssemblyCode(startOfLine, bytes));
-	  }
-	} catch (IOException e) {
-	  System.out.println("Error reading from input file.");
-	  System.out.println(e.getMessage());
-	  e.printStackTrace();
-	}
-  }
 
   private static void writeReferences(AbstractWriter writer, Symbols symbols) {
 	try {
@@ -348,8 +406,9 @@ public class DasmZ80 {
 		writeReferencesTo(symbol, 2, writer);
 	  }
 
-	  // Write references to memory addresses.
+	  // Write references to memory addresses and entry points.
 	  symbolList = symbols.getSymbolsByType(SymbolType.memoryAddress);
+	  symbolList.addAll(symbols.getSymbolsByType(SymbolType.entryPoint));
 	  if (symbolList.size() > 0) {
 		writer.write("\nMemory address cross reference list:\n");
 	  }
@@ -370,26 +429,29 @@ public class DasmZ80 {
 	  System.out.println(e.getMessage());
 	  e.printStackTrace();
 	}
-  }
+  } // writeReferences()
 
   private static void writeReferencesTo(Symbol symbol, int length, AbstractWriter writer) throws IOException {
+	boolean mustPrint = true;
 	int i = 0;
 	String format1 = "%-8s=%0" + length + "X:";
 	String format2 = "%3" + (length + 1) + "s";
 	String msg = String.format(format1, symbol.getName(), symbol.getValue());
 	for (Integer reference : symbol.getReferences()) {
 	  msg += String.format(" %04X", reference);
+	  mustPrint = true;
 	  if (++i == 8) {
-		i = 0;
 		msg += "\n";
 		writer.write(msg);
 		msg = String.format(format2, " ");
+		i = 0;
+		mustPrint = false;
 	  }
 	}
-	if (i > 0) {
+	if (mustPrint) {
 	  msg += "\n";
 	  writer.write(msg);
 	}
-  }
+  } // writeReferencesTo()
 
 }

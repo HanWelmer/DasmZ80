@@ -9,6 +9,7 @@ public class BinFileReader implements ByteReader {
 
   private File inputFile = null;
   private RandomAccessFile fis = null;
+  private int address = -1;
 
   @Override
   public void open(String fileName) throws FileNotFoundException {
@@ -17,9 +18,19 @@ public class BinFileReader implements ByteReader {
   }
 
   @Override
-  public Byte getByte() throws IOException {
+  public Byte getByte(int address) throws IOException {
+	if (address != this.address) {
+	  fis.seek(address);
+	  this.address = address;
+	}
+	return getNextByte();
+  }
+
+  @Override
+  public Byte getNextByte() throws IOException {
 	Byte nextByte = null;
 	int nextValue = fis.read();
+	address++;
 	if (nextValue != -1) {
 	  nextByte = (byte) nextValue;
 	}
@@ -27,19 +38,9 @@ public class BinFileReader implements ByteReader {
   }
 
   @Override
-  public Byte getNextByte() throws IOException {
-	return getByte();
-  }
-
-  @Override
   public void close() {
 	fis = null;
 	inputFile = null;
-  }
-
-  @Override
-  public void seek(int address) throws IOException {
-	fis.seek(address);
   }
 
 }

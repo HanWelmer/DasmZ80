@@ -2,13 +2,13 @@ package com.github.hanwelmer.dasmZ80;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
 public class Symbols {
 
-  Map<Integer, Symbol> symbols = new HashMap<Integer, Symbol>();
+  private HashMap<Integer, Symbol> symbols = new HashMap<Integer, Symbol>();
+  private HashMap<Integer, Symbol> entryPoints = new HashMap<Integer, Symbol>();
 
   /**
    * Get the symbol with the given name, if one exists. Otherwise create a new
@@ -32,6 +32,12 @@ public class Symbols {
 	  symbols.put(value, new Symbol(name, type, value, expression));
 	  symbol = symbols.get(value);
 	}
+
+	// Keep copies of entry points in a separate table.
+	if (type == SymbolType.entryPoint) {
+	  entryPoints.put(symbol.getValue(), symbol);
+	}
+
 	return symbol;
   }
 
@@ -50,4 +56,17 @@ public class Symbols {
 	return symbolList;
   }
 
+  public HashMap<Integer, Symbol> getEntryPoints() {
+	return entryPoints;
+  }
+
+  public void clear() {
+	symbols.clear();
+	entryPoints.clear();
+  }
+
+  // get symbol by value
+  public Object get(Integer value) {
+	return symbols.get(value);
+  }
 }

@@ -27,7 +27,7 @@ public class TestWriteOutput extends DasmZ80 {
 	ListingWriter writer = new ListingWriter();
 	try {
 	  writer.open(fileName);
-	  writeOutput(3, decoded, writer);
+	  writeOutput(decoded, writer);
 	} catch (IOException e) {
 	  e.printStackTrace();
 	} finally {
@@ -53,8 +53,6 @@ public class TestWriteOutput extends DasmZ80 {
 
 	newSymbol = symbols.getOrMakeSymbol("lbl1B01", SymbolType.memoryAddress, 0x1B01, "0x1B01");
 
-	newSymbol = symbols.getOrMakeSymbol("lbl0004", SymbolType.memoryAddress, 4, "0x0004");
-	newSymbol = symbols.getOrMakeSymbol("lbl0005", SymbolType.memoryAddress, 5, "0x0005");
 	newSymbol = symbols.getOrMakeSymbol("lbl0006", SymbolType.memoryAddress, 6, "0x0006");
 
 	newSymbol = symbols.getOrMakeSymbol("c12ports", SymbolType.constant, 0x0C08, "12*256+port08");
@@ -63,7 +61,7 @@ public class TestWriteOutput extends DasmZ80 {
 	newSymbol = symbols.getOrMakeSymbol("cIniP11", SymbolType.constant, 0x0C11, "12*256+SIO_A_C");
 
 	StringWriter writer = new StringWriter();
-	writeDefinitions("testWriteDefinitions()", writer, symbols, 5);
+	writeDefinitions("testWriteDefinitions()", writer, symbols);
 
 	assert (writer.output.size() == 16);
 
