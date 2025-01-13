@@ -19,9 +19,7 @@
 0000                    No entry points defined; assuming 0x0000 as single entry point
 0000 185D     __start:  JR   lbl005F-$
                         ;
-0671 E9       lbl0671:  JP   (HL)
-                        ;
-005F 31001C             LD   SP,lbl1C00
+005F 31001C   lbl005F:  LD   SP,lbl1C00
 0062 ED5E               IM   2
 0064 11001B             LD   DE,lbl1B00
 0067 7A                 LD   A,D
@@ -33,19 +31,19 @@
 0073 EDB0               LDIR
 0075 AF                 XOR  A
 0076 06AC               LD   B,0xAC
-0078 12                 LD   (DE),A
+0078 12       lbl0078:  LD   (DE),A
 0079 13                 INC  DE
 007A 10FC               DJNZ lbl0078-$
 007C 01080C             LD   BC,lbl0C08
 007F 210F1B             LD   HL,lbl1B0F
-0082 EDA3               OUTI
+0082 EDA3     lbl0082:  OUTI
 0084 EDA3               OUTI
 0086 0C                 INC  C
 0087 10F9               DJNZ lbl0082-$
 0089 CDF202             CALL lbl02F2
 008C 01110C             LD   BC,lbl0C11
 008F EDB3               OTIR
-0091 E7                 RST  0x20
+0091 E7       lbl0091:  RST  0x20
 0092 23                 INC  HL
 0093 F3                 DI
 0094 CB7E               BIT  7,(HL)
@@ -55,7 +53,9 @@
 009E FB                 EI
 009F 18F0               JR   lbl0091-$
                         ;
-00A1                    end
+0671 E9       lbl0671:  JP   (HL)
+                        ;
+0672                    end
 
 Memory address cross reference list:
 __start =0000:

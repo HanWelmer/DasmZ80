@@ -3,6 +3,7 @@ package com.github.hanwelmer.dasmZ80;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 
 /**
@@ -237,6 +238,13 @@ public class DasmZ80 {
 	HashMap<Integer, Path> paths = new HashMap<Integer, Path>();
 	try {
 	  while (!entryPoints.isEmpty()) {
+		// FIXME target addresses in the following instruction are not
+		// recognized as entry points:
+		/*
+		 * 0089 CDF202 CALL lbl02F2 
+		 * 0091 E7 lbl0091: RST 0x20
+		 */
+
 		// Get first entry point.
 		Object[] keys = entryPoints.keySet().toArray();
 		Symbol point = entryPoints.get(keys[0]);
@@ -259,9 +267,12 @@ public class DasmZ80 {
 	}
 
 	// collate paths into single list of decoded assembler instructions.
-	for (HashMap.Entry<Integer, Path> entry : paths.entrySet()) {
-	  decoded.addAll(entry.getValue().decoded);
+	Object[] keys = paths.keySet().toArray();
+	Arrays.sort(keys);
+	for (Object key : keys) {
+	  decoded.addAll(paths.get((Integer) key).decoded);
 	}
+
 	return decoded;
   } // disassembleMemory()
 
