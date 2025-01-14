@@ -130,7 +130,7 @@ public class DasmZ80 {
 		  char firstChar = firstWord.charAt(0);
 		  if (firstChar == ';') {
 			if (previousSymbol != null && previousSymbol.getComments().size() > 0) {
-			  previousSymbol.add(firstWord);
+			  previousSymbol.addComment(firstWord);
 			}
 		  } else {
 			// value
@@ -165,7 +165,7 @@ public class DasmZ80 {
 			// comment
 			String comment = input.getWord();
 			if (comment.length() > 0 && comment.charAt(0) == ';') {
-			  previousSymbol.add(comment);
+			  previousSymbol.addComment(comment);
 			}
 		  }
 		}
@@ -229,8 +229,9 @@ public class DasmZ80 {
 	HashMap<Integer, Symbol> entryPoints = symbols.getEntryPoints();
 	if (entryPoints.isEmpty()) {
 	  String addr = String.format("%04X", startAddress);
-	  entryPoints.put(startAddress, new Symbol("__start", SymbolType.entryPoint, startAddress, addr));
-	  String msg = String.format("No entry points defined; assuming 0x%s as single entry point", addr);
+	  entryPoints.put(startAddress, new Symbol("ep" + addr, SymbolType.entryPoint, startAddress, "0x" + addr));
+
+	  String msg = String.format("No entry points defined; assuming 0x%s as entry point", addr);
 	  decoded.add(new AssemblyCode(startAddress, msg));
 	}
 
@@ -238,20 +239,12 @@ public class DasmZ80 {
 	HashMap<Integer, Path> paths = new HashMap<Integer, Path>();
 	try {
 	  while (!entryPoints.isEmpty()) {
-		// FIXME target addresses in the following instruction are not
-		// recognized as entry points:
-		/*
-		 * 0089 CDF202 CALL lbl02F2 
-		 * 0091 E7 lbl0091: RST 0x20
-		 */
-
 		// Get first entry point.
 		Object[] keys = entryPoints.keySet().toArray();
 		Symbol point = entryPoints.get(keys[0]);
 		// Eat current entry point.
 		entryPoints.remove(point.getValue());
-		// FIXME skip entry points that are covered by decoded code.
-		if (newEntryPoint(paths, point.getValue())) {
+		if (pointNotVisited(paths, point.getValue())) {
 		  // Add current entry point as symbol to a memory address.
 		  Symbol symbol = symbols.getOrMakeSymbol(point.getName(), SymbolType.memoryAddress, point.getValue(),
 		      point.getExpression());
@@ -276,7 +269,7 @@ public class DasmZ80 {
 	return decoded;
   } // disassembleMemory()
 
-  private static boolean newEntryPoint(HashMap<Integer, Path> paths, Integer value) {
+  private static boolean pointNotVisited(HashMap<Integer, Path> paths, Integer value) {
 	if (paths == null) {
 	  return true;
 	}
@@ -300,21 +293,14 @@ public class DasmZ80 {
 	try {
 	  do {
 		nextInstruction = decoder.get(address, symbols);
-		if (nextInstruction == null)
-		  break;
-		decoded.add(nextInstruction);
-		// Determine next address.
-		address += nextInstruction.getBytes().size();
-		// Add jump/call address as another entry point.
-		Integer jumpAddress = nextInstruction.getCallOrJumpAddress();
-		if (jumpAddress != null && symbols.get(jumpAddress) != null) {
-		  String strAddress = String.format("%04X", jumpAddress);
-		  Symbol newSymbol = new Symbol("ep" + strAddress, SymbolType.entryPoint, jumpAddress, strAddress);
-		  entryPoints.put(jumpAddress, newSymbol);
+		if (nextInstruction != null) {
+		  decoded.add(nextInstruction);
+		  // Determine next address.
+		  address += nextInstruction.getBytes().size();
 		}
-	  } while (!nextInstruction.isExit());
+	  } while (nextInstruction != null && !nextInstruction.isExit());
 	  // add a blank line after each instruction flow path.
-	  decoded.add(new AssemblyCode(address, "", ";"));
+	  decoded.add(new AssemblyCode(address, ";"));
 	} catch (IllegalOpcodeException e) {
 	  decoded.add(new AssemblyCode(address, e.getMessage()));
 	  System.out.print(e.getMessage());

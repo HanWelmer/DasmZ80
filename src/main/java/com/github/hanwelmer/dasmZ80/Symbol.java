@@ -17,6 +17,7 @@ public class Symbol {
   private ArrayList<Integer> references;
   private ArrayList<String> comments;
 
+  // constructor
   public Symbol(String name, SymbolType type, Integer value, String expression) {
 	this.name = name;
 	this.type = type;
@@ -26,16 +27,12 @@ public class Symbol {
 	comments = new ArrayList<String>();
   }
 
-  public void add(Integer reference) {
-	references.add(reference);
-  }
-
-  public void add(String comment) {
-	comments.add(comment);
-  }
-
   public String getName() {
 	return name;
+  }
+
+  public void setName(String name) {
+	this.name = name;
   }
 
   public SymbolType getType() {
@@ -54,8 +51,16 @@ public class Symbol {
 	return references;
   }
 
+  public void addReference(Integer reference) {
+	references.add(reference);
+  }
+
   public ArrayList<String> getComments() {
 	return comments;
+  }
+
+  public void addComment(String comment) {
+	comments.add(comment);
   }
 
   public String toString() {

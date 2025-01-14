@@ -13,11 +13,11 @@ public class TestDisassemble extends DasmZ80 {
 	StringWriter writer = new StringWriter();
 	disassembleToWriter("test", reader, writer, symbols);
 	assert (writer.output.size() == 11);
-	assert ("0000 C0       __start:  RET  NZ\n".equals(writer.output.get(4)));
+	assert ("0000 C0       ep0000:   RET  NZ\n".equals(writer.output.get(4)));
 	assert ("0001 00                 NOP\n".equals(writer.output.get(5)));
 	assert ("0002 C9                 RET\n".equals(writer.output.get(6)));
-	assert ("                        ;\n".equals(writer.output.get(7)));
-	assert ("__start =0000:\n".equals(writer.output.get(10)));
+	assert ("0003                    ;\n".equals(writer.output.get(7)));
+	assert ("ep0000  =0000:\n".equals(writer.output.get(10)));
   }
 
   @Test
@@ -27,7 +27,7 @@ public class TestDisassemble extends DasmZ80 {
 	StringWriter writer = new StringWriter();
 	disassembleToWriter("test", reader, writer, symbols);
 	assert (writer.output.size() == 8);
-	assert ("0000          __start:  Unsupported code 0xDDDC at address 0x0000\n\n".equals(writer.output.get(4)));
+	assert ("0000          ep0000:   Unsupported code 0xDDDC at address 0x0000\n\n".equals(writer.output.get(4)));
 	// FIXME
 	// assert ("0000 DDDC3412 DB 0xDD, 0xDC, 0x34,
 	// 0x12\n".equals(writer.output.get(5)));
@@ -42,7 +42,7 @@ public class TestDisassemble extends DasmZ80 {
 	StringWriter writer = new StringWriter();
 	disassembleToWriter("test", reader, writer, symbols);
 	assert (writer.output.size() == 15);
-	assert ("0000 00       __start:  NOP\n".equals(writer.output.get(7)));
+	assert ("0000 00       ep0000:   NOP\n".equals(writer.output.get(7)));
 	assert ("0001 02                 LD   (BC),A\n".equals(writer.output.get(8)));
 	assert ("0002 013412             LD   BC,lbl1234\n".equals(writer.output.get(9)));
 	assert ("0005                    Unsupported code 0xDDDC at address 0x0005\n\n".equals(writer.output.get(10)));
@@ -77,7 +77,7 @@ public class TestDisassemble extends DasmZ80 {
 	assert ("                        ;I/O addresses:\n".equals(writer.output.get(2)));
 	assert ("0012            port12  EQU  0x12\n".equals(writer.output.get(3)));
 	assert ("00FE            portFE  EQU  0xFE\n".equals(writer.output.get(4)));
-	assert ("0000 DB12     __start:  IN   A,(port12)\n".equals(writer.output.get(8)));
+	assert ("0000 DB12     ep0000:   IN   A,(port12)\n".equals(writer.output.get(8)));
 	assert ("0002 D3FE               OUT  (portFE),A\n".equals(writer.output.get(9)));
 	assert ("0004 D312               OUT  (port12),A\n".equals(writer.output.get(10)));
 	assert ("0006 00                 NOP\n".equals(writer.output.get(11)));
@@ -94,15 +94,15 @@ public class TestDisassemble extends DasmZ80 {
 	StringWriter writer = new StringWriter();
 	disassembleToWriter("test", reader, writer, symbols);
 	assert (writer.output.size() == 18);
-	assert ("0000 CD0300   __start:  CALL lbl0003\n".equals(writer.output.get(7)));
-	assert ("0003 C20300   lbl0003:  JP   NZ,lbl0003\n".equals(writer.output.get(8)));
-	assert ("0006 10F8               DJNZ __start-$\n".equals(writer.output.get(9)));
-	assert ("0008 38F6               JR   C,__start-$\n".equals(writer.output.get(10)));
+	assert ("0000 CD0300   ep0000:   CALL ep0003\n".equals(writer.output.get(7)));
+	assert ("0003 C20300   ep0003:   JP   NZ,ep0003\n".equals(writer.output.get(8)));
+	assert ("0006 10F8               DJNZ ep0000-$\n".equals(writer.output.get(9)));
+	assert ("0008 38F6               JR   C,ep0000-$\n".equals(writer.output.get(10)));
 	assert ("000A 00                 NOP\n".equals(writer.output.get(11)));
-	assert ("000B C30300             JP   lbl0003\n".equals(writer.output.get(12)));
+	assert ("000B C30300             JP   ep0003\n".equals(writer.output.get(12)));
 	assert ("\nMemory address cross reference list:\n".equals(writer.output.get(15)));
-	assert ("__start =0000: 0006 0008\n".equals(writer.output.get(16)));
-	assert ("lbl0003 =0003: 0000 0003 000B\n".equals(writer.output.get(17)));
+	assert ("ep0000  =0000: 0006 0008\n".equals(writer.output.get(16)));
+	assert ("ep0003  =0003: 0000 0003 000B\n".equals(writer.output.get(17)));
   }
 
   @Test
@@ -113,20 +113,20 @@ public class TestDisassemble extends DasmZ80 {
 	StringWriter writer = new StringWriter();
 	disassembleToWriter("test", reader, writer, symbols);
 	assert (writer.output.size() == 20);
-	assert ("0000 CD0700   __start:  CALL lbl0007\n".equals(writer.output.get(8)));
-	assert ("0003 C30300   lbl0003:  JP   lbl0003\n".equals(writer.output.get(9)));
-	assert ("                        ;\n".equals(writer.output.get(10)));
+	assert ("0000 CD0700   ep0000:   CALL ep0007\n".equals(writer.output.get(8)));
+	assert ("0003 C30300   ep0003:   JP   ep0003\n".equals(writer.output.get(9)));
+	assert ("0006                    ;\n".equals(writer.output.get(10)));
 	// FIXME
 	// assert ("0006 00 DB 0x00\n".equals(writer.output.get(11)));
-	assert ("0007 10FE     lbl0007:  DJNZ lbl0007-$\n".equals(writer.output.get(11)));
-	assert ("0009 38F5               JR   C,__start-$\n".equals(writer.output.get(12)));
-	assert ("000B C30300             JP   lbl0003\n".equals(writer.output.get(13)));
-	assert ("                        ;\n".equals(writer.output.get(14)));
+	assert ("0007 10FE     ep0007:   DJNZ ep0007-$\n".equals(writer.output.get(11)));
+	assert ("0009 38F5               JR   C,ep0000-$\n".equals(writer.output.get(12)));
+	assert ("000B C30300             JP   ep0003\n".equals(writer.output.get(13)));
+	assert ("000E                    ;\n".equals(writer.output.get(14)));
 	assert ("000E                    end\n".equals(writer.output.get(15)));
 	assert ("\nMemory address cross reference list:\n".equals(writer.output.get(16)));
-	assert ("__start =0000: 0009\n".equals(writer.output.get(17)));
-	assert ("lbl0003 =0003: 0003 000B\n".equals(writer.output.get(18)));
-	assert ("lbl0007 =0007: 0000 0007\n".equals(writer.output.get(19)));
+	assert ("ep0000  =0000: 0009\n".equals(writer.output.get(17)));
+	assert ("ep0003  =0003: 0003 000B\n".equals(writer.output.get(18)));
+	assert ("ep0007  =0007: 0000 0007\n".equals(writer.output.get(19)));
   }
 
   @Test
@@ -143,12 +143,12 @@ public class TestDisassemble extends DasmZ80 {
 	assert (writer.output.size() == 15);
 	assert ("0000 CD0600   start:    CALL entry\n".equals(writer.output.get(3)));
 	assert ("0003 C30000             JP   start\n".equals(writer.output.get(4)));
-	assert ("                        ;\n".equals(writer.output.get(5)));
+	assert ("0006                    ;\n".equals(writer.output.get(5)));
 	assert ("0006 C20600   entry:    JP   NZ,entry\n".equals(writer.output.get(6)));
 	assert ("0009 10FB               DJNZ entry-$\n".equals(writer.output.get(7)));
 	assert ("000B 38F9               JR   C,entry-$\n".equals(writer.output.get(8)));
 	assert ("000D 00                 NOP\n".equals(writer.output.get(9)));
-	assert ("                        ;\n".equals(writer.output.get(10)));
+	assert ("000E                    ;\n".equals(writer.output.get(10)));
 	assert ("000E                    end\n".equals(writer.output.get(11)));
 	assert ("\nMemory address cross reference list:\n".equals(writer.output.get(12)));
 	assert ("start   =0000: 0003\n".equals(writer.output.get(13)));
@@ -191,15 +191,33 @@ public class TestDisassemble extends DasmZ80 {
 
 	disassembleToWriter("test", reader, writer, symbols);
 	assert (writer.output.size() == 18);
-	assert ("0000 CD0300   __start:  CALL loop\n".equals(writer.output.get(7)));
+	assert ("0000 CD0300   ep0000:   CALL loop\n".equals(writer.output.get(7)));
 	assert ("0003 C20300   loop:     JP   NZ,loop\n".equals(writer.output.get(8)));
 	assert ("0006 10FB               DJNZ loop-$\n".equals(writer.output.get(9)));
 	assert ("0008 38F9               JR   C,loop-$\n".equals(writer.output.get(10)));
 	assert ("000A 00                 NOP\n".equals(writer.output.get(11)));
 	assert ("000B C30300             JP   loop\n".equals(writer.output.get(12)));
 	assert ("\nMemory address cross reference list:\n".equals(writer.output.get(15)));
-	assert ("__start =0000:\n".equals(writer.output.get(16)));
+	assert ("ep0000  =0000:\n".equals(writer.output.get(16)));
 	assert ("loop    =0003: 0000 0003 0006 0008 000B\n".equals(writer.output.get(17)));
+  }
+
+  @Test
+  public void testReset() {
+	Byte[] bytes = { 0xE7 - 256, 0x18, 0xFD - 256, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	    0xC9 - 256 };
+	ByteReader reader = new ReadFromArray(bytes);
+	StringWriter writer = new StringWriter();
+	disassembleToWriter("test", reader, writer, symbols);
+	assert (writer.output.size() == 16);
+	assert ("0000 E7       ep0000:   RST  ep0020\n".equals(writer.output.get(7)));
+	assert ("0001 18FD               JR   ep0000-$\n".equals(writer.output.get(8)));
+	assert ("0003                    ;\n".equals(writer.output.get(9)));
+	assert ("0020 C9       ep0020:   RET\n".equals(writer.output.get(10)));
+	assert ("0021                    ;\n".equals(writer.output.get(11)));
+	assert ("ep0000  =0000: 0001\n".equals(writer.output.get(14)));
+	assert ("ep0020  =0020: 0000\n".equals(writer.output.get(15)));
   }
 
 }

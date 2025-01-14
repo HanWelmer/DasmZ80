@@ -1,18 +1,8 @@
 package com.github.hanwelmer.dasmZ80;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 public class AssemblyCode {
-
-  private static final List<Byte> CALL_OR_JUMP = Arrays.asList((byte) 0xC2, (byte) 0xC3, (byte) 0xC4, (byte) 0xCA,
-      (byte) 0xCC, (byte) 0xCD, (byte) 0xD2, (byte) 0xD4, (byte) 0xDA, (byte) 0xDC, (byte) 0xE2, (byte) 0xE4,
-      (byte) 0xEA, (byte) 0xEC, (byte) 0xF2, (byte) 0xF4, (byte) 0xFA, (byte) 0xFC);
-  private static final List<Byte> RELATIVE_JUMP = Arrays.asList((byte) 0x10, (byte) 0x18, (byte) 0x20, (byte) 0x28,
-      (byte) 0x30, (byte) 0x38);
-  private static final List<Byte> RESET = Arrays.asList((byte) 0xC7, (byte) 0xCF, (byte) 0xD7, (byte) 0xDF, (byte) 0xE7,
-      (byte) 0xEF, (byte) 0xF7, (byte) 0xFF);
 
   private int address = 0;
   private ArrayList<Byte> bytes;
@@ -78,6 +68,16 @@ public class AssemblyCode {
 	this.mnemonic = mnemonic;
   }
 
+  public boolean isExit() {
+	// TODO add flag to code definition, so that this part becomes
+	// microprocessor independent.
+	return bytes.get(0) == (byte) 0xC9 // RET
+	    || bytes.get(0) == (byte) 0xC3 // JP nnnn
+	    || bytes.get(0) == (byte) 0x18 // JR dd
+	    || bytes.get(0) == (byte) 0xE9 // JP (HL), JP (IX), JP (IY)
+	    || "JP   (IX)".equals(mnemonic) || "JP   (IY)".equals(mnemonic);
+  } // isExit()
+
   public String toString() {
 	// address
 	String result = String.format("%04X", address);
@@ -133,42 +133,5 @@ public class AssemblyCode {
 	}
 
 	return result + "\n";
-  }
-
-  public boolean isExit() {
-	// TODO add flag to code definition, so that this part becomes
-	// microprocessor independent.
-	return bytes.get(0) == (byte) 0xC9 // RET
-	    || bytes.get(0) == (byte) 0xC3 // JP nnnn
-	    || bytes.get(0) == (byte) 0x18 // JR dd
-	    || bytes.get(0) == (byte) 0xE9 // JP (HL), JP (IX), JP (IY)
-	    || "JP   (IX)".equals(mnemonic) || "JP   (IY)".equals(mnemonic);
-  }
-
-  public Integer getCallOrJumpAddress() {
-	// TODO Auto-generated method stub
-	Integer result = null;
-	// private int address = 0;
-	// private ArrayList<Byte> bytes;
-	// private String mnemonic;
-
-	// call or jump to absolute address
-	if (CALL_OR_JUMP.contains(bytes.get(0))) {
-	  result = bytes.get(1) + bytes.get(2) * 256;
-	} else if (RELATIVE_JUMP.contains(bytes.get(0))) {
-	  result = address + 2 + bytes.get(1);
-	} else if (RESET.contains(bytes.get(0))) {
-	  // C7 11.000.111 00
-	  // CF 11.001.111 08
-	  // D7 11.010.111 10
-	  // DF 11.011.111 18
-	  // E7 11.100.111 20
-	  // EF 11.101.111 28
-	  // F7 11.110.111 30
-	  // FF 11.111.111 38
-	  result = bytes.get(0) & 0x38;
-	}
-	// jump relative
-	return result;
-  }
+  } // toString()
 }

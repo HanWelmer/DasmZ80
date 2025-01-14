@@ -91,7 +91,64 @@ public class Decoder {
 	  asmCode.updateMnemonic("#", String.format("0x%02X", byte2));
 	}
 
-	// Process word constant / address.
+	// Process absolute address.
+	if (asmCode.getMnemonic().contains("!")) {
+	  Byte byte2 = reader.getNextByte();
+	  Byte byte3 = reader.getNextByte();
+	  asmCode.addByte(byte2);
+	  asmCode.addByte(byte3);
+
+	  // Prepare value.
+	  Integer value = new Integer(byte3);
+	  if (byte3 < 0) {
+		value += 256;
+	  }
+	  value *= 256;
+	  value += byte2;
+	  if (byte2 < 0) {
+		value += 256;
+	  }
+
+	  // Get an existing or make a new symbol.
+	  String expression = String.format("%02X%02X", byte3, byte2);
+	  String label = "ep" + expression;
+	  Symbol symbol = symbols.getOrMakeSymbol(label, SymbolType.memoryAddress, value, "0x" + expression);
+
+	  // Put label in assembly code instruction.
+	  asmCode.updateMnemonic("!", symbol.getName());
+
+	  // add address as reference to symbol.
+	  symbol.addReference(new Integer(address));
+
+	  // add the symbol as an entry point.
+	  symbols.getEntryPoints().put(value, new Symbol(label, SymbolType.entryPoint, value, expression));
+	}
+
+	// Process relative address.
+	if (asmCode.getMnemonic().contains("%")) {
+	  Byte byte2 = reader.getNextByte();
+	  asmCode.addByte(byte2);
+
+	  // Prepare value.
+	  int value = address + asmCode.getBytes().size();
+	  value += (byte2 < 128) ? byte2 : (-byte2);
+
+	  // Get an existing or make a new symbol.
+	  String expression = String.format("%04X", value);
+	  String label = "lbl" + expression;
+	  Symbol symbol = symbols.getOrMakeSymbol(label, SymbolType.memoryAddress, value, "0x" + expression);
+
+	  // Put label in assembly code instruction.
+	  asmCode.updateMnemonic("%", symbol.getName() + "-$");
+
+	  // add address as reference to symbol.
+	  symbol.addReference(new Integer(address));
+
+	  // add the symbol as an entry point.
+	  symbols.getEntryPoints().put(value, new Symbol(label, SymbolType.entryPoint, value, expression));
+	}
+
+	// Process word constant.
 	if (asmCode.getMnemonic().contains("@")) {
 	  Byte byte2 = reader.getNextByte();
 	  Byte byte3 = reader.getNextByte();
@@ -118,28 +175,7 @@ public class Decoder {
 	  asmCode.updateMnemonic("@", symbol.getName());
 
 	  // add address as reference to symbol.
-	  symbol.add(new Integer(address));
-	}
-
-	// Process relative address.
-	if (asmCode.getMnemonic().contains("%")) {
-	  Byte byte2 = reader.getNextByte();
-	  asmCode.addByte(byte2);
-
-	  // Prepare value.
-	  int value = address + asmCode.getBytes().size();
-	  value += (byte2 < 128) ? byte2 : (-byte2);
-
-	  // Get an existing or make a new symbol.
-	  String expression = String.format("%04X", value);
-	  String label = "lbl" + expression;
-	  Symbol symbol = symbols.getOrMakeSymbol(label, SymbolType.memoryAddress, value, "0x" + expression);
-
-	  // Put label in assembly code instruction.
-	  asmCode.updateMnemonic("%", symbol.getName() + "-$");
-
-	  // add address as reference to symbol.
-	  symbol.add(new Integer(address));
+	  symbol.addReference(new Integer(address));
 	}
 
 	// Process IO port.
@@ -162,7 +198,35 @@ public class Decoder {
 	  asmCode.updateMnemonic("&", symbol.getName());
 
 	  // add address as reference to symbol.
-	  symbol.add(new Integer(address));
+	  symbol.addReference(new Integer(address));
+	}
+
+	// Process reset address.
+	if (asmCode.getMnemonic().contains("*")) {
+	  // Prepare reset address.
+	  // RST 00 = C7 = 11.000.111
+	  // RST 08 = CF = 11.001.111
+	  // RST 10 = D7 = 11.010.111
+	  // RST 18 = DF = 11.011.111
+	  // RST 20 = E7 = 11.100.111
+	  // RST 28 = EF = 11.101.111
+	  // RST 30 = F7 = 11.110.111
+	  // RST 38 = FF = 11.111.111
+	  Integer resetAddress = asmCode.getBytes().get(0) & 0x38;
+
+	  // Get an existing or make a new symbol.
+	  String expression = String.format("%04X", resetAddress);
+	  String label = "ep" + expression;
+	  Symbol symbol = symbols.getOrMakeSymbol(label, SymbolType.memoryAddress, resetAddress, "0x" + expression);
+
+	  // use symbol in the assembly code.
+	  asmCode.updateMnemonic("*", label);
+
+	  // add address as reference to symbol.
+	  symbol.addReference(new Integer(address));
+
+	  // add the symbol as an entry point.
+	  symbols.getEntryPoints().put(resetAddress, new Symbol(label, SymbolType.entryPoint, resetAddress, expression));
 	}
 
 	return asmCode;
@@ -373,68 +437,68 @@ public class Decoder {
 	hashMap.put(new Integer(0xBF), new BinaryCode("BF", "CP   A"));
 	hashMap.put(new Integer(0xC0), new BinaryCode("C0", "RET  NZ"));
 	hashMap.put(new Integer(0xC1), new BinaryCode("C1", "POP  BC"));
-	hashMap.put(new Integer(0xC2), new BinaryCode("C2@@@@", "JP   NZ,@"));
-	hashMap.put(new Integer(0xC3), new BinaryCode("C3@@@@", "JP   @"));
-	hashMap.put(new Integer(0xC4), new BinaryCode("C4@@@@", "CALL NZ,@"));
+	hashMap.put(new Integer(0xC2), new BinaryCode("C2!!!!", "JP   NZ,!"));
+	hashMap.put(new Integer(0xC3), new BinaryCode("C3!!!!", "JP   !"));
+	hashMap.put(new Integer(0xC4), new BinaryCode("C4!!!!", "CALL NZ,!"));
 	hashMap.put(new Integer(0xC5), new BinaryCode("C5", "PUSH BC"));
 	hashMap.put(new Integer(0xC6), new BinaryCode("C6##", "ADD  A,#"));
-	hashMap.put(new Integer(0xC7), new BinaryCode("C7", "RST  0x00"));
+	hashMap.put(new Integer(0xC7), new BinaryCode("C7", "RST  *"));
 	hashMap.put(new Integer(0xC8), new BinaryCode("C8", "RET  Z"));
 	hashMap.put(new Integer(0xC9), new BinaryCode("C9", "RET"));
-	hashMap.put(new Integer(0xCA), new BinaryCode("CA@@@@", "JP   Z,@"));
+	hashMap.put(new Integer(0xCA), new BinaryCode("CA!!!!", "JP   Z,!"));
 	hashMap.put(new Integer(0xCB), new BinaryCode("CB", "<next>"));
-	hashMap.put(new Integer(0xCC), new BinaryCode("CC@@@@", "CALL Z,@"));
-	hashMap.put(new Integer(0xCD), new BinaryCode("CD@@@@", "CALL @"));
+	hashMap.put(new Integer(0xCC), new BinaryCode("CC!!!!", "CALL Z,!"));
+	hashMap.put(new Integer(0xCD), new BinaryCode("CD!!!!", "CALL !"));
 	hashMap.put(new Integer(0xCE), new BinaryCode("CE##", "ADC  A,#"));
-	hashMap.put(new Integer(0xCF), new BinaryCode("CF", "RST  0x08"));
+	hashMap.put(new Integer(0xCF), new BinaryCode("CF", "RST  *"));
 	hashMap.put(new Integer(0xD0), new BinaryCode("D0", "RET  NC"));
 	hashMap.put(new Integer(0xD1), new BinaryCode("D1", "POP  DE"));
-	hashMap.put(new Integer(0xD2), new BinaryCode("D2@@@@", "JP   NC,@"));
+	hashMap.put(new Integer(0xD2), new BinaryCode("D2!!!!", "JP   NC,!"));
 	hashMap.put(new Integer(0xD3), new BinaryCode("D3&&", "OUT  (&),A"));
-	hashMap.put(new Integer(0xD4), new BinaryCode("D4@@@@", "CALL NC,@"));
+	hashMap.put(new Integer(0xD4), new BinaryCode("D4!!!!", "CALL NC,!"));
 	hashMap.put(new Integer(0xD5), new BinaryCode("D5", "PUSH DE"));
 	hashMap.put(new Integer(0xD6), new BinaryCode("D6##", "SUB  #"));
-	hashMap.put(new Integer(0xD7), new BinaryCode("D7", "RST  0x10"));
+	hashMap.put(new Integer(0xD7), new BinaryCode("D7", "RST  *"));
 	hashMap.put(new Integer(0xD8), new BinaryCode("D8", "RET  C"));
 	hashMap.put(new Integer(0xD9), new BinaryCode("D9", "EXX"));
-	hashMap.put(new Integer(0xDA), new BinaryCode("DA@@@@", "JP   C,@"));
+	hashMap.put(new Integer(0xDA), new BinaryCode("DA!!!!", "JP   C,!"));
 	hashMap.put(new Integer(0xDB), new BinaryCode("DB&&", "IN   A,(&)"));
-	hashMap.put(new Integer(0xDC), new BinaryCode("DC@@@@", "CALL C,@"));
+	hashMap.put(new Integer(0xDC), new BinaryCode("DC!!!!", "CALL C,!"));
 	hashMap.put(new Integer(0xDD), new BinaryCode("DD", "<next>"));
 	hashMap.put(new Integer(0xDE), new BinaryCode("DE##", "SBC  A,#"));
-	hashMap.put(new Integer(0xDF), new BinaryCode("DF", "RST  0x18"));
+	hashMap.put(new Integer(0xDF), new BinaryCode("DF", "RST  *"));
 	hashMap.put(new Integer(0xE0), new BinaryCode("E0", "RET  PO"));
 	hashMap.put(new Integer(0xE1), new BinaryCode("E1", "POP  HL"));
-	hashMap.put(new Integer(0xE2), new BinaryCode("E2@@@@", "JP   PO,@"));
+	hashMap.put(new Integer(0xE2), new BinaryCode("E2!!!!", "JP   PO,!"));
 	hashMap.put(new Integer(0xE3), new BinaryCode("E3", "EX   (SP),HL"));
-	hashMap.put(new Integer(0xE4), new BinaryCode("E4@@@@", "CALL PO,@"));
+	hashMap.put(new Integer(0xE4), new BinaryCode("E4!!!!", "CALL PO,!"));
 	hashMap.put(new Integer(0xE5), new BinaryCode("E5", "PUSH HL"));
 	hashMap.put(new Integer(0xE6), new BinaryCode("E6##", "AND  #"));
-	hashMap.put(new Integer(0xE7), new BinaryCode("E7", "RST  0x20"));
+	hashMap.put(new Integer(0xE7), new BinaryCode("E7", "RST  *"));
 	hashMap.put(new Integer(0xE8), new BinaryCode("E8", "RET  PE"));
 	hashMap.put(new Integer(0xE9), new BinaryCode("E9", "JP   (HL)"));
-	hashMap.put(new Integer(0xEA), new BinaryCode("EA@@@@", "JP   PE,@"));
+	hashMap.put(new Integer(0xEA), new BinaryCode("EA!!!!", "JP   PE,!"));
 	hashMap.put(new Integer(0xEB), new BinaryCode("EB", "EX   DE,HL"));
-	hashMap.put(new Integer(0xEC), new BinaryCode("EC@@@@", "CALL PE,@"));
+	hashMap.put(new Integer(0xEC), new BinaryCode("EC!!!!", "CALL PE,!"));
 	hashMap.put(new Integer(0xED), new BinaryCode("ED", "<next>"));
 	hashMap.put(new Integer(0xEE), new BinaryCode("EE##", "XOR  #"));
-	hashMap.put(new Integer(0xEF), new BinaryCode("EF", "RST  0x28"));
+	hashMap.put(new Integer(0xEF), new BinaryCode("EF", "RST  *"));
 	hashMap.put(new Integer(0xF0), new BinaryCode("F0", "RET  P"));
 	hashMap.put(new Integer(0xF1), new BinaryCode("F1", "POP  AF"));
-	hashMap.put(new Integer(0xF2), new BinaryCode("F2@@@@", "JP   P,@"));
+	hashMap.put(new Integer(0xF2), new BinaryCode("F2!!!!", "JP   P,!"));
 	hashMap.put(new Integer(0xF3), new BinaryCode("F3", "DI"));
-	hashMap.put(new Integer(0xF4), new BinaryCode("F4@@@@", "CALL P,@"));
+	hashMap.put(new Integer(0xF4), new BinaryCode("F4!!!!", "CALL P,!"));
 	hashMap.put(new Integer(0xF5), new BinaryCode("F5", "PUSH AF"));
 	hashMap.put(new Integer(0xF6), new BinaryCode("F6##", "OR   #"));
-	hashMap.put(new Integer(0xF7), new BinaryCode("F7", "RST  0x30"));
+	hashMap.put(new Integer(0xF7), new BinaryCode("F7", "RST  *"));
 	hashMap.put(new Integer(0xF8), new BinaryCode("F8", "RET  M"));
 	hashMap.put(new Integer(0xF9), new BinaryCode("F9", "LD   SP,HL"));
-	hashMap.put(new Integer(0xFA), new BinaryCode("FA@@@@", "JP   M,@"));
+	hashMap.put(new Integer(0xFA), new BinaryCode("FA!!!!", "JP   M,!"));
 	hashMap.put(new Integer(0xFB), new BinaryCode("FB", "EI"));
-	hashMap.put(new Integer(0xFC), new BinaryCode("FC@@@@", "CALL M,@"));
+	hashMap.put(new Integer(0xFC), new BinaryCode("FC!!!!", "CALL M,!"));
 	hashMap.put(new Integer(0xFD), new BinaryCode("FD", "<next>"));
 	hashMap.put(new Integer(0xFE), new BinaryCode("FE##", "CP   #"));
-	hashMap.put(new Integer(0xFF), new BinaryCode("FF", "RST  0x38"));
+	hashMap.put(new Integer(0xFF), new BinaryCode("FF", "RST  *"));
 	hashMap.put(new Integer(0xCB00), new BinaryCode("CB00", "RLC  B"));
 	hashMap.put(new Integer(0xCB01), new BinaryCode("CB01", "RLC  C"));
 	hashMap.put(new Integer(0xCB02), new BinaryCode("CB02", "RLC  D"));

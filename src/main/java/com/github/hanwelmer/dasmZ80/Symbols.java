@@ -66,7 +66,7 @@ public class Symbols {
   }
 
   // get symbol by value
-  public Object get(Integer value) {
+  public Symbol get(Integer value) {
 	return symbols.get(value);
   }
 }

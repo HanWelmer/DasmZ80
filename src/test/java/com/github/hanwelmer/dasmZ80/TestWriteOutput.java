@@ -41,22 +41,22 @@ public class TestWriteOutput extends DasmZ80 {
 	Symbol newSymbol = symbols.getOrMakeSymbol("port03", SymbolType.portAddress, 0x03, "0x03");
 
 	newSymbol = symbols.getOrMakeSymbol("SIO_A_C", SymbolType.portAddress, 0xFE, "0xFE");
-	newSymbol.add(";SIO channel A, command register.");
-	newSymbol.add(";");
-	newSymbol.add(";SIO channel A, command register is initialised with (see 0x0321: 0x0322, 0x0324..0x032F):");
-	newSymbol.add(";");
-	newSymbol.add(";0x6E = 0156 -> Reset Rx CRC checker, Reset TxInt Pending, select register 6.");
-	newSymbol.add(";");
+	newSymbol.addComment(";SIO channel A, command register.");
+	newSymbol.addComment(";");
+	newSymbol.addComment(";SIO channel A, command register is initialised with (see 0x0321: 0x0322, 0x0324..0x032F):");
+	newSymbol.addComment(";");
+	newSymbol.addComment(";0x6E = 0156 -> Reset Rx CRC checker, Reset TxInt Pending, select register 6.");
+	newSymbol.addComment(";");
 
 	newSymbol = symbols.getOrMakeSymbol("vectors", SymbolType.memoryAddress, 0x1B00, "0x1B00");
-	newSymbol.add(";Base address for interrupt vector table. This byte initialised to 0xD8.");
+	newSymbol.addComment(";Base address for interrupt vector table. This byte initialised to 0xD8.");
 
 	newSymbol = symbols.getOrMakeSymbol("lbl1B01", SymbolType.memoryAddress, 0x1B01, "0x1B01");
 
 	newSymbol = symbols.getOrMakeSymbol("lbl0006", SymbolType.memoryAddress, 6, "0x0006");
 
 	newSymbol = symbols.getOrMakeSymbol("c12ports", SymbolType.constant, 0x0C08, "12*256+port08");
-	newSymbol.add(";Initialize 12 ports starting with port18.");
+	newSymbol.addComment(";Initialize 12 ports starting with port18.");
 
 	newSymbol = symbols.getOrMakeSymbol("cIniP11", SymbolType.constant, 0x0C11, "12*256+SIO_A_C");
 
