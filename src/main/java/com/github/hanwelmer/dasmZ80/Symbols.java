@@ -10,6 +10,35 @@ public class Symbols {
   private HashMap<Integer, Symbol> symbols = new HashMap<Integer, Symbol>();
   private HashMap<Integer, Symbol> entryPoints = new HashMap<Integer, Symbol>();
 
+  public void clear() {
+	symbols.clear();
+	entryPoints.clear();
+  }
+
+  public HashMap<Integer, Symbol> getEntryPoints() {
+	return entryPoints;
+  }
+
+  // get symbol by value
+  public Symbol get(Integer value) {
+	return symbols.get(value);
+  }
+
+  public ArrayList<Symbol> getSymbolsByType(SymbolType symbolType) {
+	ArrayList<Symbol> symbolList = new ArrayList<Symbol>();
+
+	// select symbols of the requested type.
+	SortedSet<Integer> values = new TreeSet<>(symbols.keySet());
+	for (Integer value : values) {
+	  Symbol symbol = symbols.get(value);
+	  if (symbol.getType() == symbolType) {
+		symbolList.add(symbol);
+	  }
+	}
+
+	return symbolList;
+  } // getSymbolsByType()
+
   /**
    * Get the symbol with the given name, if one exists. Otherwise create a new
    * symbol with the given name, type and value.
@@ -39,34 +68,9 @@ public class Symbols {
 	}
 
 	return symbol;
-  }
+  } // getOrMakeSymbol()
 
-  public ArrayList<Symbol> getSymbolsByType(SymbolType symbolType) {
-	ArrayList<Symbol> symbolList = new ArrayList<Symbol>();
-
-	// select symbols of the requested type.
-	SortedSet<Integer> values = new TreeSet<>(symbols.keySet());
-	for (Integer value : values) {
-	  Symbol symbol = symbols.get(value);
-	  if (symbol.getType() == symbolType) {
-		symbolList.add(symbol);
-	  }
-	}
-
-	return symbolList;
-  }
-
-  public HashMap<Integer, Symbol> getEntryPoints() {
-	return entryPoints;
-  }
-
-  public void clear() {
-	symbols.clear();
-	entryPoints.clear();
-  }
-
-  // get symbol by value
-  public Symbol get(Integer value) {
-	return symbols.get(value);
+  public void addSymbol(Symbol point) {
+	symbols.put(point.getValue(), point);
   }
 }

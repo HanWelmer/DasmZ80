@@ -8,7 +8,7 @@ import java.util.ArrayList;
  * @author welmerhj
  *
  */
-public class Symbol {
+public class Symbol implements Comparable<Symbol> {
 
   private String name;
   private SymbolType type;
@@ -61,6 +61,11 @@ public class Symbol {
 
   public void addComment(String comment) {
 	comments.add(comment);
+  }
+
+  @Override
+  public int compareTo(Symbol other) {
+	return this.name.compareTo(other.getName());
   }
 
   public String toString() {

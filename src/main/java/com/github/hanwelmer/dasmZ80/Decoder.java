@@ -91,7 +91,7 @@ public class Decoder {
 	  asmCode.updateMnemonic("#", String.format("0x%02X", byte2));
 	}
 
-	// Process absolute address.
+	// Process jump or call to absolute address.
 	if (asmCode.getMnemonic().contains("!")) {
 	  Byte byte2 = reader.getNextByte();
 	  Byte byte3 = reader.getNextByte();
@@ -110,21 +110,13 @@ public class Decoder {
 	  }
 
 	  // Get an existing or make a new symbol.
-	  String expression = String.format("%02X%02X", byte3, byte2);
-	  String label = "ep" + expression;
-	  Symbol symbol = symbols.getOrMakeSymbol(label, SymbolType.memoryAddress, value, "0x" + expression);
+	  Symbol symbol = getOrMakeSymbol(value, address, symbols);
 
 	  // Put label in assembly code instruction.
 	  asmCode.updateMnemonic("!", symbol.getName());
-
-	  // add address as reference to symbol.
-	  symbol.addReference(new Integer(address));
-
-	  // add the symbol as an entry point.
-	  symbols.getEntryPoints().put(value, new Symbol(label, SymbolType.entryPoint, value, expression));
 	}
 
-	// Process relative address.
+	// Process jump to relative address.
 	if (asmCode.getMnemonic().contains("%")) {
 	  Byte byte2 = reader.getNextByte();
 	  asmCode.addByte(byte2);
@@ -134,18 +126,10 @@ public class Decoder {
 	  value += (byte2 < 128) ? byte2 : (-byte2);
 
 	  // Get an existing or make a new symbol.
-	  String expression = String.format("%04X", value);
-	  String label = "lbl" + expression;
-	  Symbol symbol = symbols.getOrMakeSymbol(label, SymbolType.memoryAddress, value, "0x" + expression);
+	  Symbol symbol = getOrMakeSymbol(value, address, symbols);
 
 	  // Put label in assembly code instruction.
 	  asmCode.updateMnemonic("%", symbol.getName() + "-$");
-
-	  // add address as reference to symbol.
-	  symbol.addReference(new Integer(address));
-
-	  // add the symbol as an entry point.
-	  symbols.getEntryPoints().put(value, new Symbol(label, SymbolType.entryPoint, value, expression));
 	}
 
 	// Process word constant.
@@ -212,25 +196,31 @@ public class Decoder {
 	  // RST 28 = EF = 11.101.111
 	  // RST 30 = F7 = 11.110.111
 	  // RST 38 = FF = 11.111.111
-	  Integer resetAddress = asmCode.getBytes().get(0) & 0x38;
+	  Integer value = asmCode.getBytes().get(0) & 0x38;
 
 	  // Get an existing or make a new symbol.
-	  String expression = String.format("%04X", resetAddress);
-	  String label = "ep" + expression;
-	  Symbol symbol = symbols.getOrMakeSymbol(label, SymbolType.memoryAddress, resetAddress, "0x" + expression);
+	  Symbol symbol = getOrMakeSymbol(value, address, symbols);
 
-	  // use symbol in the assembly code.
-	  asmCode.updateMnemonic("*", label);
-
-	  // add address as reference to symbol.
-	  symbol.addReference(new Integer(address));
-
-	  // add the symbol as an entry point.
-	  symbols.getEntryPoints().put(resetAddress, new Symbol(label, SymbolType.entryPoint, resetAddress, expression));
+	  // Put label in assembly code instruction.
+	  asmCode.updateMnemonic("*", symbol.getName());
 	}
 
 	return asmCode;
   } // get()
+
+  private Symbol getOrMakeSymbol(Integer value, Integer address, Symbols symbols) {
+	// Get an existing or make a new symbol.
+	String expression = String.format("%04X", value);
+	String label = "lbl" + expression;
+	Symbol symbol = symbols.getOrMakeSymbol(label, SymbolType.label, value, "0x" + expression);
+
+	// add address as reference to symbol.
+	symbol.addReference(new Integer(address));
+
+	// add the symbol as an entry point.
+	symbols.getEntryPoints().put(value, symbol);
+	return symbol;
+  }
 
   private void applyDisplacement(AssemblyCode asmCode, Byte value) {
 	if (value >= 0) {

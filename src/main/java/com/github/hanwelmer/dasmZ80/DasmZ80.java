@@ -245,12 +245,11 @@ public class DasmZ80 {
 		// Eat current entry point.
 		entryPoints.remove(point.getValue());
 		if (pointNotVisited(paths, point.getValue())) {
-		  // Add current entry point as symbol to a memory address.
-		  Symbol symbol = symbols.getOrMakeSymbol(point.getName(), SymbolType.memoryAddress, point.getValue(),
-		      point.getExpression());
+		  // Add current entry point to symbol list
+		  symbols.addSymbol(point);
 		  // Disassemble code path that starts at the entry point.
 		  ArrayList<AssemblyCode> codePath = disassemblePath(point, decoder, entryPoints, symbols);
-		  paths.put(symbol.getValue(), new Path(symbol, codePath));
+		  paths.put(point.getValue(), new Path(point, codePath));
 		}
 	  }
 	} catch (IOException e) {
@@ -310,6 +309,7 @@ public class DasmZ80 {
 
   private static void fillInLabels(ArrayList<AssemblyCode> decoded, Symbols symbols) {
 	fillInLabelTypes(decoded, symbols, SymbolType.entryPoint);
+	fillInLabelTypes(decoded, symbols, SymbolType.label);
 	fillInLabelTypes(decoded, symbols, SymbolType.memoryAddress);
   } // fillInLabels()
 
@@ -403,14 +403,17 @@ public class DasmZ80 {
 		writeReferencesTo(symbol, 2, writer);
 	  }
 
-	  // Write references to memory addresses and entry points.
-	  symbolList = symbols.getSymbolsByType(SymbolType.memoryAddress);
+	  // Write references to entry points, labels and memory addresses.
+	  symbolList = symbols.getSymbolsByType(SymbolType.label);
 	  symbolList.addAll(symbols.getSymbolsByType(SymbolType.entryPoint));
+	  symbolList.addAll(symbols.getSymbolsByType(SymbolType.memoryAddress));
+	  Object[] sortedSymbolList = symbolList.toArray();
+	  Arrays.sort(sortedSymbolList);
 	  if (symbolList.size() > 0) {
 		writer.write("\nMemory address cross reference list:\n");
 	  }
-	  for (Symbol symbol : symbolList) {
-		writeReferencesTo(symbol, 4, writer);
+	  for (Object symbol : sortedSymbolList) {
+		writeReferencesTo((Symbol) symbol, 4, writer);
 	  }
 
 	  // Write references to constants.
