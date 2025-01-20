@@ -23,11 +23,18 @@ public class TestWriteOutput extends DasmZ80 {
 	bytes0x76.add((byte) 0x76);
 	decoded.add(new AssemblyCode(2, bytes0x76, null, "HALT", ";comment"));
 
+	ArrayList<Byte> allBytes = new ArrayList<Byte>();
+	allBytes.addAll(bytes0x00);
+	allBytes.addAll(bytes0x02);
+	allBytes.addAll(bytes0x76);
+	Byte[] bytes = allBytes.toArray(new Byte[allBytes.size()]);
+	ByteReader reader = new ReadFromArray(bytes);
+
 	String fileName = "testWriteOutput.bin";
 	ListingWriter writer = new ListingWriter();
 	try {
 	  writer.open(fileName);
-	  writeOutput(decoded, writer);
+	  writeOutput(writer, reader, decoded);
 	} catch (IOException e) {
 	  e.printStackTrace();
 	} finally {

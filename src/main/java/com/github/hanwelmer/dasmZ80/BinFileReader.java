@@ -38,6 +38,17 @@ public class BinFileReader implements ByteReader {
   }
 
   @Override
+  public int getSize() {
+	int result = 0;
+	try {
+	  result = (int) fis.length();
+	} catch (IOException e) {
+	  e.printStackTrace();
+	}
+	return result;
+  }
+
+  @Override
   public void close() {
 	fis = null;
 	inputFile = null;

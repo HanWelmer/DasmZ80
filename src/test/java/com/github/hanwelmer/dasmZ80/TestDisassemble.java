@@ -10,6 +10,7 @@ public class TestDisassemble extends DasmZ80 {
   public void testReturn() {
 	Byte[] bytes = { 0xC0 - 256, 0x00, 0xC9 - 256 };
 	ByteReader reader = new ReadFromArray(bytes);
+	finalAddress = reader.getSize();
 	StringWriter writer = new StringWriter();
 	disassembleToWriter("test", reader, writer, symbols);
 	assert (writer.output.size() == 11);
@@ -24,6 +25,7 @@ public class TestDisassemble extends DasmZ80 {
   public void testIllegalOpcode0x03() {
 	Byte[] bytes = { 0xDD - 256, 0xDC - 256, 0x34, 0x12 };
 	ByteReader reader = new ReadFromArray(bytes);
+	finalAddress = reader.getSize();
 	StringWriter writer = new StringWriter();
 	disassembleToWriter("test", reader, writer, symbols);
 	assert (writer.output.size() == 8);
@@ -39,6 +41,7 @@ public class TestDisassemble extends DasmZ80 {
 	    0x0E, 0x0F, 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1A, 0x1B, 0x1C, 0x1D, 0x1E, 0x1F,
 	    0x20, 0x21, 0x22 };
 	ByteReader reader = new ReadFromArray(bytes);
+	finalAddress = reader.getSize();
 	StringWriter writer = new StringWriter();
 	disassembleToWriter("test", reader, writer, symbols);
 	assert (writer.output.size() == 15);
@@ -71,6 +74,7 @@ public class TestDisassemble extends DasmZ80 {
   public void testPortReferenceTable() {
 	Byte[] bytes = { 0xDB - 256, 0x12, 0xD3 - 256, 0xFE - 256, 0xD3 - 256, 0x12, 0x00 };
 	ByteReader reader = new ReadFromArray(bytes);
+	finalAddress = reader.getSize();
 	StringWriter writer = new StringWriter();
 	disassembleToWriter("test", reader, writer, symbols);
 	assert (writer.output.size() == 19);
@@ -91,6 +95,7 @@ public class TestDisassemble extends DasmZ80 {
 	Byte[] bytes = { 0xCD - 256, 0x03, 0x00, 0xC2 - 256, 0x03, 0x00, 0x10, 0xF8 - 256, 0x38, 0xF6 - 256, 0x00,
 	    0xC3 - 256, 0x03, 0x00 };
 	ByteReader reader = new ReadFromArray(bytes);
+	finalAddress = reader.getSize();
 	StringWriter writer = new StringWriter();
 	disassembleToWriter("test", reader, writer, symbols);
 	int index = 15;
@@ -114,6 +119,7 @@ public class TestDisassemble extends DasmZ80 {
 	Byte[] bytes = { 0xCD - 256, 0x07, 0x00, 0xC3 - 256, 0x03, 0x00, 0x00, 0x10, 0xFE - 256, 0x38, 0xF5 - 256,
 	    0xC3 - 256, 0x03, 0x00 };
 	ByteReader reader = new ReadFromArray(bytes);
+	finalAddress = reader.getSize();
 	StringWriter writer = new StringWriter();
 	disassembleToWriter("test", reader, writer, symbols);
 	assert (writer.output.size() == 16);
@@ -141,6 +147,7 @@ public class TestDisassemble extends DasmZ80 {
 	symbols.getOrMakeSymbol("start", SymbolType.entryPoint, 0, "0x0000");
 	symbols.getOrMakeSymbol("entry", SymbolType.entryPoint, 6, "0x0006");
 	ByteReader reader = new ReadFromArray(bytes);
+	finalAddress = reader.getSize();
 	StringWriter writer = new StringWriter();
 	disassembleToWriter("test", reader, writer, symbols);
 	symbols.clear();
@@ -166,6 +173,7 @@ public class TestDisassemble extends DasmZ80 {
 
 	Byte[] bytes = { 0xDB - 256, 0x12, 0xD3 - 256, 0xFE - 256, 0xD3 - 256, 0x12, 0x00 };
 	ByteReader reader = new ReadFromArray(bytes);
+	finalAddress = reader.getSize();
 	StringWriter writer = new StringWriter();
 
 	disassembleToWriter("test", reader, writer, portSymbols);
@@ -191,6 +199,7 @@ public class TestDisassemble extends DasmZ80 {
 	Byte[] bytes = { 0xCD - 256, 0x03, 0x00, 0xC2 - 256, 0x03, 0x00, 0x10, 0xFB - 256, 0x38, 0xF9 - 256, 0x00,
 	    0xC3 - 256, 0x03, 0x00 };
 	ByteReader reader = new ReadFromArray(bytes);
+	finalAddress = reader.getSize();
 	StringWriter writer = new StringWriter();
 
 	disassembleToWriter("test", reader, writer, symbols);
@@ -212,6 +221,7 @@ public class TestDisassemble extends DasmZ80 {
 	    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 	    0xC9 - 256 };
 	ByteReader reader = new ReadFromArray(bytes);
+	finalAddress = reader.getSize();
 	StringWriter writer = new StringWriter();
 	disassembleToWriter("test", reader, writer, symbols);
 	int index = 13;
@@ -226,6 +236,33 @@ public class TestDisassemble extends DasmZ80 {
 	assert ("\nMemory address cross reference list:\n".equals(writer.output.get(index++)));
 	assert ("ep0000  =0000: 0001\n".equals(writer.output.get(index++)));
 	assert ("lbl0020 =0020: 0000\n".equals(writer.output.get(index++)));
+  }
+
+  @Test
+  public void testLinesOutsideReaderAddressRange() {
+	Byte[] bytes = { 0xCD - 256, 0x07, 0x00, 0xC3 - 256, 0x03, 0x00 };
+	ByteReader reader = new ReadFromArray(bytes);
+	finalAddress = reader.getSize();
+	StringWriter writer = new StringWriter();
+	disassembleToWriter("test", reader, writer, symbols);
+	int index = 15;
+	assert (writer.output.size() == index);
+	index = 1;
+	assert ("                        ;\n".equals(writer.output.get(index++)));
+	assert ("                        ;Memory addresses:\n".equals(writer.output.get(index++)));
+	assert ("0007            lbl0007 EQU  0x0007\n".equals(writer.output.get(index++)));
+	assert ("                        ;\n".equals(writer.output.get(index++)));
+	assert ("0000                    org 0x0000\n".equals(writer.output.get(index++)));
+	assert ("0000                    No entry points defined; assuming 0x0000 as entry point\n"
+	    .equals(writer.output.get(index++)));
+	assert ("0000 CD0700   ep0000:   CALL lbl0007\n".equals(writer.output.get(index++)));
+	assert ("0003 C30300   lbl0003:  JP   lbl0003\n".equals(writer.output.get(index++)));
+	assert ("0006                    ;\n".equals(writer.output.get(index++)));
+	assert ("0006                    end\n".equals(writer.output.get(index++)));
+	assert ("\nMemory address cross reference list:\n".equals(writer.output.get(index++)));
+	assert ("ep0000  =0000:\n".equals(writer.output.get(index++)));
+	assert ("lbl0003 =0003: 0003\n".equals(writer.output.get(index++)));
+	assert ("lbl0007 =0007: 0000\n".equals(writer.output.get(index++)));
   }
 
 }

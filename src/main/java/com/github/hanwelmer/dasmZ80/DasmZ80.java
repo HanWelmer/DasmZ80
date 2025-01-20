@@ -179,6 +179,7 @@ public class DasmZ80 {
 	ListingWriter writer = new ListingWriter();
 	try {
 	  reader.open(fileName);
+	  finalAddress = reader.getSize();
 	  writer.open(changeExtension(fileName));
 	  disassembleToWriter(fileName, reader, writer, symbols);
 	} catch (FileNotFoundException e) {
@@ -216,7 +217,7 @@ public class DasmZ80 {
 
 	// Write everything to the output file.
 	writeDefinitions(fileName, writer, symbols);
-	writeOutput(decoded, writer);
+	writeOutput(writer, reader, decoded);
 	writeReferences(writer, symbols);
   } // disassembleToWriter()
 
@@ -244,7 +245,8 @@ public class DasmZ80 {
 		Symbol point = entryPoints.get(keys[0]);
 		// Eat current entry point.
 		entryPoints.remove(point.getValue());
-		if (pointNotVisited(paths, point.getValue())) {
+		if (point.getValue() >= startAddress && point.getValue() < finalAddress
+		    && pointNotVisited(paths, point.getValue())) {
 		  // Add current entry point to symbol list
 		  symbols.addSymbol(point);
 		  // Disassemble code path that starts at the entry point.
@@ -258,7 +260,7 @@ public class DasmZ80 {
 	  e.printStackTrace();
 	}
 
-	// collate paths into single list of decoded assembler instructions.
+	// collate paths into single sorted list of decoded assembler instructions.
 	Object[] keys = paths.keySet().toArray();
 	Arrays.sort(keys);
 	for (Object key : keys) {
@@ -266,7 +268,7 @@ public class DasmZ80 {
 	}
 
 	return decoded;
-  } // disassembleMemory()
+  } // disassembleReader()
 
   private static boolean pointNotVisited(HashMap<Integer, Path> paths, Integer value) {
 	if (paths == null) {
@@ -281,7 +283,7 @@ public class DasmZ80 {
 	  }
 	}
 	return !found;
-  }
+  } // pointNotVisited()
 
   private static ArrayList<AssemblyCode> disassemblePath(Symbol entryPoint, Decoder decoder,
       HashMap<Integer, Symbol> entryPoints, Symbols symbols) throws IOException {
@@ -342,11 +344,12 @@ public class DasmZ80 {
 	  }
 
 	  symbolList = symbols.getSymbolsByType(SymbolType.memoryAddress);
+	  symbolList.addAll(symbols.getSymbolsByType(SymbolType.label));
 	  boolean done = false;
 	  for (Symbol symbol : symbolList) {
-		// ignore symbol definitions to memory addresses within the range of the
-		// disassembled code.
-		if (symbol.getValue() < startAddress || symbol.getValue() > finalAddress) {
+		// ignore labels within the range of the disassembled code.
+		if (symbol.getType() != SymbolType.label || symbol.getType() == SymbolType.label
+		    && (symbol.getValue() < startAddress || symbol.getValue() > finalAddress)) {
 		  if (!done) {
 			writer.write(new AssemblyCode(0, null, ";"));
 			writer.write(new AssemblyCode(0, null, IDENTIFY_MEMORY));
@@ -374,10 +377,12 @@ public class DasmZ80 {
 	}
   } // writeDefinitions()
 
-  protected static void writeOutput(ArrayList<AssemblyCode> decoded, AbstractWriter writer) {
+  protected static void writeOutput(AbstractWriter writer, ByteReader reader, ArrayList<AssemblyCode> decoded) {
 	try {
 	  int nextAddress = startAddress;
+	  // FIXME add unvisited code from reader.
 	  for (AssemblyCode line : decoded) {
+		// FIXME ignore lines outside reader address range.
 		writer.write(line);
 		nextAddress = line.getAddress();
 		if (line.getBytes() != null) {
@@ -400,7 +405,7 @@ public class DasmZ80 {
 		writer.write("\nI/O address cross reference list:\n");
 	  }
 	  for (Symbol symbol : symbolList) {
-		writeReferencesTo(symbol, 2, writer);
+		writeSymbolReferences(symbol, 2, writer);
 	  }
 
 	  // Write references to entry points, labels and memory addresses.
@@ -413,7 +418,7 @@ public class DasmZ80 {
 		writer.write("\nMemory address cross reference list:\n");
 	  }
 	  for (Object symbol : sortedSymbolList) {
-		writeReferencesTo((Symbol) symbol, 4, writer);
+		writeSymbolReferences((Symbol) symbol, 4, writer);
 	  }
 
 	  // Write references to constants.
@@ -422,7 +427,7 @@ public class DasmZ80 {
 		writer.write("\nConstants reference list:\n");
 	  }
 	  for (Symbol symbol : symbolList) {
-		writeReferencesTo(symbol, 4, writer);
+		writeSymbolReferences(symbol, 4, writer);
 	  }
 	} catch (IOException e) {
 	  System.out.println("Error writing to output file.");
@@ -431,7 +436,7 @@ public class DasmZ80 {
 	}
   } // writeReferences()
 
-  private static void writeReferencesTo(Symbol symbol, int length, AbstractWriter writer) throws IOException {
+  private static void writeSymbolReferences(Symbol symbol, int length, AbstractWriter writer) throws IOException {
 	boolean mustPrint = true;
 	int i = 0;
 	String format1 = "%-8s=%0" + length + "X:";

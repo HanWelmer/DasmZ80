@@ -33,6 +33,11 @@ public class ReadFromArray implements ByteReader {
   }
 
   @Override
+  public int getSize() {
+	return array.size();
+  }
+
+  @Override
   public void close() {
   }
 

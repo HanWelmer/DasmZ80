@@ -11,5 +11,7 @@ public interface ByteReader {
 
   public Byte getNextByte() throws IOException;
 
+  public int getSize();
+
   public void close();
 }

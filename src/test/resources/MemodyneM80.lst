@@ -16,6 +16,7 @@
 1B1A            lbl1B1A EQU  0x1B1A
 1B54            lbl1B54 EQU  0x1B54
 1C00            lbl1C00 EQU  0x1C00
+C103            lblC103 EQU  0xC103
                         ;
 0000                    org 0x0000
 0000                    No entry points defined; assuming 0x0000 as entry point
@@ -176,8 +177,7 @@
 039F                    ;
 0671 E9       lbl0671:  JP   (HL)
 0672                    ;
-C103          lblC103:  ;
-C103                    end
+0672                    end
 
 Memory address cross reference list:
 ep0000  =0000:
