@@ -382,7 +382,6 @@ public class DasmZ80 {
 	  int nextAddress = startAddress;
 	  // FIXME add unvisited code from reader.
 	  for (AssemblyCode line : decoded) {
-		// FIXME ignore lines outside reader address range.
 		writer.write(line);
 		nextAddress = line.getAddress();
 		if (line.getBytes() != null) {
