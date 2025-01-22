@@ -1,6 +1,9 @@
 # dasmZ80 download folder
 This page contains released versions of the Z80 Disassembler.
 
+## Version 1.3.0:
+Merge unvisited code with disassembled output.
+
 ## Version 1.2.2:
 Bug fix: Distinguish between defined labels, defined entry points and discovered entry points.
 See Usage for more details. The same limitations apply as for version 1.0.0.
