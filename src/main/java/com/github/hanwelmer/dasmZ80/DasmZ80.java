@@ -210,30 +210,30 @@ public class DasmZ80 {
   protected static void disassembleToWriter(String fileName, ByteReader reader, AbstractWriter writer,
       Symbols symbols) {
 	// Do the actual disassembly.
-	ArrayList<AssemblyCode> decoded = disassembleReader(fileName, reader, symbols);
+	HashMap<Integer, Path> paths = disassembleReader(fileName, reader, symbols);
 
 	// Fill in symbols to memory addresses.
-	fillInLabels(decoded, symbols);
+	fillInLabels(paths, symbols);
 
 	// Write everything to the output file.
 	writeDefinitions(fileName, writer, symbols);
-	writeOutput(writer, reader, decoded);
+	writeOutput(writer, reader, paths);
 	writeReferences(writer, symbols);
   } // disassembleToWriter()
 
-  protected static ArrayList<AssemblyCode> disassembleReader(String fileName, ByteReader reader, Symbols symbols) {
+  protected static HashMap<Integer, Path> disassembleReader(String fileName, ByteReader reader, Symbols symbols) {
 	Decoder decoder = new Decoder();
 	decoder.setReader(reader);
-	ArrayList<AssemblyCode> decoded = new ArrayList<AssemblyCode>();
 
 	// Add default entry point if none are defined
 	HashMap<Integer, Symbol> entryPoints = symbols.getEntryPoints();
+	AssemblyCode prefix = null;
 	if (entryPoints.isEmpty()) {
 	  String addr = String.format("%04X", startAddress);
 	  entryPoints.put(startAddress, new Symbol("ep" + addr, SymbolType.entryPoint, startAddress, "0x" + addr));
 
 	  String msg = String.format("No entry points defined; assuming 0x%s as entry point", addr);
-	  decoded.add(new AssemblyCode(startAddress, msg));
+	  prefix = new AssemblyCode(startAddress, msg);
 	}
 
 	// loop through all entry points
@@ -250,7 +250,11 @@ public class DasmZ80 {
 		  // Add current entry point to symbol list
 		  symbols.addSymbol(point);
 		  // Disassemble code path that starts at the entry point.
-		  ArrayList<AssemblyCode> codePath = disassemblePath(point, decoder, entryPoints, symbols);
+		  ArrayList<AssemblyCode> codePath = new ArrayList<AssemblyCode>();
+		  if (paths.size() == 0 && prefix != null) {
+			codePath.add(prefix.getAddress(), prefix);
+		  }
+		  codePath.addAll(disassemblePath(point, decoder, entryPoints, symbols));
 		  paths.put(point.getValue(), new Path(point, codePath));
 		}
 	  }
@@ -260,14 +264,7 @@ public class DasmZ80 {
 	  e.printStackTrace();
 	}
 
-	// collate paths into single sorted list of decoded assembler instructions.
-	Object[] keys = paths.keySet().toArray();
-	Arrays.sort(keys);
-	for (Object key : keys) {
-	  decoded.addAll(paths.get((Integer) key).decoded);
-	}
-
-	return decoded;
+	return paths;
   } // disassembleReader()
 
   private static boolean pointNotVisited(HashMap<Integer, Path> paths, Integer value) {
@@ -307,15 +304,19 @@ public class DasmZ80 {
 	return decoded;
   } // disassemble()
 
-  private static void fillInLabels(ArrayList<AssemblyCode> decoded, Symbols symbols) {
-	fillInLabelTypes(decoded, symbols, SymbolType.entryPoint);
-	fillInLabelTypes(decoded, symbols, SymbolType.label);
-	fillInLabelTypes(decoded, symbols, SymbolType.memoryAddress);
+  private static void fillInLabels(HashMap<Integer, Path> paths, Symbols symbols) {
+	// Collect symbols to be filled in as labels in a single array.
+	ArrayList<Symbol> symbolList = symbols.getSymbolsByType(SymbolType.entryPoint);
+	symbolList.addAll(symbols.getSymbolsByType(SymbolType.label));
+	symbolList.addAll(symbols.getSymbolsByType(SymbolType.memoryAddress));
+
+	// Fill in the labels in the decoded instructions in all execution paths.
+	paths.forEach((Integer entryPoint, Path path) -> fillInLabels(path.decoded, symbolList));
   } // fillInLabels()
 
-  private static void fillInLabelTypes(ArrayList<AssemblyCode> decoded, Symbols symbols, SymbolType symbolType) {
+  private static void fillInLabels(ArrayList<AssemblyCode> decoded, ArrayList<Symbol> symbols) {
 	int index = 0;
-	for (Symbol symbol : symbols.getSymbolsByType(symbolType)) {
+	for (Symbol symbol : symbols) {
 	  // Look up the line where the label must be set.
 	  while (index < decoded.size() && decoded.get(index).getAddress() <= symbol.getValue()) {
 		index++;
@@ -375,25 +376,35 @@ public class DasmZ80 {
 	}
   } // writeDefinitions()
 
-  protected static void writeOutput(AbstractWriter writer, ByteReader reader, ArrayList<AssemblyCode> decoded) {
+  protected static void writeOutput(AbstractWriter writer, ByteReader reader, HashMap<Integer, Path> paths) {
 	try {
 	  int nextAddress = startAddress;
 	  int readerAddress = nextAddress;
-	  for (AssemblyCode line : decoded) {
-		nextAddress = line.getAddress();
+
+	  // Output disassembled execution paths, sorted by entry point, intermixed
+	  // with unvisited input code.
+	  Object[] keys = paths.keySet().toArray();
+	  Arrays.sort(keys);
+	  for (Object key : keys) {
+		nextAddress = (Integer) key;
+		// Output unvisited input code if necessary.
 		if (readerAddress != nextAddress) {
-		  // add a blank line after a range of consecutive disassembled code..
-		  writer.write(new AssemblyCode(readerAddress, ";"));
 		  writeUnvisitedCode(readerAddress, nextAddress, writer, reader);
+		  readerAddress = nextAddress;
 		}
-		writer.write(line);
-		if (line.getBytes() != null) {
-		  nextAddress += line.getBytes().size();
+		// add a blank line before each execution path.
+		writer.write(new AssemblyCode(readerAddress, ";"));
+		// Output disassembled instruction of the execution path.
+		for (AssemblyCode line : paths.get((Integer) key).decoded) {
+		  writer.write(line);
+		  if (line.getBytes() != null) {
+			nextAddress += line.getBytes().size();
+		  }
 		}
 		readerAddress = nextAddress;
 	  }
+
 	  // Add unvisited code beyond last decoded address.
-	  writer.write(new AssemblyCode(readerAddress, ";"));
 	  writeUnvisitedCode(readerAddress, reader.getSize(), writer, reader);
 	  writer.write(new AssemblyCode(reader.getSize(), "end"));
 	} catch (IOException e) {
@@ -405,6 +416,9 @@ public class DasmZ80 {
 
   private static void writeUnvisitedCode(int fromAddress, int toAddress, AbstractWriter writer, ByteReader reader)
       throws IOException {
+	// add a blank line before the unvisited code.
+	writer.write(new AssemblyCode(fromAddress, ";"));
+	// Output unvisited code, 4 bytes per line..
 	ArrayList<Byte> bytes = new ArrayList<Byte>();
 	int lastAddress = fromAddress;
 	while (fromAddress < toAddress) {

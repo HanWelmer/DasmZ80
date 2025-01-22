@@ -2,6 +2,7 @@ package com.github.hanwelmer.dasmZ80;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import org.junit.Test;
 
@@ -10,6 +11,8 @@ public class TestWriteOutput extends DasmZ80 {
   @Test
   public void testWriteOutput() {
 	ArrayList<AssemblyCode> decoded = new ArrayList<AssemblyCode>();
+
+	Symbol entryPoint = new Symbol("__start", SymbolType.entryPoint, new Integer(0), "0");
 
 	ArrayList<Byte> bytes0x00 = new ArrayList<Byte>();
 	bytes0x00.add((byte) 0x00);
@@ -23,6 +26,9 @@ public class TestWriteOutput extends DasmZ80 {
 	bytes0x76.add((byte) 0x76);
 	decoded.add(new AssemblyCode(2, bytes0x76, null, "HALT", ";comment"));
 
+	HashMap<Integer, Path> paths = new HashMap<Integer, Path>();
+	paths.put(entryPoint.getValue(), new Path(entryPoint, decoded));
+
 	ArrayList<Byte> allBytes = new ArrayList<Byte>();
 	allBytes.addAll(bytes0x00);
 	allBytes.addAll(bytes0x02);
@@ -34,7 +40,7 @@ public class TestWriteOutput extends DasmZ80 {
 	ListingWriter writer = new ListingWriter();
 	try {
 	  writer.open(fileName);
-	  writeOutput(writer, reader, decoded);
+	  writeOutput(writer, reader, paths);
 	} catch (IOException e) {
 	  e.printStackTrace();
 	} finally {
