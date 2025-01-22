@@ -300,8 +300,6 @@ public class DasmZ80 {
 		  address += nextInstruction.getBytes().size();
 		}
 	  } while (nextInstruction != null && !nextInstruction.isExit());
-	  // add a blank line after each instruction flow path.
-	  decoded.add(new AssemblyCode(address, ";"));
 	} catch (IllegalOpcodeException e) {
 	  decoded.add(new AssemblyCode(address, e.getMessage()));
 	  System.out.print(e.getMessage());
@@ -380,21 +378,68 @@ public class DasmZ80 {
   protected static void writeOutput(AbstractWriter writer, ByteReader reader, ArrayList<AssemblyCode> decoded) {
 	try {
 	  int nextAddress = startAddress;
-	  // FIXME add unvisited code from reader.
+	  int readerAddress = nextAddress;
 	  for (AssemblyCode line : decoded) {
-		writer.write(line);
 		nextAddress = line.getAddress();
+		if (readerAddress != nextAddress) {
+		  // add a blank line after a range of consecutive disassembled code..
+		  writer.write(new AssemblyCode(readerAddress, ";"));
+		  writeUnvisitedCode(readerAddress, nextAddress, writer, reader);
+		}
+		writer.write(line);
 		if (line.getBytes() != null) {
 		  nextAddress += line.getBytes().size();
 		}
+		readerAddress = nextAddress;
 	  }
-	  writer.write(new AssemblyCode(nextAddress, "end"));
+	  // Add unvisited code beyond last decoded address.
+	  writer.write(new AssemblyCode(readerAddress, ";"));
+	  writeUnvisitedCode(readerAddress, reader.getSize(), writer, reader);
+	  writer.write(new AssemblyCode(reader.getSize(), "end"));
 	} catch (IOException e) {
 	  System.out.println("Error writing to output file.");
 	  System.out.println(e.getMessage());
 	  e.printStackTrace();
 	}
   } // writeOutput()
+
+  private static void writeUnvisitedCode(int fromAddress, int toAddress, AbstractWriter writer, ByteReader reader)
+      throws IOException {
+	ArrayList<Byte> bytes = new ArrayList<Byte>();
+	int lastAddress = fromAddress;
+	while (fromAddress < toAddress) {
+	  bytes.add(reader.getByte(fromAddress++));
+	  if (fromAddress % 4 == 0) {
+		writeDefineBytes(bytes, lastAddress, writer);
+		lastAddress += bytes.size();
+		bytes.clear();
+	  }
+	}
+	writeDefineBytes(bytes, lastAddress, writer);
+  } // writeUnvisitedCode()
+
+  private static void writeDefineBytes(ArrayList<Byte> bytes, int lastAddress, AbstractWriter writer)
+      throws IOException {
+	if (bytes.size() != 0) {
+	  String def = String.format("%04X ", lastAddress);
+	  int spaces = 19;
+	  for (Byte byt : bytes) {
+		def += String.format("%02X", byt);
+		spaces--;
+		spaces--;
+	  }
+	  // String format = String.format("%dsDB ", spaces);
+	  String format = "%" + spaces + "sDB  ";
+	  def += String.format(format, " ");
+	  String comma = " ";
+	  for (Byte byt : bytes) {
+		def += String.format("%s0x%02X", comma, byt);
+		comma = ", ";
+	  }
+	  def += "\n";
+	  writer.write(def);
+	}
+  } // writeDefineBytes()
 
   private static void writeReferences(AbstractWriter writer, Symbols symbols) {
 	try {
