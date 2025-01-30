@@ -69,7 +69,7 @@ public class Symbol implements Comparable<Symbol> {
   }
 
   public String toString() {
-	String def = String.format("%04X%12s%-7s EQU", getValue(), " ", getName());
+	String def = String.format("%04X%10s%-9s EQU", getValue(), " ", getName());
 	if (def.length() < 28) {
 	  def += "  ";
 	} else {
