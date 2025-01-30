@@ -248,7 +248,7 @@ public class DasmZ80 {
 		if (point.getValue() >= startAddress && point.getValue() < finalAddress
 		    && pointNotVisited(paths, point.getValue())) {
 		  // Add current entry point to symbol list
-		  symbols.addSymbol(point);
+		  symbols.addAsMemoryAddress(point);
 		  // Disassemble code path that starts at the entry point.
 		  ArrayList<AssemblyCode> codePath = new ArrayList<AssemblyCode>();
 		  if (paths.size() == 0 && prefix != null) {
