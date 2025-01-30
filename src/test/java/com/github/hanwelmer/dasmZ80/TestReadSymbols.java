@@ -76,14 +76,15 @@ public class TestReadSymbols extends DasmZ80 {
 	ArrayList<Symbol> constants = symbols.getSymbolsByType(SymbolType.constant);
 
 	assert (constants.size() == 2);
+
 	assert (constants.get(0).getType() == SymbolType.constant);
-	assert (constants.get(0).getName().equals("c12ports"));
-	assert (constants.get(0).getValue().equals(new Integer(0x0C08)));
-	assert (constants.get(0).getComments().get(0).equals(";Initialize 12 ports starting with port18."));
+	assert (constants.get(0).getName().equals("cIniP11"));
+	assert (constants.get(0).getValue().equals(new Integer(0x0C11)));
 
 	assert (constants.get(1).getType() == SymbolType.constant);
-	assert (constants.get(1).getName().equals("cIniP11"));
-	assert (constants.get(1).getValue().equals(new Integer(0x0C11)));
+	assert (constants.get(1).getName().equals("c12ports"));
+	assert (constants.get(1).getValue().equals(new Integer(0x0C08)));
+	assert (constants.get(1).getComments().get(0).equals(";Initialize 12 ports starting with port18."));
   }
 
   @Test
@@ -211,14 +212,15 @@ public class TestReadSymbols extends DasmZ80 {
 
 	assert (constants.size() == 2);
 	assert (constants.get(0).getType() == SymbolType.constant);
-	assert (constants.get(0).getName().equals("c12ports"));
-	assert (constants.get(0).getValue().equals(new Integer(0x0C08)));
-	assert (constants.get(0).getExpression().contentEquals("12 * 256 + 8"));
-	assert (constants.get(0).getComments().get(0).equals(";Initialize 12 ports starting with port18."));
 
-	assert (constants.get(1).getType() == SymbolType.constant);
-	assert (constants.get(1).getName().equals("cIniP11"));
-	assert (constants.get(1).getValue().equals(new Integer(0x0C11)));
-	assert (constants.get(1).getExpression().contentEquals("12 * 256 + 11"));
+	assert (constants.get(0).getType() == SymbolType.constant);
+	assert (constants.get(0).getName().equals("cIniP11"));
+	assert (constants.get(0).getValue().equals(new Integer(0x0C11)));
+	assert (constants.get(0).getExpression().contentEquals("12 * 256 + 11"));
+
+	assert (constants.get(1).getName().equals("c12ports"));
+	assert (constants.get(1).getValue().equals(new Integer(0x0C08)));
+	assert (constants.get(1).getExpression().contentEquals("12 * 256 + 8"));
+	assert (constants.get(1).getComments().get(0).equals(";Initialize 12 ports starting with port18."));
   }
 }

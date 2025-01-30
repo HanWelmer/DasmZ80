@@ -8,14 +8,14 @@ import java.util.ArrayList;
  * @author welmerhj
  *
  */
-public class Symbol implements Comparable<Symbol> {
+public class Symbol {
 
-  private String name;
+  protected String name;
+  protected Integer value;
   private SymbolType type;
-  private Integer value;
   private String expression;
-  private ArrayList<Integer> references;
-  private ArrayList<String> comments;
+  protected ArrayList<String> comments;
+  protected ArrayList<Integer> references;
 
   // constructor
   public Symbol(String name, SymbolType type, Integer value, String expression) {
@@ -61,11 +61,6 @@ public class Symbol implements Comparable<Symbol> {
 
   public void addComment(String comment) {
 	comments.add(comment);
-  }
-
-  @Override
-  public int compareTo(Symbol other) {
-	return this.name.compareTo(other.getName());
   }
 
   public String toString() {
