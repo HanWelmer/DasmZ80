@@ -315,9 +315,9 @@ public class DasmZ80 {
   } // fillInLabels()
 
   private static void fillInLabels(ArrayList<AssemblyCode> decoded, ArrayList<Symbol> symbols) {
-	int index = 0;
 	for (Symbol symbol : symbols) {
 	  // Look up the line where the label must be set.
+	  int index = 0;
 	  while (index < decoded.size() && decoded.get(index).getAddress() <= symbol.getValue()) {
 		index++;
 	  }
@@ -337,22 +337,22 @@ public class DasmZ80 {
 	  if (symbolList.size() > 0) {
 		writer.write(new AssemblyCode(0, null, ";"));
 		writer.write(new AssemblyCode(0, null, IDENTIFY_IO));
-	  }
-	  for (Symbol symbol : symbolList) {
-		writer.write(symbol.toString());
+		for (Symbol symbol : symbolList) {
+		  writer.write(symbol.toString());
+		}
 	  }
 
 	  symbolList = symbols.getSymbolsByType(SymbolType.memoryAddress);
 	  symbolList.addAll(symbols.getSymbolsByType(SymbolType.label));
-	  boolean done = false;
+	  boolean toDo = true;
 	  for (Symbol symbol : symbolList) {
 		// ignore labels within the range of the disassembled code.
-		if (symbol.getType() != SymbolType.label || symbol.getType() == SymbolType.label
-		    && (symbol.getValue() < startAddress || symbol.getValue() > finalAddress)) {
-		  if (!done) {
+		if (symbol.getType() == SymbolType.memoryAddress || symbol.getValue() < startAddress
+		    || symbol.getValue() >= finalAddress) {
+		  if (toDo) {
 			writer.write(new AssemblyCode(0, null, ";"));
 			writer.write(new AssemblyCode(0, null, IDENTIFY_MEMORY));
-			done = true;
+			toDo = false;
 		  }
 		  writer.write(symbol.toString());
 		}
@@ -362,9 +362,9 @@ public class DasmZ80 {
 	  if (symbolList.size() > 0) {
 		writer.write(new AssemblyCode(0, null, ";"));
 		writer.write(new AssemblyCode(0, null, IDENTIFY_CONSTANT));
-	  }
-	  for (Symbol symbol : symbolList) {
-		writer.write(symbol.toString());
+		for (Symbol symbol : symbolList) {
+		  writer.write(symbol.toString());
+		}
 	  }
 
 	  writer.write(new AssemblyCode(0, null, ";"));

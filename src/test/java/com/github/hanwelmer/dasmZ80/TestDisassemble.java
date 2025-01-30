@@ -1,5 +1,7 @@
 package com.github.hanwelmer.dasmZ80;
 
+import java.io.IOException;
+
 import org.junit.Test;
 
 public class TestDisassemble extends DasmZ80 {
@@ -72,8 +74,8 @@ public class TestDisassemble extends DasmZ80 {
 	assert (writer.output.size() == 20);
 	int index = 2;
 	assert ("                        ;I/O addresses:\n".equals(writer.output.get(index++)));
-	assert ("0012            port12  EQU  0x12\n".equals(writer.output.get(index++)));
-	assert ("00FE            portFE  EQU  0xFE\n".equals(writer.output.get(index++)));
+	assert ("0012          port12    EQU  0x12\n".equals(writer.output.get(index++)));
+	assert ("00FE          portFE    EQU  0xFE\n".equals(writer.output.get(index++)));
 	assert ("                        ;\n".equals(writer.output.get(index++)));
 	assert ("0000                    org 0x0000\n".equals(writer.output.get(index++)));
 	assert ("0000                    ;\n".equals(writer.output.get(index++)));
@@ -91,15 +93,26 @@ public class TestDisassemble extends DasmZ80 {
   }
 
   @Test
-  public void testMemoryReferenceTable() {
+  public void testMemoryReferenceTable() throws IOException {
+	ReadSymbolsFromArray input = new ReadSymbolsFromArray();
+	input.add("                      ;Entry points");
+	input.add("0000        ep0000     ENTRY 0x0000");
+
+	symbols = readSymbols(input);
+
 	Byte[] bytes = { 0xCD - 256, 0x03, 0x00, 0xC2 - 256, 0x03, 0x00, 0x10, 0xF8 - 256, 0x38, 0xF6 - 256, 0x00,
 	    0xC3 - 256, 0x03, 0x00 };
 	ByteReader reader = new ReadFromArray(bytes);
-	finalAddress = reader.getSize();
 	StringWriter writer = new StringWriter();
+	startAddress = 0;
+	finalAddress = reader.getSize();
+
 	disassembleToWriter("test", reader, writer, symbols);
-	assert (writer.output.size() == 16);
-	int index = 5;
+	assert (writer.output.size() == 15);
+	int index = 1;
+	assert ("                        ;\n".equals(writer.output.get(index++)));
+	assert ("0000                    org 0x0000\n".equals(writer.output.get(index++)));
+	assert ("0000                    ;\n".equals(writer.output.get(index++)));
 	assert ("0000 CD0300   ep0000:   CALL lbl0003\n".equals(writer.output.get(index++)));
 	assert ("0003 C20300   lbl0003:  JP   NZ,lbl0003\n".equals(writer.output.get(index++)));
 	assert ("0006 10F8               DJNZ ep0000-$\n".equals(writer.output.get(index++)));
@@ -114,15 +127,26 @@ public class TestDisassemble extends DasmZ80 {
   }
 
   @Test
-  public void testNoEntrypoints() {
+  public void testNoEntrypoints() throws IOException {
+	ReadSymbolsFromArray input = new ReadSymbolsFromArray();
+	input.add("                      ;Entry points");
+	input.add("0000        ep0000    ENTRY 0x0000");
+
+	symbols = readSymbols(input);
+
 	Byte[] bytes = { 0xCD - 256, 0x07, 0x00, 0xC3 - 256, 0x03, 0x00, 0x00, 0x10, 0xFE - 256, 0x38, 0xF5 - 256,
 	    0xC3 - 256, 0x03, 0x00 };
 	ByteReader reader = new ReadFromArray(bytes);
-	finalAddress = reader.getSize();
 	StringWriter writer = new StringWriter();
+	startAddress = 0;
+	finalAddress = reader.getSize();
+
 	disassembleToWriter("test", reader, writer, symbols);
 	assert (writer.output.size() == 19);
-	int index = 5;
+	int index = 1;
+	assert ("                        ;\n".equals(writer.output.get(index++)));
+	assert ("0000                    org 0x0000\n".equals(writer.output.get(index++)));
+	assert ("0000                    ;\n".equals(writer.output.get(index++)));
 	assert ("0000 CD0700   ep0000:   CALL lbl0007\n".equals(writer.output.get(index++)));
 	assert ("0003 C30300   lbl0003:  JP   lbl0003\n".equals(writer.output.get(index++)));
 	assert ("0006                    ;\n".equals(writer.output.get(index++)));
@@ -140,19 +164,27 @@ public class TestDisassemble extends DasmZ80 {
   }
 
   @Test
-  public void testTwoEntrypoints() {
+  public void testTwoEntrypoints() throws IOException {
+	ReadSymbolsFromArray input = new ReadSymbolsFromArray();
+	input.add("                      ;Entry points");
+	input.add("0000        start     ENTRY 0x0000");
+	input.add("0006        entry     ENTRY 0x0006");
+
+	symbols = readSymbols(input);
+
 	Byte[] bytes = { 0xCD - 256, 0x06, 0x00, 0xC3 - 256, 0x00, 0x00, 0xC2 - 256, 0x06, 0x00, 0x10, 0xFB - 256, 0x38,
 	    0xF9 - 256, 0x00 };
-	symbols.clear();
-	symbols.getOrMakeSymbol("start", SymbolType.entryPoint, 0, "0x0000");
-	symbols.getOrMakeSymbol("entry", SymbolType.entryPoint, 6, "0x0006");
 	ByteReader reader = new ReadFromArray(bytes);
-	finalAddress = reader.getSize();
 	StringWriter writer = new StringWriter();
+	startAddress = 0;
+	finalAddress = reader.getSize();
+
 	disassembleToWriter("test", reader, writer, symbols);
-	symbols.clear();
 	assert (writer.output.size() == 16);
-	int index = 3;
+	int index = 1;
+
+	assert ("                        ;\n".equals(writer.output.get(index++)));
+	assert ("0000                    org 0x0000\n".equals(writer.output.get(index++)));
 	assert ("0000                    ;\n".equals(writer.output.get(index++)));
 	assert ("0000 CD0600   start:    CALL entry\n".equals(writer.output.get(index++)));
 	assert ("0003 C30000             JP   start\n".equals(writer.output.get(index++)));
@@ -181,8 +213,8 @@ public class TestDisassemble extends DasmZ80 {
 	disassembleToWriter("test", reader, writer, portSymbols);
 	assert (writer.output.size() == 16);
 	assert ("                        ;I/O addresses]\n".equals(writer.output.get(2)));
-	assert ("0012            p12     EQU  	0x12\n".equals(writer.output.get(3)));
-	assert ("00FE            pFE     EQU    0xFE\n".equals(writer.output.get(4)));
+	assert ("0012          p12       EQU  	0x12\n".equals(writer.output.get(3)));
+	assert ("00FE          pFE       EQU    0xFE\n".equals(writer.output.get(4)));
 	assert ("0000 DB12               IN   A,(p12)\n".equals(writer.output.get(7)));
 	assert ("0002 D3FE               OUT  (pFE),A\n".equals(writer.output.get(8)));
 	assert ("0004 D312               OUT  (p12),A\n".equals(writer.output.get(9)));
@@ -218,16 +250,27 @@ public class TestDisassemble extends DasmZ80 {
   }
 
   @Test
-  public void testReset() {
+  public void testReset() throws IOException {
+	ReadSymbolsFromArray input = new ReadSymbolsFromArray();
+	input.add("                      ;Entry points");
+	input.add("0000        ep0000    ENTRY 0x0000");
+
+	symbols = readSymbols(input);
+
 	Byte[] bytes = { 0xE7 - 256, 0x18, 0xFD - 256, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 	    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 	    0xC9 - 256 };
 	ByteReader reader = new ReadFromArray(bytes);
-	finalAddress = reader.getSize();
 	StringWriter writer = new StringWriter();
+	startAddress = 0;
+	finalAddress = reader.getSize();
+
 	disassembleToWriter("test", reader, writer, symbols);
 	assert (writer.output.size() == 23);
-	int index = 5;
+	int index = 1;
+	assert ("                        ;\n".equals(writer.output.get(index++)));
+	assert ("0000                    org 0x0000\n".equals(writer.output.get(index++)));
+	assert ("0000                    ;\n".equals(writer.output.get(index++)));
 	assert ("0000 E7       ep0000:   RST  lbl0020\n".equals(writer.output.get(index++)));
 	assert ("0001 18FD               JR   ep0000-$\n".equals(writer.output.get(index++)));
 	assert ("0003                    ;\n".equals(writer.output.get(index++)));
@@ -249,22 +292,28 @@ public class TestDisassemble extends DasmZ80 {
   }
 
   @Test
-  public void testLinesOutsideReaderAddressRange() {
+  public void testLinesOutsideReaderAddressRange() throws IOException {
+	ReadSymbolsFromArray input = new ReadSymbolsFromArray();
+	input.add("                      ;Entry points");
+	input.add("0000        ep0000    ENTRY 0x0000");
+
+	symbols = readSymbols(input);
+
 	Byte[] bytes = { 0xCD - 256, 0x07, 0x00, 0xC3 - 256, 0x03, 0x00 };
 	ByteReader reader = new ReadFromArray(bytes);
-	finalAddress = reader.getSize();
 	StringWriter writer = new StringWriter();
+	startAddress = 0;
+	finalAddress = reader.getSize();
+
 	disassembleToWriter("test", reader, writer, symbols);
-	assert (writer.output.size() == 16);
+	assert (writer.output.size() == 15);
 	int index = 1;
 	assert ("                        ;\n".equals(writer.output.get(index++)));
 	assert ("                        ;Memory addresses:\n".equals(writer.output.get(index++)));
-	assert ("0007            lbl0007 EQU  0x0007\n".equals(writer.output.get(index++)));
+	assert ("0007          lbl0007   EQU  0x0007\n".equals(writer.output.get(index++)));
 	assert ("                        ;\n".equals(writer.output.get(index++)));
 	assert ("0000                    org 0x0000\n".equals(writer.output.get(index++)));
 	assert ("0000                    ;\n".equals(writer.output.get(index++)));
-	assert ("0000                    No entry points defined; assuming 0x0000 as entry point\n"
-	    .equals(writer.output.get(index++)));
 	assert ("0000 CD0700   ep0000:   CALL lbl0007\n".equals(writer.output.get(index++)));
 	assert ("0003 C30300   lbl0003:  JP   lbl0003\n".equals(writer.output.get(index++)));
 	assert ("0006                    ;\n".equals(writer.output.get(index++)));
@@ -273,6 +322,54 @@ public class TestDisassemble extends DasmZ80 {
 	assert ("ep0000  =0000:\n".equals(writer.output.get(index++)));
 	assert ("lbl0003 =0003: 0003\n".equals(writer.output.get(index++)));
 	assert ("lbl0007 =0007: 0000\n".equals(writer.output.get(index++)));
+  }
+
+  @Test
+  public void test2SymbolsSameValue() throws IOException {
+	ReadSymbolsFromArray input = new ReadSymbolsFromArray();
+	input.add("                      ;");
+	input.add("                      ;I/O addresses:");
+	input.add("0008        port08    EQU  0x08");
+	input.add("                      ;");
+	input.add("                      ;Entry points");
+	input.add("0000        reset     ENTRY 0x0000     ;entry point after reset.");
+	input.add("0008        reset8    ENTRY 0x0008     ;pop BC and set Carry.");
+
+	symbols = readSymbols(input);
+
+	Byte[] bytes = { 0x18, 0xFE - 256, 0x37, 0xDD - 256, 0xCB - 256, 0x0E, 0xEE - 256, 0xD7 - 256, 0xC1 - 256, 0x37,
+	    0xD3 - 256, 0x08, 0xCF - 256, 0xC9 - 256 };
+	ByteReader reader = new ReadFromArray(bytes);
+	StringWriter writer = new StringWriter();
+	startAddress = 0;
+	finalAddress = reader.getSize();
+
+	disassembleToWriter("test", reader, writer, symbols);
+	assert (writer.output.size() == 24);
+	int index = 1;
+	assert ("                        ;\n".equals(writer.output.get(index++)));
+	assert ("                        ;I/O addresses:\n".equals(writer.output.get(index++)));
+	assert ("0008          port08    EQU  0x08\n".equals(writer.output.get(index++)));
+	assert ("                        ;\n".equals(writer.output.get(index++)));
+	assert ("0000                    org 0x0000\n".equals(writer.output.get(index++)));
+	assert ("0000                    ;\n".equals(writer.output.get(index++)));
+	assert ("0000 18FE     reset:    JR   reset-$\n".equals(writer.output.get(index++)));
+	assert ("0002                    ;\n".equals(writer.output.get(index++)));
+	assert ("0002 37DD               DB   0x37, 0xDD\n".equals(writer.output.get(index++)));
+	assert ("0004 CB0EEED7           DB   0xCB, 0x0E, 0xEE, 0xD7\n".equals(writer.output.get(index++)));
+	assert ("0008                    ;\n".equals(writer.output.get(index++)));
+	assert ("0008 C1       reset8:   POP  BC\n".equals(writer.output.get(index++)));
+	assert ("0009 37                 SCF\n".equals(writer.output.get(index++)));
+	assert ("000A D308               OUT  (port08),A\n".equals(writer.output.get(index++)));
+	assert ("000C CF                 RST  reset8\n".equals(writer.output.get(index++)));
+	assert ("000D C9                 RET\n".equals(writer.output.get(index++)));
+	assert ("000E                    ;\n".equals(writer.output.get(index++)));
+	assert ("000E                    end\n".equals(writer.output.get(index++)));
+	assert ("\nI/O address cross reference list:\n".equals(writer.output.get(index++)));
+	assert ("port08  =08: 000A\n".equals(writer.output.get(index++)));
+	assert ("\nMemory address cross reference list:\n".equals(writer.output.get(index++)));
+	assert ("reset   =0000: 0000\n".equals(writer.output.get(index++)));
+	assert ("reset8  =0008: 000C\n".equals(writer.output.get(index++)));
   }
 
 }
