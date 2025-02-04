@@ -217,7 +217,7 @@ public class DasmZ80 {
 
 	// Write everything to the output file.
 	writeDefinitions(fileName, writer, symbols);
-	writeOutput(writer, reader, paths);
+	writeOutput(writer, reader, paths, symbols);
 	writeReferences(writer, symbols);
   } // disassembleToWriter()
 
@@ -242,20 +242,20 @@ public class DasmZ80 {
 	  while (!entryPoints.isEmpty()) {
 		// Get first entry point.
 		Object[] keys = entryPoints.keySet().toArray();
-		Symbol point = entryPoints.get(keys[0]);
+		Symbol entryPoint = entryPoints.get(keys[0]);
 		// Eat current entry point.
-		entryPoints.remove(point.getValue());
-		if (point.getValue() >= startAddress && point.getValue() < finalAddress
-		    && pointNotVisited(paths, point.getValue())) {
+		entryPoints.remove(entryPoint.getValue());
+		if (entryPoint.getValue() >= startAddress && entryPoint.getValue() < finalAddress
+		    && pointNotVisited(paths, entryPoint.getValue())) {
 		  // Add current entry point to symbol list
-		  symbols.addAsMemoryAddress(point);
+		  symbols.addAsMemoryAddress(entryPoint);
 		  // Disassemble code path that starts at the entry point.
 		  ArrayList<AssemblyCode> codePath = new ArrayList<AssemblyCode>();
 		  if (paths.size() == 0 && prefix != null) {
 			codePath.add(prefix.getAddress(), prefix);
 		  }
-		  codePath.addAll(disassemblePath(point, decoder, entryPoints, symbols));
-		  paths.put(point.getValue(), new Path(point, codePath));
+		  codePath.addAll(disassemblePath(entryPoint, decoder, entryPoints, symbols));
+		  paths.put(entryPoint.getValue(), new Path(entryPoint, codePath));
 		}
 	  }
 	} catch (IOException e) {
@@ -411,7 +411,8 @@ public class DasmZ80 {
 	}
   } // writeDefinitions()
 
-  protected static void writeOutput(AbstractWriter writer, ByteReader reader, HashMap<Integer, Path> paths) {
+  protected static void writeOutput(AbstractWriter writer, ByteReader reader, HashMap<Integer, Path> paths,
+      Symbols symbols) {
 	try {
 	  writer.write(new AssemblyCode(startAddress, String.format("org 0x%04X", startAddress)));
 
@@ -423,15 +424,15 @@ public class DasmZ80 {
 	  int readerAddress = nextAddress;
 	  for (Object key : keys) {
 		nextAddress = (Integer) key;
+		Path path = paths.get((Integer) key);
 		// Output unvisited input code if necessary.
 		if (readerAddress != nextAddress) {
 		  writeUnvisitedCode(readerAddress, nextAddress, writer, reader);
 		  readerAddress = nextAddress;
 		}
-		// add a blank line before each execution path.
-		writer.write(new AssemblyCode(readerAddress, ";"));
-		// Output disassembled instruction of the execution path.
-		for (AssemblyCode line : paths.get((Integer) key).decoded) {
+		writeEntryPoint(writer, path.entryPoint, paths, symbols);
+		// Output disassembled instructions of the execution path.
+		for (AssemblyCode line : path.decoded) {
 		  writer.write(line);
 		  if (line.getBytes() != null) {
 			nextAddress += line.getBytes().size();
@@ -449,6 +450,48 @@ public class DasmZ80 {
 	  e.printStackTrace();
 	}
   } // writeOutput()
+
+  private static void writeEntryPoint(AbstractWriter writer, Symbol entryPoint, HashMap<Integer, Path> paths,
+      Symbols symbols) throws IOException {
+	// Start the entry point with a blank line.
+	writer.write(new AssemblyCode(entryPoint.getValue(), ";"));
+
+	// Followed by entry point name and comments from symbol definition file.
+	writer.write(new AssemblyCode(entryPoint.getValue(), ";****************"));
+	writer.write(new AssemblyCode(entryPoint.getValue(), ";* Entry point: " + entryPoint.getName()));
+	for (String comment : entryPoint.getComments()) {
+	  writer.write(new AssemblyCode(entryPoint.getValue(), ";* " + comment.substring(1)));
+	}
+	writer.write(new AssemblyCode(entryPoint.getValue(), ";*"));
+
+	// And finally the list of references to this entry point.
+	writer.write(new AssemblyCode(entryPoint.getValue(), ";* Called by:"));
+	for (Integer reference : entryPoint.getReferences()) {
+	  Symbol calledBy = getEntryPointFor(reference, paths);
+	  String ref = String.format(";* 0x%04X (0x%04X %s", reference, calledBy.getValue(), calledBy.getName());
+	  if (calledBy.getComments().size() != 0) {
+		ref += ": ";
+		ref += calledBy.getComments().get(0).substring(1);
+	  }
+	  ref += ")";
+	  writer.write(new AssemblyCode(entryPoint.getValue(), ref));
+	}
+	writer.write(new AssemblyCode(entryPoint.getValue(), ";****************"));
+  }
+
+  // Return entry point of path containing the reference.
+  private static Symbol getEntryPointFor(Integer reference, HashMap<Integer, Path> paths) {
+	Symbol result = null;
+	Object[] keys = paths.keySet().toArray();
+	Arrays.sort(keys);
+	for (Object key : keys) {
+	  Path path = paths.get((Integer) key);
+	  if (result == null && path.startAddress <= reference && reference < path.nextAddress) {
+		result = path.entryPoint;
+	  }
+	}
+	return result;
+  }
 
   private static void writeUnvisitedCode(int fromAddress, int toAddress, AbstractWriter writer, ByteReader reader)
       throws IOException {

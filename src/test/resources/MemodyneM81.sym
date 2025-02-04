@@ -136,3 +136,18 @@
 0078            reset2  ENTRY 0x0078        ;local label within reset function.
 0082            reset3  ENTRY 0x0082        ;local label within reset function.
 0091            reset4  ENTRY 0x0091        ;local label within reset function.
+                        ;
+                        ;Comments:
+0000 185D     reset:    JR   reset1-$       ;entry point after hardware reset.
+0008 C1       reset8:   POP  BC             ;pop BC and set Carry.
+0007 D7                 RST  reset10        ;pop BC and increment DE module 128
+0038 DDCB0266 reset38:  BIT  4,(IX+2)       ;if ((IX+2).bit4 == 1) { C=C*2; toggle B.bit2} lbl1B0D = BC.
+005F 31001C   reset1:   LD   SP,topOfRAM    ;Init stack pointer to top of available memory.
+0062 ED5E               IM   2              ;Handle interrupts via vector table.
+0064 11001B             LD   DE,vectors     ;Load DE-register with base address for interrupt vector table.
+0067 7A                 LD   A,D            ;Load I-register with high byte of that base address.
+006A D5                 PUSH DE             ;Load IX-register with base address for interrupt vector table.
+006D 210003             LD   HL,org_vec     ;Copy original values for vector table from ROM to RAM.
+0075 AF                 XOR  A              ;Initialize data and stack (0x1B54..0x1BFF) with 0x00.
+007C 01080C             LD   BC,c12ports    ;Initialise 12 IO-devices at port08..SIO_B_C by ...
+007F 210F1B             LD   HL,ioInit      ; sending byte pairs from 0x1B0F..0x1B26

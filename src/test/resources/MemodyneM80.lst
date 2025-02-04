@@ -107,6 +107,7 @@
                         ; IO    : Z80 SIO at 0x10..0x13 ?
                         ;         Z80 CTC at ?
                         ;
+                        ;
                         ;Memory addresses:
 0054          lbl0054   EQU  0x0054
 00A1          lbl00A1   EQU  0x00A1
@@ -136,6 +137,7 @@ C103          lblC103   EQU  0xC103
 0A13          cIniP13   EQU  10*256+SIO_B_C ;send 10 bytes to SIO_B_C.
 0C08          c12ports  EQU  12*256+port08  ;Initialize 12 ports starting with port18.
 0C11          cIniP11   EQU  12*256+SIO_A_C ;send 12 bytes to SIO_A_C.
+                        ;
                         ;
 0000                    org 0x0000
 0000                    ;
@@ -204,19 +206,19 @@ C103          lblC103   EQU  0xC103
 0073 EDB0               LDIR
 0075 AF                 XOR  A
 0076 06AC               LD   B,0xAC
-0078 12       lbl0078:  LD   (DE),A
+0078 12       reset2:   LD   (DE),A
 0079 13                 INC  DE
-007A 10FC               DJNZ lbl0078-$
+007A 10FC               DJNZ reset2-$
 007C 01080C             LD   BC,lbl0C08
 007F 210F1B             LD   HL,ioInit
-0082 EDA3     lbl0082:  OUTI
+0082 EDA3     reset3:   OUTI
 0084 EDA3               OUTI
 0086 0C                 INC  C
-0087 10F9               DJNZ lbl0082-$
+0087 10F9               DJNZ reset3-$
 0089 CDF202             CALL lbl02F2
 008C 01110C             LD   BC,lbl0C11
 008F EDB3               OTIR
-0091 E7       lbl0091:  RST  reset20
+0091 E7       reset4:   RST  reset20
 0092 23                 INC  HL
 0093 F3                 DI
 0094 CB7E               BIT  7,(HL)
@@ -224,7 +226,59 @@ C103          lblC103   EQU  0xC103
 0098 2A001B             LD   HL,(vectors)
 009B C47106             CALL NZ,lbl0671
 009E FB                 EI
-009F 18F0               JR   lbl0091-$
+009F 18F0               JR   reset4-$
+00A1                    ;
+0078                    ;
+0078 12       reset2:   LD   (DE),A
+0079 13                 INC  DE
+007A 10FC               DJNZ reset2-$
+007C 01080C             LD   BC,lbl0C08
+007F 210F1B             LD   HL,ioInit
+0082 EDA3     reset3:   OUTI
+0084 EDA3               OUTI
+0086 0C                 INC  C
+0087 10F9               DJNZ reset3-$
+0089 CDF202             CALL lbl02F2
+008C 01110C             LD   BC,lbl0C11
+008F EDB3               OTIR
+0091 E7       reset4:   RST  reset20
+0092 23                 INC  HL
+0093 F3                 DI
+0094 CB7E               BIT  7,(HL)
+0096 CBBE               RES  7,(HL)
+0098 2A001B             LD   HL,(vectors)
+009B C47106             CALL NZ,lbl0671
+009E FB                 EI
+009F 18F0               JR   reset4-$
+00A1                    ;
+0082                    ;
+0082 EDA3     reset3:   OUTI
+0084 EDA3               OUTI
+0086 0C                 INC  C
+0087 10F9               DJNZ reset3-$
+0089 CDF202             CALL lbl02F2
+008C 01110C             LD   BC,lbl0C11
+008F EDB3               OTIR
+0091 E7       reset4:   RST  reset20
+0092 23                 INC  HL
+0093 F3                 DI
+0094 CB7E               BIT  7,(HL)
+0096 CBBE               RES  7,(HL)
+0098 2A001B             LD   HL,(vectors)
+009B C47106             CALL NZ,lbl0671
+009E FB                 EI
+009F 18F0               JR   reset4-$
+00A1                    ;
+0091                    ;
+0091 E7       reset4:   RST  reset20
+0092 23                 INC  HL
+0093 F3                 DI
+0094 CB7E               BIT  7,(HL)
+0096 CBBE               RES  7,(HL)
+0098 2A001B             LD   HL,(vectors)
+009B C47106             CALL NZ,lbl0671
+009E FB                 EI
+009F 18F0               JR   reset4-$
 00A1                    ;
 00A1 AF2A50             DB   0xAF, 0x2A, 0x50
 00A4 1BED5B56           DB   0x1B, 0xED, 0x5B, 0x56
@@ -785,16 +839,13 @@ port12  =12:
 
 Memory address cross reference list:
 counter =1B90:
-ioInit  =1B0F: 007F
+ioInit  =1B0F: 007F 007F
 ioReset =1B1A: 02F2
 lbl0044 =0044: 003C
 lbl0054 =0054: 0070
-lbl0078 =0078: 007A
-lbl0082 =0082: 0087
-lbl0091 =0091: 009F
 lbl00A1 =00A1: 0309
-lbl02F2 =02F2: 0089
-lbl02F2 =02F2: 0089
+lbl02F2 =02F2: 0089 0089 0089
+lbl02F2 =02F2: 0089 0089 0089
 lbl0300 =0300: 006D
 lbl0317 =0317: 0312
 lbl0321 =0321: 031B
@@ -806,11 +857,11 @@ lbl0383 =0383: 0353
 lbl038D =038D: 0387
 lbl041F =041F: 0322
 lbl0456 =0456: 0392
-lbl0671 =0671: 009B
-lbl0671 =0671: 009B
+lbl0671 =0671: 009B 009B 009B 009B
+lbl0671 =0671: 009B 009B 009B 009B
 lbl0A13 =0A13: 02F5
-lbl0C08 =0C08: 007C
-lbl0C11 =0C11: 008C
+lbl0C08 =0C08: 007C 007C
+lbl0C11 =0C11: 008C 008C 008C
 lbl1B01 =1B01:
 lbl1B02 =1B02:
 lbl1B03 =1B03: 0020
@@ -823,12 +874,15 @@ reset   =0000:
 reset1  =005F: 0000
 reset10 =0010: 02FF 038E
 reset18 =0018: 033C 033E
-reset20 =0020: 0091 038F
+reset2  =0078: 007A 007A
+reset20 =0020: 0091 0091 038F 0091 0091
+reset3  =0082: 0087 0087 0087
 reset30 =0030: 0011
 reset38 =0038: 0307 0346 038D
+reset4  =0091: 009F 009F 009F 009F
 reset8  =0008: 02FA
 topOfRAM=1C00: 005F
-vectors =1B00: 0064 0098
+vectors =1B00: 0098 0098 0098 0064 0098
 
 Constants reference list:
 c12ports=0C08:

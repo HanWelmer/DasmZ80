@@ -12,7 +12,8 @@ public class TestWriteOutput extends DasmZ80 {
   public void testWriteOutput() {
 	ArrayList<AssemblyCode> decoded = new ArrayList<AssemblyCode>();
 
-	Symbol entryPoint = new Symbol("__start", SymbolType.entryPoint, new Integer(0), "0");
+	Symbols symbols = new Symbols();
+	Symbol entryPoint = symbols.getOrMakeSymbol("__start", SymbolType.entryPoint, new Integer(0), "0");
 
 	ArrayList<Byte> bytes0x00 = new ArrayList<Byte>();
 	bytes0x00.add((byte) 0x00);
@@ -40,7 +41,7 @@ public class TestWriteOutput extends DasmZ80 {
 	ListingWriter writer = new ListingWriter();
 	try {
 	  writer.open(fileName);
-	  writeOutput(writer, reader, paths);
+	  writeOutput(writer, reader, paths, symbols);
 	} catch (IOException e) {
 	  e.printStackTrace();
 	} finally {

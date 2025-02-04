@@ -68,6 +68,10 @@ public class AssemblyCode {
 	this.mnemonic = mnemonic;
   }
 
+  public void setComment(String comment) {
+	this.comment = comment;
+  }
+
   public boolean isExit() {
 	// TODO add flag to code definition, so that this part becomes
 	// microprocessor independent.

@@ -114,6 +114,11 @@ public class Decoder {
 
 	  // Put label in assembly code instruction.
 	  asmCode.updateMnemonic("!", symbol.getName());
+
+	  // Add first line of symbol comment to the instruction.
+	  if (symbol.getComments().size() > 0) {
+		asmCode.setComment(symbol.getComments().get(0));
+	  }
 	}
 
 	// Process jump to relative address.
@@ -203,6 +208,11 @@ public class Decoder {
 
 	  // Put label in assembly code instruction.
 	  asmCode.updateMnemonic("*", symbol.getName());
+
+	  // Add first line of symbol comment to the instruction.
+	  if (symbol.getComments().size() > 0) {
+		asmCode.setComment(symbol.getComments().get(0));
+	  }
 	}
 
 	return asmCode;

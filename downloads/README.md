@@ -1,6 +1,9 @@
 # dasmZ80 download folder
 This page contains released versions of the Z80 Disassembler.
 
+## Version 1.4.0:
+Accept user defined comments from symbol definition file.
+
 ## Version 1.3.1:
 Bug fix: allow same value for symbols defined for port addresses and symbols defined for memory addresses (including entry points and discovered labels). 
 
