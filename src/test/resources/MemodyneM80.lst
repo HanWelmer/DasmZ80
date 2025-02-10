@@ -107,7 +107,6 @@
                         ; IO    : Z80 SIO at 0x10..0x13 ?
                         ;         Z80 CTC at ?
                         ;
-                        ;
                         ;Memory addresses:
 0054          lbl0054   EQU  0x0054
 00A1          lbl00A1   EQU  0x00A1
