@@ -24,9 +24,10 @@ import java.util.HashMap;
 // output filename).
 public class DasmZ80 {
 
+  private static final String IDENTIFY_COMMENT = ";Comments:";
+  private static final String IDENTIFY_CONSTANT = ";Constants:";
   private static final String IDENTIFY_IO = ";I/O addresses:";
   private static final String IDENTIFY_MEMORY = ";Memory addresses:";
-  private static final String IDENTIFY_CONSTANT = ";Constants:";
   protected static int startAddress = 0;
   protected static int finalAddress = 0;
 
@@ -113,18 +114,22 @@ public class DasmZ80 {
 	Symbol previousSymbol = null;
 	while (input.ready()) {
 	  String line = input.readLine().trim();
-	  if (line.contains(IDENTIFY_IO)) {
+	  if (line.contains(IDENTIFY_COMMENT)) {
+		type = SymbolType.comment;
+	  } else if (line.contains(IDENTIFY_CONSTANT)) {
+		type = SymbolType.constant;
+	  } else if (line.contains(IDENTIFY_IO)) {
 		type = SymbolType.portAddress;
 	  } else if (line.contains(IDENTIFY_MEMORY)) {
 		type = SymbolType.memoryAddress;
-	  } else if (line.contains(IDENTIFY_CONSTANT)) {
-		type = SymbolType.constant;
 	  } else {
 		// 0010 name EQU expression;comment
 		// or:
 		// 0010 name ENTRY expression;comment
 		// or:
-		// ;comment
+		// 0010 ;some comment
+		// or:
+		// ;some comment
 		String firstWord = input.getWord();
 		if (firstWord.length() != 0) {
 		  char firstChar = firstWord.charAt(0);
@@ -134,36 +139,22 @@ public class DasmZ80 {
 			}
 		  } else {
 			// value
-			if (firstWord.length() == 0 || !(Character.isDigit(firstWord.charAt(0))
-			    || firstWord.charAt(0) >= 'A' && firstWord.charAt(0) <= 'F')) {
-			  throw new IOException(String.format("value must begin with a digit, received: %s", firstWord));
+			if (firstWord.length() == 0 || !isHexDigit(firstWord.charAt(0))) {
+			  throw new IOException(
+			      String.format("value must begin with a hexadecimal digit, received: %s", firstWord));
 			}
 			Integer value = Integer.decode("0x" + firstWord);
 
-			// name
-			String name = input.getWord();
-			if (!(Character.isLetter(firstChar) || firstChar != '_')) {
-			  throw new IOException(String.format("symbol must begin with a character, received: %s", name));
+			if (type != SymbolType.comment) {
+			  previousSymbol = parseNonCommentSymbol(input, type, value, symbols);
+			} else {
+			  previousSymbol = symbols.getOrMakeCommentSymbol(value);
 			}
-
-			// EQU or ENTRY
-			String statement = input.getWord();
-			if ("ENTRY".equals(statement)) {
-			  type = SymbolType.entryPoint;
-			} else if (!"EQU".equals(statement)) {
-			  throw new IOException(String.format("expected EQU, received: %s", statement));
-			}
-
-			// expression
-			String expression = input.getValue().trim();
-			if (expression.length() == 0) {
-			  throw new IOException(String.format("expression expected"));
-			}
-
-			previousSymbol = symbols.getOrMakeSymbol(name, type, value, expression);
-
-			// comment
+			// skip until comment
 			String comment = input.getWord();
+			while (comment.length() > 0 && comment.charAt(0) != ';') {
+			  comment = input.getWord();
+			}
 			if (comment.length() > 0 && comment.charAt(0) == ';') {
 			  previousSymbol.addComment(comment);
 			}
@@ -172,7 +163,37 @@ public class DasmZ80 {
 	  }
 	}
 	return symbols;
+
   } // readSymbols()
+
+  private static Symbol parseNonCommentSymbol(AbstractSymbolReader input, SymbolType type, Integer value,
+      Symbols symbols) throws IOException {
+	// name
+	String name = input.getWord();
+	char firstChar = name.charAt(0);
+	if (!(Character.isLetter(firstChar) || firstChar != '_')) {
+	  throw new IOException(String.format("symbol must begin with a character, received: %s", name));
+	}
+
+	// EQU or ENTRY
+	String statement = input.getWord();
+	if ("ENTRY".equals(statement)) {
+	  type = SymbolType.entryPoint;
+	} else if (!"EQU".equals(statement)) {
+	  throw new IOException(String.format("expected EQU, received: %s", statement));
+	}
+
+	// expression
+	String expression = input.getValue().trim();
+	if (expression.length() == 0) {
+	  throw new IOException(String.format("expression expected"));
+	}
+	return symbols.getOrMakeSymbol(name, type, value, expression);
+  }
+
+  private static boolean isHexDigit(char character) {
+	return Character.isDigit(character) || character >= 'A' && character <= 'F';
+  }
 
   protected static void disassembleFile(String fileName, Symbols symbols) {
 	BinFileReader reader = new BinFileReader();
@@ -223,8 +244,8 @@ public class DasmZ80 {
 	// Do the actual disassembly.
 	HashMap<Integer, Path> paths = disassembleReader(fileName, reader, symbols);
 
-	// Fill in symbols to memory addresses.
-	fillInLabels(paths, symbols);
+	// Fill in symbols to memory addresses and comments.
+	fillInSymbols(paths, symbols);
 
 	// Write everything to the output file.
 	try {
@@ -310,7 +331,7 @@ public class DasmZ80 {
 	return decoded;
   } // disassemble()
 
-  private static void fillInLabels(HashMap<Integer, Path> paths, Symbols symbols) {
+  private static void fillInSymbols(HashMap<Integer, Path> paths, Symbols symbols) {
 	// Collect symbols to be filled in as labels in a single array.
 	ArrayList<Symbol> symbolList = symbols.getSymbolsByType(SymbolType.entryPoint);
 	symbolList.addAll(symbols.getSymbolsByType(SymbolType.label));
@@ -318,6 +339,11 @@ public class DasmZ80 {
 
 	// Fill in the labels in the decoded instructions in all execution paths.
 	paths.forEach((Integer entryPoint, Path path) -> fillInLabels(path.decoded, symbolList));
+
+	// Fill in the comments.
+	// Note that this may overwrite comment from entry point in case of jump or
+	// call statements.
+	paths.forEach((Integer entryPoint, Path path) -> fillInComments(path.decoded, symbols.getComments()));
   } // fillInLabels()
 
   private static void fillInLabels(ArrayList<AssemblyCode> decoded, ArrayList<Symbol> symbols) {
@@ -333,6 +359,20 @@ public class DasmZ80 {
 	  }
 	}
   } // fillInLabelTypes()
+
+  private static Object fillInComments(ArrayList<AssemblyCode> decoded, HashMap<Integer, Symbol> comments) {
+	for (AssemblyCode code : decoded) {
+	  if (code.getBytes() != null && code.getBytes().size() > 0) {
+		Symbol comment = comments.get(code.getAddress());
+		if (comment != null) {
+		  code.setComment(comment.getComments().get(0));
+		}
+	  }
+
+	}
+	// TODO Auto-generated method stub
+	return null;
+  }
 
   protected static void writeDefinitions(String fileName, AbstractWriter writer, Symbols symbols) throws IOException {
 	// Write symbol definitions, grouped by symbol type and sorted by address.

@@ -82,11 +82,11 @@ public class TestWriteOutput extends DasmZ80 {
 	String blank = "                        ;\n";
 	String msgPort03 = "0003          port03    EQU  0x03\n";
 	String msgSIO_A_C = "00FE          SIO_A_C   EQU  0xFE           ;SIO channel A, command register.\n";
-	msgSIO_A_C += "                        ;\n";
-	msgSIO_A_C += "                        ;SIO channel A, command register is initialised with (see 0x0321: 0x0322, 0x0324..0x032F):\n";
-	msgSIO_A_C += "                        ;\n";
-	msgSIO_A_C += "                        ;0x6E = 0156 -> Reset Rx CRC checker, Reset TxInt Pending, select register 6.\n";
-	msgSIO_A_C += "                        ;\n";
+	msgSIO_A_C += "                                            ;\n";
+	msgSIO_A_C += "                                            ;SIO channel A, command register is initialised with (see 0x0321: 0x0322, 0x0324..0x032F):\n";
+	msgSIO_A_C += "                                            ;\n";
+	msgSIO_A_C += "                                            ;0x6E = 0156 -> Reset Rx CRC checker, Reset TxInt Pending, select register 6.\n";
+	msgSIO_A_C += "                                            ;\n";
 	assert (writer.output.get(1).equals(blank));
 	assert (writer.output.get(2).equals("                        ;I/O addresses:\n"));
 	assert (writer.output.get(3).equals(msgPort03));
@@ -94,7 +94,7 @@ public class TestWriteOutput extends DasmZ80 {
 	assert (writer.output.get(5).equals(blank));
 
 	String msg7 = "0006          lbl0006   EQU  0x0006         ;\n";
-	msg7 += "                        ;\n";
+	msg7 += "                                            ;\n";
 	String msg8 = "1B00          vectors   EQU  0x1B00         ;Base address for interrupt vector table. This byte initialised to 0xD8.\n";
 	String msg9 = "1B01          lbl1B01   EQU  0x1B01\n";
 	assert (writer.output.get(6).equals("                        ;Memory addresses:\n"));

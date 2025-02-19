@@ -6,11 +6,12 @@ import java.util.HashMap;
 public class Symbols {
 
   // symbols, grouped by symbol type:
-  private HashMap<Integer, Symbol> entryPoints = new HashMap<Integer, Symbol>();
-  private HashMap<Integer, Symbol> portAddresses = new HashMap<Integer, Symbol>();
-  private HashMap<Integer, Symbol> memoryAddresses = new HashMap<Integer, Symbol>();
+  private HashMap<Integer, Symbol> comments = new HashMap<Integer, Symbol>();
   private HashMap<Integer, Symbol> constants = new HashMap<Integer, Symbol>();
+  private HashMap<Integer, Symbol> entryPoints = new HashMap<Integer, Symbol>();
   private HashMap<Integer, Symbol> labels = new HashMap<Integer, Symbol>();
+  private HashMap<Integer, Symbol> memoryAddresses = new HashMap<Integer, Symbol>();
+  private HashMap<Integer, Symbol> portAddresses = new HashMap<Integer, Symbol>();
 
   public void clear() {
 	entryPoints.clear();
@@ -20,6 +21,10 @@ public class Symbols {
 	labels.clear();
   }
 
+  public HashMap<Integer, Symbol> getComments() {
+	return comments;
+  }
+
   public HashMap<Integer, Symbol> getEntryPoints() {
 	return entryPoints;
   }
@@ -27,20 +32,23 @@ public class Symbols {
   public ArrayList<Symbol> getSymbolsByType(SymbolType symbolType) {
 	ArrayList<Symbol> symbolList = new ArrayList<Symbol>();
 	switch (symbolType) {
+	case comment:
+	  comments.forEach((Integer key, Symbol symbol) -> symbolList.add(symbol));
+	  break;
+	case constant:
+	  constants.forEach((Integer key, Symbol symbol) -> symbolList.add(symbol));
+	  break;
 	case entryPoint:
 	  entryPoints.forEach((Integer key, Symbol symbol) -> symbolList.add(symbol));
+	  break;
+	case label:
+	  labels.forEach((Integer key, Symbol symbol) -> symbolList.add(symbol));
 	  break;
 	case memoryAddress:
 	  memoryAddresses.forEach((Integer key, Symbol symbol) -> symbolList.add(symbol));
 	  break;
 	case portAddress:
 	  portAddresses.forEach((Integer key, Symbol symbol) -> symbolList.add(symbol));
-	  break;
-	case constant:
-	  constants.forEach((Integer key, Symbol symbol) -> symbolList.add(symbol));
-	  break;
-	case label:
-	  labels.forEach((Integer key, Symbol symbol) -> symbolList.add(symbol));
 	  break;
 	default:
 	  break;
@@ -102,6 +110,18 @@ public class Symbols {
 	if (symbol == null) {
 	  symbols.put(newSymbol.getValue(), newSymbol);
 	  symbol = newSymbol;
+	}
+	return symbol;
+  }
+
+  public Symbol getOrMakeCommentSymbol(Integer value) {
+	// If available use symbolType or constant.
+	Symbol symbol = comments.get(value);
+
+	// If not, create a new comment symbol.
+	if (symbol == null) {
+	  symbol = new Symbol(SymbolType.comment, value);
+	  comments.put(value, symbol);
 	}
 	return symbol;
   }
