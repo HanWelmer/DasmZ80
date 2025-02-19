@@ -95,14 +95,14 @@ public class TestComments extends DasmZ80 {
 	assert ("0004                    end\n".equals(writer.output.get(index++)));
   }
 
-  // @Test
+  @Test
   public void testSingleLineComment2() throws IOException {
 	ReadSymbolsFromArray input = new ReadSymbolsFromArray();
 	input.add("                        ;Comments:");
 	input.add("0001 ED5E IM 2 ;Handle interrupts via vector table.");
 	Symbols symbols = readSymbols(input);
 
-	Byte[] bytes = { 0xCD - 256, 0x06, 0x00, 0xED - 256, 0xEE - 256, 0xC9 - 256, 0x00, 0xCF - 256, 0x00, 0xC9 - 256 };
+	Byte[] bytes = { 0x00, 0xED - 256, 0x5E, 0xC9 - 256 };
 	ByteReader reader = new ReadFromArray(bytes);
 	StringWriter writer = new StringWriter();
 
@@ -122,7 +122,8 @@ public class TestComments extends DasmZ80 {
 	assert ("0000                    ;* Called by:\n".equals(writer.output.get(index++)));
 	assert ("0000                    ;****************\n".equals(writer.output.get(index++)));
 	assert ("0000 00       ep0000:   NOP\n".equals(writer.output.get(index++)));
-	assert ("0001 ED5E IM 2 ;Handle interrupts via vector table.\n".equals(writer.output.get(index++)));
+	assert ("0001 ED5E               IM   2              ;Handle interrupts via vector table.\n"
+	    .equals(writer.output.get(index++)));
 	assert ("0003 C9                 RET\n".equals(writer.output.get(index++)));
 	assert ("0004                    ;\n".equals(writer.output.get(index++)));
 	assert ("0004                    end\n".equals(writer.output.get(index++)));
