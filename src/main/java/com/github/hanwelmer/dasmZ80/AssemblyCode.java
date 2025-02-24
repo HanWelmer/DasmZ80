@@ -10,6 +10,16 @@ public class AssemblyCode {
   private String mnemonic;
   private String comment;
 
+  /**
+   * Create a new assembler instruction based on address, array of binary bytes,
+   * label, mnemonic and comment.
+   * 
+   * @param address
+   * @param bytes
+   * @param label
+   * @param mnemonic
+   * @param comment
+   */
   public AssemblyCode(int address, ArrayList<Byte> bytes, String label, String mnemonic, String comment) {
 	this.address = address;
 	this.bytes = bytes;
@@ -18,11 +28,25 @@ public class AssemblyCode {
 	this.comment = comment;
   }
 
+  /**
+   * Create a new assembler instruction based on address and array with binary
+   * bytes.
+   * 
+   * @param address
+   * @param bytes
+   */
   public AssemblyCode(int address, ArrayList<Byte> bytes) {
 	this.address = address;
 	this.bytes = bytes;
   }
 
+  /**
+   * Create a new assembler instruction based on address, mnemonic and comment.
+   * 
+   * @param address
+   * @param mnemonic
+   * @param comment
+   */
   public AssemblyCode(int address, String mnemonic, String comment) {
 	this.address = address;
 	this.label = "";
@@ -30,6 +54,12 @@ public class AssemblyCode {
 	this.comment = comment;
   }
 
+  /**
+   * Create a new assembler instruction based on address and mnemonic.
+   * 
+   * @param address
+   * @param mnemonic
+   */
   public AssemblyCode(int address, String mnemonic) {
 	this.address = address;
 	this.label = "";

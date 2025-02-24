@@ -316,14 +316,29 @@ public class DasmZ80 {
 	AssemblyCode nextInstruction;
 
 	try {
-	  do {
+	  boolean exit = false;
+	  while (!exit) {
 		nextInstruction = decoder.get(address, symbols);
-		if (nextInstruction != null) {
+		if (nextInstruction == null) {
+		  exit = true;
+		} else {
 		  decoded.add(nextInstruction);
+		  exit = nextInstruction.isExit();
 		  // Determine next address.
 		  address += nextInstruction.getBytes().size();
+		  // Add comments from comment symbols.
+		  Symbol commentSymbol = symbols.getComments().get(nextInstruction.getAddress());
+		  if (commentSymbol != null) {
+			nextInstruction.setComment(commentSymbol.getComments().get(0));
+			for (int index = 1; index < commentSymbol.getComments().size(); index++) {
+			  String comment = commentSymbol.getComments().get(index);
+			  // use a space as mnemonic to enforce line number in
+			  // AssemblyCode.toString().
+			  decoded.add(new AssemblyCode(address, " ", comment));
+			}
+		  }
 		}
-	  } while (nextInstruction != null && !nextInstruction.isExit());
+	  }
 	} catch (IllegalOpcodeException e) {
 	  decoded.add(new AssemblyCode(address, e.getMessage()));
 	  System.out.print(e.getMessage());
@@ -340,10 +355,11 @@ public class DasmZ80 {
 	// Fill in the labels in the decoded instructions in all execution paths.
 	paths.forEach((Integer entryPoint, Path path) -> fillInLabels(path.decoded, symbolList));
 
-	// Fill in the comments.
-	// Note that this may overwrite comment from entry point in case of jump or
-	// call statements.
-	paths.forEach((Integer entryPoint, Path path) -> fillInComments(path.decoded, symbols.getComments()));
+	// Fill in the comments. Note that this may overwrite comment from entry
+	// point in case of jump or call statements.
+	// FIXME
+	// paths.forEach((Integer entryPoint, Path path) ->
+	// fillInComments(path.decoded, symbols.getComments()));
   } // fillInLabels()
 
   private static void fillInLabels(ArrayList<AssemblyCode> decoded, ArrayList<Symbol> symbols) {
@@ -370,7 +386,6 @@ public class DasmZ80 {
 	  }
 
 	}
-	// TODO Auto-generated method stub
 	return null;
   }
 
