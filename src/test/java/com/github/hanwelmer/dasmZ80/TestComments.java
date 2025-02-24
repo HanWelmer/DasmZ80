@@ -129,6 +129,76 @@ public class TestComments extends DasmZ80 {
 	assert ("0004                    end\n".equals(writer.output.get(index++)));
   }
 
+  @Test
+  public void testTwoLineComment1() throws IOException {
+	ReadSymbolsFromArray input = new ReadSymbolsFromArray();
+	input.add("                        ;Comments:");
+	input.add("0001           ;Handle interrupts ...");
+	input.add("               ;... via vector table.");
+	Symbols symbols = readSymbols(input);
+
+	Byte[] bytes = { 0x00, 0xED - 256, 0x5E, 0xC9 - 256 };
+	ByteReader reader = new ReadFromArray(bytes);
+	StringWriter writer = new StringWriter();
+
+	startAddress = 0;
+	finalAddress = reader.getSize();
+	disassembleToWriter("test", reader, writer, symbols);
+
+	int index = 1;
+	assert ("                        ;\n".equals(writer.output.get(index++)));
+	assert ("0000                    No entry points defined; assuming 0x0000 as entry point\n"
+	    .equals(writer.output.get(index++)));
+	assert ("0000                    org 0x0000\n".equals(writer.output.get(index++)));
+	assert ("0000                    ;\n".equals(writer.output.get(index++)));
+	assert ("0000                    ;****************\n".equals(writer.output.get(index++)));
+	assert ("0000                    ;* Entry point: ep0000\n".equals(writer.output.get(index++)));
+	assert ("0000                    ;*\n".equals(writer.output.get(index++)));
+	assert ("0000                    ;* Called by:\n".equals(writer.output.get(index++)));
+	assert ("0000                    ;****************\n".equals(writer.output.get(index++)));
+	assert ("0000 00       ep0000:   NOP\n".equals(writer.output.get(index++)));
+	assert ("0001 ED5E               IM   2              ;Handle interrupts ...\n".equals(writer.output.get(index++)));
+	assert ("0003                                        ;... via vector table.\n".equals(writer.output.get(index++)));
+	assert ("0003 C9                 RET\n".equals(writer.output.get(index++)));
+	assert ("0004                    ;\n".equals(writer.output.get(index++)));
+	assert ("0004                    end\n".equals(writer.output.get(index++)));
+  }
+
+  @Test
+  public void testTwoLineComment2() throws IOException {
+	ReadSymbolsFromArray input = new ReadSymbolsFromArray();
+	input.add("                        ;Comments:");
+	input.add("0001 ED5E IM 2 ;Handle interrupts ...");
+	input.add("               ;... via vector table.");
+	Symbols symbols = readSymbols(input);
+
+	Byte[] bytes = { 0x00, 0xED - 256, 0x5E, 0xC9 - 256 };
+	ByteReader reader = new ReadFromArray(bytes);
+	StringWriter writer = new StringWriter();
+
+	startAddress = 0;
+	finalAddress = reader.getSize();
+	disassembleToWriter("test", reader, writer, symbols);
+
+	int index = 1;
+	assert ("                        ;\n".equals(writer.output.get(index++)));
+	assert ("0000                    No entry points defined; assuming 0x0000 as entry point\n"
+	    .equals(writer.output.get(index++)));
+	assert ("0000                    org 0x0000\n".equals(writer.output.get(index++)));
+	assert ("0000                    ;\n".equals(writer.output.get(index++)));
+	assert ("0000                    ;****************\n".equals(writer.output.get(index++)));
+	assert ("0000                    ;* Entry point: ep0000\n".equals(writer.output.get(index++)));
+	assert ("0000                    ;*\n".equals(writer.output.get(index++)));
+	assert ("0000                    ;* Called by:\n".equals(writer.output.get(index++)));
+	assert ("0000                    ;****************\n".equals(writer.output.get(index++)));
+	assert ("0000 00       ep0000:   NOP\n".equals(writer.output.get(index++)));
+	assert ("0001 ED5E               IM   2              ;Handle interrupts ...\n".equals(writer.output.get(index++)));
+	assert ("0003                                        ;... via vector table.\n".equals(writer.output.get(index++)));
+	assert ("0003 C9                 RET\n".equals(writer.output.get(index++)));
+	assert ("0004                    ;\n".equals(writer.output.get(index++)));
+	assert ("0004                    end\n".equals(writer.output.get(index++)));
+  }
+
   // @Test
   public void testCallLineComment() throws IOException {
 	ReadSymbolsFromArray input = new ReadSymbolsFromArray();
