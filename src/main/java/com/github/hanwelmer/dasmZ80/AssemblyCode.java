@@ -71,6 +71,10 @@ public class AssemblyCode {
 	return address;
   }
 
+  public ArrayList<Byte> getBytes() {
+	return bytes;
+  }
+
   public void addByte(Byte nextByte) {
 	if (bytes == null) {
 	  bytes = new ArrayList<Byte>();
@@ -78,24 +82,20 @@ public class AssemblyCode {
 	bytes.add(nextByte);
   }
 
-  public void updateMnemonic(String oldValue, String newValue) {
-	mnemonic = mnemonic.replace(oldValue, newValue);
-  }
-
-  public ArrayList<Byte> getBytes() {
-	return bytes;
+  public void setLabel(String label) {
+	this.label = label;
   }
 
   public String getMnemonic() {
 	return mnemonic;
   }
 
-  public void setLabel(String label) {
-	this.label = label;
-  }
-
   public void setMnemonic(String mnemonic) {
 	this.mnemonic = mnemonic;
+  }
+
+  public void updateMnemonic(String oldValue, String newValue) {
+	mnemonic = mnemonic.replace(oldValue, newValue);
   }
 
   public void setComment(String comment) {

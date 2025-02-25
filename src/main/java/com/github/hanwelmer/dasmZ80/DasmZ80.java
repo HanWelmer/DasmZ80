@@ -360,7 +360,7 @@ public class DasmZ80 {
 	// FIXME
 	// paths.forEach((Integer entryPoint, Path path) ->
 	// fillInComments(path.decoded, symbols.getComments()));
-  } // fillInLabels()
+  } // fillInSymbols()
 
   private static void fillInLabels(ArrayList<AssemblyCode> decoded, ArrayList<Symbol> symbols) {
 	for (Symbol symbol : symbols) {
@@ -374,7 +374,7 @@ public class DasmZ80 {
 		decoded.get(index - 1).setLabel(symbol.getName());
 	  }
 	}
-  } // fillInLabelTypes()
+  } // fillInLabels()
 
   private static Object fillInComments(ArrayList<AssemblyCode> decoded, HashMap<Integer, Symbol> comments) {
 	for (AssemblyCode code : decoded) {
