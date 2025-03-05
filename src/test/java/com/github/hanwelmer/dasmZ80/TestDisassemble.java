@@ -186,14 +186,6 @@ public class TestDisassemble extends DasmZ80 {
 	assert ("0003 C30300   lbl0003:  JP   lbl0003\n".equals(writer.output.get(index++)));
 	assert ("0006                    ;\n".equals(writer.output.get(index++)));
 	assert ("0006 00                 DB   0x00\n".equals(writer.output.get(index++)));
-	assert ("0007                    ;\n".equals(writer.output.get(index++)));
-	assert ("0007                    ;****************\n".equals(writer.output.get(index++)));
-	assert ("0007                    ;* Entry point: lbl0007\n".equals(writer.output.get(index++)));
-	assert ("0007                    ;*\n".equals(writer.output.get(index++)));
-	assert ("0007                    ;* Called by:\n".equals(writer.output.get(index++)));
-	assert ("0007                    ;* 0x0000 (0x0000 ep0000)\n".equals(writer.output.get(index++)));
-	assert ("0007                    ;* 0x0007 (0x0007 lbl0007)\n".equals(writer.output.get(index++)));
-	assert ("0007                    ;****************\n".equals(writer.output.get(index++)));
 	assert ("0007 10FE     lbl0007:  DJNZ lbl0007-$\n".equals(writer.output.get(index++)));
 	assert ("0009 38F5               JR   C,ep0000-$\n".equals(writer.output.get(index++)));
 	assert ("000B C30300             JP   lbl0003\n".equals(writer.output.get(index++)));
@@ -356,13 +348,6 @@ public class TestDisassemble extends DasmZ80 {
 	assert ("0014 00000000           DB   0x00, 0x00, 0x00, 0x00\n".equals(writer.output.get(index++)));
 	assert ("0018 00000000           DB   0x00, 0x00, 0x00, 0x00\n".equals(writer.output.get(index++)));
 	assert ("001C 00000000           DB   0x00, 0x00, 0x00, 0x00\n".equals(writer.output.get(index++)));
-	assert ("0020                    ;\n".equals(writer.output.get(index++)));
-	assert ("0020                    ;****************\n".equals(writer.output.get(index++)));
-	assert ("0020                    ;* Entry point: lbl0020\n".equals(writer.output.get(index++)));
-	assert ("0020                    ;*\n".equals(writer.output.get(index++)));
-	assert ("0020                    ;* Called by:\n".equals(writer.output.get(index++)));
-	assert ("0020                    ;* 0x0000 (0x0000 ep0000)\n".equals(writer.output.get(index++)));
-	assert ("0020                    ;****************\n".equals(writer.output.get(index++)));
 	assert ("0020 C9       lbl0020:  RET\n".equals(writer.output.get(index++)));
 	assert ("0021                    ;\n".equals(writer.output.get(index++)));
 	assert ("0021                    end\n".equals(writer.output.get(index++)));

@@ -276,13 +276,15 @@ public class DasmZ80 {
 		Symbol entryPoint = entryPoints.get(keys[0]);
 		// Eat current entry point.
 		entryPoints.remove(entryPoint.getValue());
-		if (entryPoint.getValue() >= startAddress && entryPoint.getValue() < finalAddress
-		    && pointNotVisited(paths, entryPoint.getValue())) {
+		if (entryPoint.getValue() >= startAddress && entryPoint.getValue() < finalAddress) {
 		  // Add current entry point to symbol list
 		  symbols.addAsMemoryAddress(entryPoint);
 		  // Disassemble code path that starts at the entry point.
-		  ArrayList<AssemblyCode> codePath = disassemblePath(entryPoint, decoder, entryPoints, symbols);
-		  paths.put(entryPoint.getValue(), new Path(entryPoint, codePath));
+		  if (pointNotVisited(paths, entryPoint.getValue())) {
+			ArrayList<AssemblyCode> codePath = disassemblePath(entryPoint, decoder, entryPoints, symbols);
+			paths.put(entryPoint.getValue(), new Path(entryPoint, codePath));
+
+		  }
 		}
 	  }
 	} catch (IOException e) {
@@ -387,7 +389,7 @@ public class DasmZ80 {
 
 	}
 	return null;
-  }
+  } // fillInComments()
 
   protected static void writeDefinitions(String fileName, AbstractWriter writer, Symbols symbols) throws IOException {
 	// Write symbol definitions, grouped by symbol type and sorted by address.
@@ -484,9 +486,13 @@ public class DasmZ80 {
 		writeUnvisitedCode(readerAddress, nextAddress, writer, reader);
 		readerAddress = nextAddress;
 	  }
-	  writeEntryPoint(writer, path.entryPoint, paths, symbols);
 	  // Output disassembled instructions of the execution path.
 	  for (AssemblyCode line : path.decoded) {
+		// Output comment block for an entry point if necessary.
+		Symbol entryPoint = symbols.getSymbol(line.getAddress());
+		if (entryPoint != null && entryPoint.getType() == SymbolType.entryPoint) {
+		  writeEntryPoint(writer, entryPoint, paths, symbols);
+		}
 		writer.write(line);
 		if (line.getBytes() != null) {
 		  nextAddress += line.getBytes().size();
@@ -605,9 +611,9 @@ public class DasmZ80 {
 	for (Symbol symbol : symbols.getSymbolsByType(SymbolType.label)) {
 	  symbolList.add(new SymbolSortedByName(symbol));
 	}
-	for (Symbol symbol : symbols.getSymbolsByType(SymbolType.entryPoint)) {
-	  symbolList.add(new SymbolSortedByName(symbol));
-	}
+	// for (Symbol symbol : symbols.getSymbolsByType(SymbolType.entryPoint)) {
+	// symbolList.add(new SymbolSortedByName(symbol));
+	// }
 	for (Symbol symbol : symbols.getSymbolsByType(SymbolType.memoryAddress)) {
 	  symbolList.add(new SymbolSortedByName(symbol));
 	}
@@ -615,8 +621,12 @@ public class DasmZ80 {
 	  Object[] sortedSymbolList = symbolList.toArray();
 	  Arrays.sort(sortedSymbolList);
 	  writer.write("\nMemory address cross reference list:\n");
+	  int previousAddress = -1;
 	  for (Object symbol : sortedSymbolList) {
-		writeSymbolReferences((Symbol) symbol, 4, writer);
+		if (((Symbol) symbol).getValue() != previousAddress) {
+		  writeSymbolReferences((Symbol) symbol, 4, writer);
+		  previousAddress = ((Symbol) symbol).getValue();
+		}
 	  }
 	}
 

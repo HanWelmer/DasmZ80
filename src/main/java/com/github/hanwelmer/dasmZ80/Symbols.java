@@ -129,4 +129,8 @@ public class Symbols {
   public void addAsMemoryAddress(Symbol point) {
 	memoryAddresses.put(point.getValue(), point);
   }
+
+  public Symbol getSymbol(int address) {
+	return memoryAddresses.get(address);
+  }
 }

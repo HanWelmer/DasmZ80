@@ -1,10 +1,4 @@
 0000                    org 0x0000
-0000                    ;
-0000                    ;****************
-0000                    ;* Entry point: __start
-0000                    ;*
-0000                    ;* Called by:
-0000                    ;****************
 0000 00       start:    NOP                 ;comment
 0001 02                 LD (BC),A           ;comment
 0002 76                 HALT                ;comment

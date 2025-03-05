@@ -458,32 +458,14 @@ public class TestComments extends DasmZ80 {
   }
 
   @Test
-  public void testJumpLineComment1() throws IOException {
-	ReadSymbolsFromArray input = new ReadSymbolsFromArray();
-	input.add("0000           reset    ENTRY 0x0000       ;entry point after hardware reset.");
-	input.add("0008           reset8   ENTRY 0x0008       ;Hello.");
-	input.add("0010           reset10  ENTRY 0x0010       ;Hello too.");
-	input.add("; world.");
-	input.add("                        ;Comments:");
-	input.add("0008 C1        reset8:  POP BC      ;pop BC and set Carry.");
-	input.add("0007 D7                 RST reset10 ;pop BC and increment DE module 128.");
-	Symbols symbols = readSymbols(input);
-
-  }
-
-  @Test
   public void testFollowThrough() throws IOException {
 	ReadSymbolsFromArray input = new ReadSymbolsFromArray();
 	input.add("0000           reset    ENTRY 0x0000");
 	input.add("0002           ep0002   ENTRY 0x0002");
 	input.add("0008           reset8   ENTRY 0x0008       ;Hello.");
 	input.add("                        ;Comments:");
-	// input.add("0000 185D reset: JR reset8-$ ;entry point after hardware
-	// reset.");
-	input.add("0000 185D               JR reset8  ;entry point after hardware reset.");
-	input.add("0007 D7                 RST reset10 ;pop BC and increment DE module 128.");
-	input.add("0008 C1                 POP BC      ;pop BC and set Carry.");
-	// input.add("0008 C1 reset8: POP BC ;pop BC and set Carry.");
+	input.add("0000                    ;entry point after hardware reset.");
+	input.add("0008                    ;pop BC and set Carry.");
 	Symbols symbols = readSymbols(input);
 
 	Byte[] bytes = { 0x18, 0x06, 0x37, 0xDD - 256, 0xCB - 256, 0x0E, 0xEE - 256, 0x00, 0xC1 - 256, 0x37, 0xC9 - 256 };
@@ -514,12 +496,13 @@ public class TestComments extends DasmZ80 {
 	assert ("0002 37       ep0002:   SCF\n".equals(writer.output.get(index++)));
 	assert ("0003 DDCB0EEE           SET  5,(IX+14)\n".equals(writer.output.get(index++)));
 	assert ("0007 00                 NOP\n".equals(writer.output.get(index++)));
+	assert ("0008                    ;\n".equals(writer.output.get(index++)));
 	assert ("0008                    ;****************\n".equals(writer.output.get(index++)));
 	assert ("0008                    ;* Entry point: reset8\n".equals(writer.output.get(index++)));
 	assert ("0008                    ;* Hello.\n".equals(writer.output.get(index++)));
 	assert ("0008                    ;*\n".equals(writer.output.get(index++)));
 	assert ("0008                    ;* Called by:\n".equals(writer.output.get(index++)));
-	assert ("0008                    ;* 0000 (0000 reset)\n".equals(writer.output.get(index++)));
+	assert ("0008                    ;* 0x0000 (0x0000 reset)\n".equals(writer.output.get(index++)));
 	assert ("0008                    ;****************\n".equals(writer.output.get(index++)));
 	assert ("0008 C1       reset8:   POP  BC             ;pop BC and set Carry.\n".equals(writer.output.get(index++)));
 	assert ("0009 37                 SCF\n".equals(writer.output.get(index++)));
