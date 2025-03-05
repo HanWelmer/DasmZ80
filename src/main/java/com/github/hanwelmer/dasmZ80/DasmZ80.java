@@ -82,11 +82,39 @@ public class DasmZ80 {
 	System.out.println("Usage: java -jar dasmZ80.jar [-s file.sym] filename.ext");
 	System.out.println(" where filename.ext is file to be disassembled");
 	System.out
-	    .println("  and -s file.sym is an optional input file with symbol definitions, comments and entry points.");
+	    .println("  and -s file.sym is an optional input file with symbol definitions, entry points and comments.");
 	System.out.println("File filename must have extension .bin");
 	System.out.println(" and must be in binary format.");
 	System.out.println(" Binary code is assumed to be Z80 compatible.");
 	System.out.println(" Start address is assumed to be 0x0000.");
+	System.out.println("Format of symbol definitions file is as follows:");
+	System.out.println(
+	    " Block of symbol definitions for IO addresses are preceded by a comment line containing " + IDENTIFY_IO);
+	System.out.println(" Block of symbol definitions for memory addresses are preceded by a comment line containing "
+	    + IDENTIFY_MEMORY);
+	System.out.println(" Block of symbol definitions for general constants are preceded by a comment line containing "
+	    + IDENTIFY_CONSTANT);
+	System.out.println(" Block of disassembled code comment definitions are preceded by a comment line containing "
+	    + IDENTIFY_COMMENT);
+	System.out.println(" General format of a symbol definition is: 0010 name EQU   expression ;comment");
+	System.out.println(" General format of an entry point is:      0010 name ENTRY expression ;comment");
+	System.out.println(" General format of a disassembled code comment definition is: 0010 ;comment");
+	System.out.println("  or: 0010 001122 label: MNE ;comment");
+	System.out.println("  as long as 'MNE' is not an EQU or ENTRY statement.");
+	System.out.println(" Comment is by default until end of line.");
+	System.out.println(" Comment can be extended until next block or symbol definition");
+	System.out.println("  with:    ;comment.");
+	System.out.println("  or with:       ;comment.");
+	System.out.println("  or with: 0010  ;comment.");
+	System.out.println(" In the examples above:");
+	System.out.println("  0010        is an example of a 16 bit address or constant.");
+	System.out.println("  001122      is an example of (3) byte value(s) copied from the input file.");
+	System.out.println("  name:       is an example of the name for a symbol.");
+	System.out
+	    .println("  expression: is an example of the expression that produces the value for a symbol or entry point.");
+	System.out.println("  label:      is an example of a label followed by a colon as terminator.");
+	System.out.println("  MNE         is an example of a disasssembeld code mnemonic.");
+	System.out.println("  ;comment is an example of comment until end of line.");
 	System.exit(1);
   } // usage()
 
@@ -330,7 +358,7 @@ public class DasmZ80 {
 		  address += nextInstruction.getBytes().size();
 		  // Add comments from comment symbols.
 		  Symbol commentSymbol = symbols.getComments().get(nextInstruction.getAddress());
-		  if (commentSymbol != null) {
+		  if (commentSymbol != null && commentSymbol.getComments().size() > 0) {
 			nextInstruction.setComment(commentSymbol.getComments().get(0));
 			for (int index = 1; index < commentSymbol.getComments().size(); index++) {
 			  String comment = commentSymbol.getComments().get(index);
