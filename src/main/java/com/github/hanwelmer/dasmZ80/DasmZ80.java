@@ -356,12 +356,6 @@ public class DasmZ80 {
 
 	// Fill in the labels in the decoded instructions in all execution paths.
 	paths.forEach((Integer entryPoint, Path path) -> fillInLabels(path.decoded, symbolList));
-
-	// Fill in the comments. Note that this may overwrite comment from entry
-	// point in case of jump or call statements.
-	// FIXME
-	// paths.forEach((Integer entryPoint, Path path) ->
-	// fillInComments(path.decoded, symbols.getComments()));
   } // fillInSymbols()
 
   private static void fillInLabels(ArrayList<AssemblyCode> decoded, ArrayList<Symbol> symbols) {
@@ -377,19 +371,6 @@ public class DasmZ80 {
 	  }
 	}
   } // fillInLabels()
-
-  private static Object fillInComments(ArrayList<AssemblyCode> decoded, HashMap<Integer, Symbol> comments) {
-	for (AssemblyCode code : decoded) {
-	  if (code.getBytes() != null && code.getBytes().size() > 0) {
-		Symbol comment = comments.get(code.getAddress());
-		if (comment != null) {
-		  code.setComment(comment.getComments().get(0));
-		}
-	  }
-
-	}
-	return null;
-  } // fillInComments()
 
   protected static void writeDefinitions(String fileName, AbstractWriter writer, Symbols symbols) throws IOException {
 	// Write symbol definitions, grouped by symbol type and sorted by address.
@@ -590,8 +571,7 @@ public class DasmZ80 {
   } // writeDefineBytes()
 
   private static void writeReferences(AbstractWriter writer, Symbols symbols) throws IOException {
-	// Write symbols and references, grouped by symbol type and sorted by symbol
-	// name.
+	// Write symbols and references, grouped by symbol type and sorted by name.
 	// Write references to port addresses.
 	ArrayList<SymbolSortedByName> symbolList = new ArrayList<SymbolSortedByName>();
 	for (Symbol symbol : symbols.getSymbolsByType(SymbolType.portAddress)) {
@@ -606,14 +586,11 @@ public class DasmZ80 {
 	  }
 	}
 
-	// Write references to entry points, labels and memory addresses.
+	// Write references to labels and memory addresses.
 	symbolList.clear();
 	for (Symbol symbol : symbols.getSymbolsByType(SymbolType.label)) {
 	  symbolList.add(new SymbolSortedByName(symbol));
 	}
-	// for (Symbol symbol : symbols.getSymbolsByType(SymbolType.entryPoint)) {
-	// symbolList.add(new SymbolSortedByName(symbol));
-	// }
 	for (Symbol symbol : symbols.getSymbolsByType(SymbolType.memoryAddress)) {
 	  symbolList.add(new SymbolSortedByName(symbol));
 	}
