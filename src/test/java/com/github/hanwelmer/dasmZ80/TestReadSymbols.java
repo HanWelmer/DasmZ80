@@ -231,14 +231,7 @@ public class TestReadSymbols extends DasmZ80 {
 	input.add("0003                    ;Handle interrupts via vector table.");
 	Symbols symbols = readSymbols(input);
 
-	ArrayList<Symbol> comments = symbols.getSymbolsByType(SymbolType.comment);
-	assert (comments.size() == 1);
-	assert (comments.get(0).getType() == SymbolType.comment);
-	assert (comments.get(0).getValue() == 0x0003);
-	assert (comments.get(0).getComments().size() == 1);
-	assert (";Handle interrupts via vector table.".equals(comments.get(0).getComments().get(0)));
-	String toString = comments.get(0).toString();
-	assert ("0003                                        ;Handle interrupts via vector table.\n".equals(toString));
+	validateSingleLineComment(symbols.getSymbolsByType(SymbolType.comment));
   }
 
   @Test
@@ -248,7 +241,10 @@ public class TestReadSymbols extends DasmZ80 {
 	input.add("0003 ED5E               IM   2              ;Handle interrupts via vector table.");
 	Symbols symbols = readSymbols(input);
 
-	ArrayList<Symbol> comments = symbols.getSymbolsByType(SymbolType.comment);
+	validateSingleLineComment(symbols.getSymbolsByType(SymbolType.comment));
+  }
+
+  private void validateSingleLineComment(ArrayList<Symbol> comments) {
 	assert (comments.size() == 1);
 	assert (comments.get(0).getType() == SymbolType.comment);
 	assert (comments.get(0).getValue() == 0x0003);
@@ -266,17 +262,7 @@ public class TestReadSymbols extends DasmZ80 {
 	input.add("0003                    ;... via vector table.");
 	Symbols symbols = readSymbols(input);
 
-	ArrayList<Symbol> comments = symbols.getSymbolsByType(SymbolType.comment);
-	assert (comments.size() == 1);
-	assert (comments.get(0).getType() == SymbolType.comment);
-	assert (comments.get(0).getValue() == 0x0003);
-	assert (comments.get(0).getComments().size() == 2);
-	assert (";Handle interrupts ...".equals(comments.get(0).getComments().get(0)));
-	assert (";... via vector table.".equals(comments.get(0).getComments().get(1)));
-	String toString = comments.get(0).toString();
-	String part1 = "0003                                        ;Handle interrupts ...\n";
-	String part2 = "                                            ;... via vector table.\n";
-	assert (toString.equals(part1 + part2));
+	validateTwoLineComment(symbols.getSymbolsByType(SymbolType.comment));
   }
 
   @Test
@@ -287,7 +273,32 @@ public class TestReadSymbols extends DasmZ80 {
 	input.add("                        ;... via vector table.");
 	Symbols symbols = readSymbols(input);
 
-	ArrayList<Symbol> comments = symbols.getSymbolsByType(SymbolType.comment);
+	validateTwoLineComment(symbols.getSymbolsByType(SymbolType.comment));
+  }
+
+  @Test
+  public void testTwoLineComment3() throws IOException {
+	ReadSymbolsFromArray input = new ReadSymbolsFromArray();
+	input.add("                        ;Comments:");
+	input.add("0003 ED5E               IM   2              ;Handle interrupts ...");
+	input.add("0003                                        ;... via vector table.");
+	Symbols symbols = readSymbols(input);
+
+	validateTwoLineComment(symbols.getSymbolsByType(SymbolType.comment));
+  }
+
+  @Test
+  public void testTwoLineComment4() throws IOException {
+	ReadSymbolsFromArray input = new ReadSymbolsFromArray();
+	input.add("                        ;Comments:");
+	input.add("0003 ED5E               IM   2              ;Handle interrupts ...");
+	input.add("                                            ;... via vector table.");
+	Symbols symbols = readSymbols(input);
+
+	validateTwoLineComment(symbols.getSymbolsByType(SymbolType.comment));
+  }
+
+  private void validateTwoLineComment(ArrayList<Symbol> comments) {
 	assert (comments.size() == 1);
 	assert (comments.get(0).getType() == SymbolType.comment);
 	assert (comments.get(0).getValue() == 0x0003);
@@ -299,23 +310,4 @@ public class TestReadSymbols extends DasmZ80 {
 	String part2 = "                                            ;... via vector table.\n";
 	assert (toString.equals(part1 + part2));
   }
-
-  // @Test
-  public void testTwoLineComment3() throws IOException {
-	ReadSymbolsFromArray input = new ReadSymbolsFromArray();
-	input.add("                        ;Comments:");
-	input.add("0003 ED5E               IM   2              ;Handle interrupts ...");
-	input.add("0003                                        ;...via vector table.");
-	Symbols symbols = readSymbols(input);
-  }
-
-  // @Test
-  public void testTwoLineComment4() throws IOException {
-	ReadSymbolsFromArray input = new ReadSymbolsFromArray();
-	input.add("                        ;Comments:");
-	input.add("0003 ED5E               IM   2              ;Handle interrupts ...");
-	input.add("                                            ;...via vector table.");
-	Symbols symbols = readSymbols(input);
-  }
-
 }
