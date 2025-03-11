@@ -106,7 +106,6 @@
                         ; Memory: 1K RAM  at 0x1800..0x1bff ?
                         ; IO    : Z80 SIO at 0x10..0x13 ?
                         ;         Z80 CTC at ?
-                        ;
                         ;Memory addresses:
 1B00            vectors EQU  0x1B00         ;Base address for interrupt vector table. This byte initialised to 0xD8.
 1B01            lbl1B01 EQU  0x1B01         ;Initialised to 0x06.
@@ -118,13 +117,12 @@
 1B1A            ioReset EQU  0x1B1A         ;Base address for IO-device reset constants.
 1B90            counter EQU  0x1B90         ;?
 1C00            topOfRAM EQU 0x1C00         ;Top of available memory.
-                        ;
                         ;Constants:
 0054            vecSize EQU  topOfVec-org_vec   ;Size of ROM based original values for vector table.
 0A13            cIniP13 EQU  10*256+SIO_B_C ;send 10 bytes to SIO_B_C.
 0C08            c12ports EQU 12*256+port08  ;Initialize 12 ports starting with port18.
 0C11            cIniP11 EQU  12*256+SIO_A_C ;send 12 bytes to SIO_A_C.
-                        ;
+                        ;Entry points:
 0000            reset   ENTRY 0x0000        ;entry point after reset.
 005F            reset1  ENTRY 0x005F        ;continuation of reset entry point.
 0008            reset8  ENTRY 0x0008        ;pop BC and set Carry.
@@ -136,11 +134,10 @@
 0078            reset2  ENTRY 0x0078        ;local label within reset function.
 0082            reset3  ENTRY 0x0082        ;local label within reset function.
 0091            reset4  ENTRY 0x0091        ;local label within reset function.
-                        ;
                         ;Comments:
 0000 185D     reset:    JR   reset1-$       ;entry point after hardware reset.
-0008 C1       reset8:   POP  BC             ;pop BC and set Carry.
 0007 D7                 RST  reset10        ;pop BC and increment DE module 128
+0008 C1       reset8:   POP  BC             ;pop BC and set Carry.
 0038 DDCB0266 reset38:  BIT  4,(IX+2)       ;if ((IX+2).bit4 == 1) { C=C*2; toggle B.bit2} lbl1B0D = BC.
 005F 31001C   reset1:   LD   SP,topOfRAM    ;Init stack pointer to top of available memory.
 0062 ED5E               IM   2              ;Handle interrupts via vector table.
