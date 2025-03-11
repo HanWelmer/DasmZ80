@@ -179,11 +179,8 @@ public class DasmZ80 {
 			  previousSymbol = symbols.getOrMakeCommentSymbol(value);
 			}
 			// skip until comment
-			String comment = input.getWord();
-			while (comment.length() > 0 && comment.charAt(0) != ';') {
-			  comment = input.getWord();
-			}
-			if (comment.length() > 0 && comment.charAt(0) == ';') {
+			String comment = input.getComment();
+			if (comment.length() > 0) {
 			  previousSymbol.addComment(comment);
 			}
 		  }

@@ -512,4 +512,58 @@ public class TestComments extends DasmZ80 {
 	assert ("000B                    end\n".equals(writer.output.get(index++)));
   }
 
+  @Test
+  public void testMemodyneM80() throws IOException {
+	ReadSymbolsFromArray input = new ReadSymbolsFromArray();
+	input.add("                         ;Memory addresses:");
+	input.add(
+	    "1B00            vectors  EQU  0x1B00         ;Base address for interrupt vector table. This byte initialised to 0xD8.");
+	input.add("1C00            topOfRAM EQU 0x1C00         ;Top of available memory.");
+	input.add("                         ;Entry points:");
+	input.add("0000            reset   ENTRY 0x0000        ;entry point after reset.");
+	input.add("0002            reset1  ENTRY 0x005F        ;continuation of reset entry point.");
+	input.add("                        ;Comments:");
+	input.add("0000 185D     reset:    JR   reset1-$       ;entry point after hardware reset.");
+	input.add("0002 31001C   reset1:   LD   SP,topOfRAM    ;Init stack pointer to top of available memory.");
+	input.add("0005 ED5E               IM   2              ;Handle interrupts via vector table.");
+	Symbols symbols = readSymbols(input);
+
+	Byte[] bytes = { 0x18, 0x00, 0x31, 0x00, 0x1C, 0xED - 256, 0x5E, 0xC9 - 256 };
+	ByteReader reader = new ReadFromArray(bytes);
+	StringWriter writer = new StringWriter();
+
+	startAddress = 0;
+	finalAddress = reader.getSize();
+	disassembleToWriter("test", reader, writer, symbols);
+
+	int index = 5;
+	assert ("                        ;\n".equals(writer.output.get(index++)));
+	assert ("0000                    org 0x0000\n".equals(writer.output.get(index++)));
+	assert ("0000                    ;\n".equals(writer.output.get(index++)));
+	assert ("0000                    ;****************\n".equals(writer.output.get(index++)));
+	assert ("0000                    ;* Entry point: reset\n".equals(writer.output.get(index++)));
+	assert ("0000                    ;* entry point after reset.\n".equals(writer.output.get(index++)));
+	assert ("0000                    ;*\n".equals(writer.output.get(index++)));
+	assert ("0000                    ;* Called by:\n".equals(writer.output.get(index++)));
+	assert ("0000                    ;****************\n".equals(writer.output.get(index++)));
+	assert ("0000 1800     reset:    JR   reset1-$       ;entry point after hardware reset.\n"
+	    .equals(writer.output.get(index++)));
+	assert ("0002                    ;\n".equals(writer.output.get(index++)));
+	assert ("0002                    ;****************\n".equals(writer.output.get(index++)));
+	assert ("0002                    ;* Entry point: reset1\n".equals(writer.output.get(index++)));
+	assert ("0002                    ;* continuation of reset entry point.\n".equals(writer.output.get(index++)));
+	assert ("0002                    ;*\n".equals(writer.output.get(index++)));
+	assert ("0002                    ;* Called by:\n".equals(writer.output.get(index++)));
+	assert ("0002                    ;* 0x0000 (0x0000 reset: entry point after reset.)\n"
+	    .equals(writer.output.get(index++)));
+	assert ("0002                    ;****************\n".equals(writer.output.get(index++)));
+	assert ("0002 31001C   reset1:   LD   SP,topOfRAM    ;Init stack pointer to top of available memory.\n"
+	    .equals(writer.output.get(index++)));
+	assert ("0005 ED5E               IM   2              ;Handle interrupts via vector table.\n"
+	    .equals(writer.output.get(index++)));
+	assert ("0007 C9                 RET\n".equals(writer.output.get(index++)));
+	assert ("0008                    ;\n".equals(writer.output.get(index++)));
+	assert ("0008                    end\n".equals(writer.output.get(index++)));
+  }
+
 }

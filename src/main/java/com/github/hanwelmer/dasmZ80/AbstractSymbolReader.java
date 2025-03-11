@@ -13,6 +13,18 @@ public abstract class AbstractSymbolReader implements AbstractReader {
 	return getString(false);
   }
 
+  public String getComment() {
+	String comment = "";
+	// skip until ';'
+	while (pos < lastLine.length() && lastLine.charAt(pos) != ';') {
+	  pos++;
+	}
+	if (pos < lastLine.length() && lastLine.charAt(pos) == ';') {
+	  comment += lastLine.substring(pos);
+	}
+	return comment;
+  }
+
   private String getString(boolean asIdentifier) {
 	String value = "";
 	// skip spaces
