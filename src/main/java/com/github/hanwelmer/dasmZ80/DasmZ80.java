@@ -488,23 +488,26 @@ public class DasmZ80 {
 	  nextAddress = (Integer) key;
 	  Path path = paths.get((Integer) key);
 	  // Output unvisited input code if necessary.
-	  if (readerAddress != nextAddress) {
+	  if (readerAddress < nextAddress) {
 		writeUnvisitedCode(readerAddress, nextAddress, writer, reader);
 		readerAddress = nextAddress;
 	  }
-	  // Output disassembled instructions of the execution path.
-	  for (AssemblyCode line : path.decoded) {
-		// Output comment block for an entry point if necessary.
-		Symbol entryPoint = symbols.getSymbol(line.getAddress());
-		if (entryPoint != null && entryPoint.getType() == SymbolType.entryPoint) {
-		  writeEntryPoint(writer, entryPoint, paths, symbols);
+	  // Output path if not done yet.
+	  if (readerAddress == nextAddress) {
+		// Output disassembled instructions of the execution path.
+		for (AssemblyCode line : path.decoded) {
+		  // Output comment block for an entry point if necessary.
+		  Symbol entryPoint = symbols.getSymbol(line.getAddress());
+		  if (entryPoint != null && entryPoint.getType() == SymbolType.entryPoint) {
+			writeEntryPoint(writer, entryPoint, paths, symbols);
+		  }
+		  writer.write(line);
+		  if (line.getBytes() != null) {
+			nextAddress += line.getBytes().size();
+		  }
 		}
-		writer.write(line);
-		if (line.getBytes() != null) {
-		  nextAddress += line.getBytes().size();
-		}
+		readerAddress = nextAddress;
 	  }
-	  readerAddress = nextAddress;
 	}
 
 	// Add unvisited code beyond last decoded address.
