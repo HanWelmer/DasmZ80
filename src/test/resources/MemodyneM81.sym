@@ -107,6 +107,12 @@
                         ; IO    : Z80 SIO at 0x10..0x13 ?
                         ;         Z80 CTC at ?
                         ;Memory addresses:
+0044            reset38_ EQU 0x0044
+0078            reset2  EQU  0x0078
+0082            reset3  EQU  0x0082
+0091            reset4  EQU  0x0091
+0300            orgVec  EQU  0x0300         ;ROM based default contents for the interrupt vector table.
+0354            topOfVec EQU 0x0354         ;Top of ROM based default contents for the vector table.
 1B00            vectors EQU  0x1B00         ;Base address for interrupt vector table. This byte initialised to 0xD8.
 1B01            lbl1B01 EQU  0x1B01         ;Initialised to 0x06.
 1B02            lbl1B02 EQU  0x1B02         ;Initialised to 0x00.
@@ -118,33 +124,44 @@
 1B90            counter EQU  0x1B90         ;?
 1C00            topOfRAM EQU 0x1C00         ;Top of available memory.
                         ;Constants:
-0054            vecSize EQU  topOfVec-org_vec   ;Size of ROM based original values for vector table.
+0054            vecSize EQU  topOfVec-orgVec    ;Size of ROM based original values for vector table.
 0A13            cIniP13 EQU  10*256+SIO_B_C ;send 10 bytes to SIO_B_C.
 0C08            c12ports EQU 12*256+port08  ;Initialize 12 ports starting with port18.
 0C11            cIniP11 EQU  12*256+SIO_A_C ;send 12 bytes to SIO_A_C.
                         ;Entry points:
-0000            reset   ENTRY 0x0000        ;entry point after reset.
-005F            reset1  ENTRY 0x005F        ;continuation of reset entry point.
+0000            reset   ENTRY 0x0000        ;entry point after hardware reset.
+005F            reset1  ENTRY 0x005F        ;continuation of entry point after hardware reset.
 0008            reset8  ENTRY 0x0008        ;pop BC and set Carry.
 0010            reset10 ENTRY 0x0010        ;pop BC and increment DE module 128.
 0018            reset18 ENTRY 0x0018        ;store HL at lbl1B54.
 0020            reset20 ENTRY 0x0020        ;Load HL with 0x1B03.
 0030            reset30 ENTRY 0x0030        ;Increment DE module 128.
 0038            reset38 ENTRY 0x0038        ;if ((IX+2).bit4 == 1) { C=C*2; toggle B.bit2} lbl1B0D = BC.
-0078            reset2  ENTRY 0x0078        ;local label within reset function.
-0082            reset3  ENTRY 0x0082        ;local label within reset function.
-0091            reset4  ENTRY 0x0091        ;local label within reset function.
+02F2            iniSioB ENTRY 0x02F2        ;Initialize SIO channel B.
                         ;Comments:
-0000 185D     reset:    JR   reset1-$       ;entry point after hardware reset.
+0000 185D     reset:    JR   reset1-$       ;continue elsewhere.
 0007 D7                 RST  reset10        ;pop BC and increment DE module 128
-0008 C1       reset8:   POP  BC             ;pop BC and set Carry.
-0038 DDCB0266 reset38:  BIT  4,(IX+2)       ;if ((IX+2).bit4 == 1) { C=C*2; toggle B.bit2} lbl1B0D = BC.
+0038 DDCB0266 reset38:  BIT  4,(IX+2)       ;if ((IX+2).bit4 == 1) {
+003E CB21               SLA  C              ;  C=C*2;
+0040 78                 LD   A,B            ;  toggle B.bit2
+0043 7F                 LD   A,A            ;} does not make sense; 0x47 = LD B,A.
+0044 ED430D1B lbl0044:  LD   (lbl1B0D),BC   ;lbl1B0D = BC.
 005F 31001C   reset1:   LD   SP,topOfRAM    ;Init stack pointer to top of available memory.
 0062 ED5E               IM   2              ;Handle interrupts via vector table.
 0064 11001B             LD   DE,vectors     ;Load DE-register with base address for interrupt vector table.
 0067 7A                 LD   A,D            ;Load I-register with high byte of that base address.
-006A D5                 PUSH DE             ;Load IX-register with base address for interrupt vector table.
-006D 210003             LD   HL,org_vec     ;Copy original values for vector table from ROM to RAM.
+006A D5                 PUSH DE             ;copy vector table base address to IX-register.
+006D 210003             LD   HL,org_vec     ;Copy default values for vector table from ROM to RAM.
 0075 AF                 XOR  A              ;Initialize data and stack (0x1B54..0x1BFF) with 0x00.
 007C 01080C             LD   BC,c12ports    ;Initialise 12 IO-devices at port08..SIO_B_C by ...
 007F 210F1B             LD   HL,ioInit      ; sending byte pairs from 0x1B0F..0x1B26
+0089 CDF202             CALL iniSioB        ;Initialize SIO channel B.
+008C 01110C             LD   BC,cIniP11     ;Initialize SIO channel A with 12 bytes from 0x1B24..0x1B2F.
+0091 E7       reset4:   RST  reset20        ;Load HL with 0x1B03.
+0092 23                 INC  HL             ;....... with 0x1B04.
+0093 F3                 DI                  ;Disable interrupts while..
+0094 CB7E               BIT  7,(HL)         ;..test and reset 0x1B04 bit 7
+009B C47106             CALL NZ,lbl0671     ;..if (0x1B04 bit 7 == 1) { call lbl0671 }.
+02F2 211A1B   iniSioB:  LD   HL,ioReset     ;Initialize SIO channel B with bytes from 0x1B1A..0x1B23.
+02FF D7                 RST  reset10        ;pop BC and increment DE module 128
+                                            ;0xD8 = RET C is executed always after reset 8 (DEC and reset10 do not affect Carry).
