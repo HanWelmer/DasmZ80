@@ -25,6 +25,10 @@ public class Symbols {
 	return comments;
   }
 
+  public HashMap<Integer, Symbol> getConstants() {
+	return constants;
+  }
+
   public HashMap<Integer, Symbol> getEntryPoints() {
 	return entryPoints;
   }

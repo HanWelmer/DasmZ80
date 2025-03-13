@@ -158,7 +158,10 @@ public class Decoder {
 	  // Get an existing or make a new symbol.
 	  String expression = String.format("%02X%02X", byte3, byte2);
 	  String label = "lbl" + expression;
-	  Symbol symbol = symbols.getOrMakeSymbol(label, SymbolType.memoryAddress, value, "0x" + expression);
+	  Symbol symbol = symbols.getConstants().get(value);
+	  if (symbol == null) {
+		symbol = symbols.getOrMakeSymbol(label, SymbolType.memoryAddress, value, "0x" + expression);
+	  }
 
 	  // Put label in assembly code instruction.
 	  asmCode.updateMnemonic("@", symbol.getName());

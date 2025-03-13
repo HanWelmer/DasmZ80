@@ -454,4 +454,52 @@ public class TestDisassemble extends DasmZ80 {
 	assert ("reset8  =0008: 000C\n".equals(writer.output.get(index++)));
   }
 
+  @Test
+  public void testConstantSymbols() throws IOException {
+	ReadSymbolsFromArray input = new ReadSymbolsFromArray();
+	input.add("                      ;Comments:");
+	input.add("0000               	   	 ;Load BC.");
+	input.add("0003                    	 ;Load DE.");
+	input.add("0006                    	 ;Copy vector table.");
+	input.add("                      ;Constants:");
+	input.add("1B00         vectors  EQU  0x1B00");
+	input.add("0300         orgVec   EQU  0x0300");
+	input.add("0354         topOfVec EQU  0x0354");
+	input.add("0054         vecSize  EQU  topOfVec-orgVec    ;Size of ROM based original values for vector table.");
+	symbols = readSymbols(input);
+
+	Byte[] bytes = { 0x01, 0x54, 0x00, 0x11, 0x00, 0x1B, 0x21, 0x00, 0x03, 0xC9 - 256 };
+	ByteReader reader = new ReadFromArray(bytes);
+	StringWriter writer = new StringWriter();
+	startAddress = 0;
+	finalAddress = reader.getSize();
+
+	disassembleToWriter("test", reader, writer, symbols);
+
+	int index = 1;
+	assert ("                        ;\n".equals(writer.output.get(index++)));
+	assert ("                        ;Constants:\n".equals(writer.output.get(index++)));
+	assert ("0054          vecSize   EQU  topOfVec-orgVec;Size of ROM based original values for vector table.\n"
+	    .equals(writer.output.get(index++)));
+	assert ("0300          orgVec    EQU  0x0300\n".equals(writer.output.get(index++)));
+	assert ("0354          topOfVec  EQU  0x0354\n".equals(writer.output.get(index++)));
+	assert ("1B00          vectors   EQU  0x1B00\n".equals(writer.output.get(index++)));
+	assert ("                        ;\n".equals(writer.output.get(index++)));
+	assert ("0000                    No entry points defined; assuming 0x0000 as entry point\n"
+	    .equals(writer.output.get(index++)));
+	assert ("0000                    org 0x0000\n".equals(writer.output.get(index++)));
+	assert ("0000                    ;\n".equals(writer.output.get(index++)));
+	assert ("0000                    ;****************\n".equals(writer.output.get(index++)));
+	assert ("0000                    ;* Entry point: ep0000\n".equals(writer.output.get(index++)));
+	assert ("0000                    ;*\n".equals(writer.output.get(index++)));
+	assert ("0000                    ;* Called by:\n".equals(writer.output.get(index++)));
+	assert ("0000                    ;****************\n".equals(writer.output.get(index++)));
+	assert ("0000 015400   ep0000:   LD   BC,vecSize     ;Load BC.\n".equals(writer.output.get(index++)));
+	assert ("0003 11001B             LD   DE,vectors     ;Load DE.\n".equals(writer.output.get(index++)));
+	assert ("0006 210003             LD   HL,orgVec      ;Copy vector table.\n".equals(writer.output.get(index++)));
+	assert ("0009 C9                 RET\n".equals(writer.output.get(index++)));
+	assert ("000A                    ;\n".equals(writer.output.get(index++)));
+	assert ("000A                    end\n".equals(writer.output.get(index++)));
+  }
+
 }
