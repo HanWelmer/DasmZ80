@@ -1,6 +1,10 @@
 # dasmZ80 download folder
 This page contains released versions of the Z80 Disassembler.
 
+## Version 1.4.1
+Bug fix: Use constant symbol when loading BC, DE or HL.
+Bug fix: Sort entry point references by address.
+
 ## Version 1.4.0:
 Accept user defined comments from symbol definition file.
 
