@@ -373,7 +373,7 @@ public class DasmZ80 {
 	return decoded;
   } // disassemble()
 
-  private static void fillInSymbols(HashMap<Integer, Path> paths, Symbols symbols) {
+  protected static void fillInSymbols(HashMap<Integer, Path> paths, Symbols symbols) {
 	// Collect symbols to be filled in as labels in a single array.
 	ArrayList<Symbol> symbolList = symbols.getSymbolsByType(SymbolType.entryPoint);
 	symbolList.addAll(symbols.getSymbolsByType(SymbolType.label));
@@ -528,10 +528,12 @@ public class DasmZ80 {
 	}
 	writer.write(new AssemblyCode(entryPoint.getValue(), ";*"));
 
-	// And finally the list of references to this entry point.
+	// List of references to this entry point, sorted by address.
+	Object[] sortedReferences = entryPoint.getReferences().toArray();
+	Arrays.sort(sortedReferences);
 	writer.write(new AssemblyCode(entryPoint.getValue(), ";* Called by:"));
-	for (Integer reference : entryPoint.getReferences()) {
-	  Symbol calledBy = getEntryPointFor(reference, paths);
+	for (Object reference : sortedReferences) {
+	  Symbol calledBy = getEntryPointFor((Integer) reference, paths);
 	  String ref = String.format(";* 0x%04X (0x%04X %s", reference, calledBy.getValue(), calledBy.getName());
 	  if (calledBy.getComments().size() != 0) {
 		ref += ": ";
@@ -598,7 +600,7 @@ public class DasmZ80 {
 	}
   } // writeDefineBytes()
 
-  private static void writeReferences(AbstractWriter writer, Symbols symbols) throws IOException {
+  protected static void writeReferences(AbstractWriter writer, Symbols symbols) throws IOException {
 	// Write symbols and references, grouped by symbol type and sorted by name.
 	// Write references to port addresses.
 	ArrayList<SymbolSortedByName> symbolList = new ArrayList<SymbolSortedByName>();

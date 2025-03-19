@@ -1,6 +1,7 @@
 package com.github.hanwelmer.dasmZ80;
 
 import java.io.IOException;
+import java.util.HashMap;
 
 import org.junit.Test;
 
@@ -502,4 +503,64 @@ public class TestDisassemble extends DasmZ80 {
 	assert ("000A                    end\n".equals(writer.output.get(index++)));
   }
 
+  @Test
+  public void testTwoEntryPointReferences() throws IOException {
+	ReadSymbolsFromArray input = new ReadSymbolsFromArray();
+	input.add("                      ;Entry points");
+	input.add("0000        start     ENTRY 0x0000");
+	input.add("0006        doit      ENTRY 0x0006");
+	symbols = readSymbols(input);
+
+	Byte[] bytes = { 0xCD - 256, 0x06, 0x00, 0xC3 - 256, 0x06, 0x00, 0xC3 - 256, 0x06, 0x00 };
+	ByteReader reader = new ReadFromArray(bytes);
+	StringWriter writer = new StringWriter();
+	startAddress = 0;
+	finalAddress = reader.getSize();
+
+	// disassembleToWriter("test", reader, writer, symbols);
+	String fileName = "test";
+	HashMap<Integer, Path> paths = disassembleReader(fileName, reader, symbols);
+	fillInSymbols(paths, symbols);
+
+	// Write everything to the output file.
+	try {
+	  writeDefinitions(fileName, writer, symbols);
+	  // for this test, force out of order references to the entry point of the
+	  // second path.
+	  Integer key = 6;
+	  Integer ref = 3;
+	  paths.get(key).entryPoint.getReferences().remove(ref);
+	  paths.get(key).entryPoint.getReferences().add(ref);
+	  writeOutput(writer, reader, paths, symbols);
+	  writeReferences(writer, symbols);
+	} catch (IOException e) {
+	  System.out.println("Error writing to output file.");
+	  System.out.println(e.getMessage());
+	  e.printStackTrace();
+	}
+
+	int index = 1;
+	assert ("                        ;\n".equals(writer.output.get(index++)));
+	assert ("0000                    org 0x0000\n".equals(writer.output.get(index++)));
+	assert ("0000                    ;\n".equals(writer.output.get(index++)));
+	assert ("0000                    ;****************\n".equals(writer.output.get(index++)));
+	assert ("0000                    ;* Entry point: start\n".equals(writer.output.get(index++)));
+	assert ("0000                    ;*\n".equals(writer.output.get(index++)));
+	assert ("0000                    ;* Called by:\n".equals(writer.output.get(index++)));
+	assert ("0000                    ;****************\n".equals(writer.output.get(index++)));
+	assert ("0000 CD0600   start:    CALL doit\n".equals(writer.output.get(index++)));
+	assert ("0003 C30600             JP   doit\n".equals(writer.output.get(index++)));
+	assert ("0006                    ;\n".equals(writer.output.get(index++)));
+	assert ("0006                    ;****************\n".equals(writer.output.get(index++)));
+	assert ("0006                    ;* Entry point: doit\n".equals(writer.output.get(index++)));
+	assert ("0006                    ;*\n".equals(writer.output.get(index++)));
+	assert ("0006                    ;* Called by:\n".equals(writer.output.get(index++)));
+	assert ("0006                    ;* 0x0000 (0x0000 start)\n".equals(writer.output.get(index++)));
+	assert ("0006                    ;* 0x0003 (0x0000 start)\n".equals(writer.output.get(index++)));
+	assert ("0006                    ;* 0x0006 (0x0006 doit)\n".equals(writer.output.get(index++)));
+	assert ("0006                    ;****************\n".equals(writer.output.get(index++)));
+	assert ("0006 C30600   doit:     JP   doit\n".equals(writer.output.get(index++)));
+	assert ("0009                    ;\n".equals(writer.output.get(index++)));
+	assert ("0009                    end\n".equals(writer.output.get(index++)));
+  }
 }
