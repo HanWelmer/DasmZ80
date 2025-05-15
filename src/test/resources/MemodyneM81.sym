@@ -10,7 +10,7 @@
 000D            port0D  EQU  0x0D
 000E            port0E  EQU  0x0E
 000F            port0F  EQU  0x0F
-0010            port10  EQU  0x10           ;SIO channel A, data register.
+0010            SIO_A   EQU  0x10           ;SIO channel A, data register.
 0011            SIO_A_C EQU  0x11           ;SIO channel A, command register.
                         ;SIO channel A, command register is initialised with (see 0x0321: 0x0322, 0x0324..0x032F):
                         ;0x6E = 0156 -> Reset Rx CRC checker, Reset TxInt Pending, select register 6.
@@ -53,7 +53,7 @@
                         ;0xAA -> Transmit sync character (in external sync mode).
                         ;0x07 = 0007 -> Select register 7.
                         ;0xAA -> Not used in external sync mode.
-0012            port12  EQU  0x12           ;SIO channel B, data register.
+0012            SIO_B   EQU  0x12           ;SIO channel B, data register.
 0013            SIO_B_C EQU  0x13           ;SIO channel B, command register.
                         ;SIO channel B, command register is initialised with (see 0x0325: 0x0326, 0x031A..0x0323):
                         ;0x30 = 0060 -> Error reset.
@@ -163,5 +163,8 @@
 0094 CB7E               BIT  7,(HL)         ;..test and reset 0x1B04 bit 7
 009B C47106             CALL NZ,lbl0671     ;..if (0x1B04 bit 7 == 1) { call lbl0671 }.
 02F2 211A1B   iniSioB:  LD   HL,ioReset     ;Initialize SIO channel B with bytes from 0x1B1A..0x1B23.
-02FF D7                 RST  reset10        ;pop BC and increment DE module 128
-                                            ;0xD8 = RET C is executed always after reset 8 (DEC and reset10 do not affect Carry).
+02FA CF                 RST  reset8         ;pop BC and set Carry.
+02FB DD355A             DEC  (IX+90)        ;Decrement counter at 0x1B90.
+02FE C0                 RET  NZ             ;It was initialized to 0, so first time round we return immediately.
+0300 D8       orgVec:   RET  C              ;0300-0354 ROM based default contents for the interrupt vector table.
+                                            ;RET C is executed always after reset 8 (DEC and reset10 do not affect Carry).

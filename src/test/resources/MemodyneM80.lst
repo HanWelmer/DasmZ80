@@ -109,7 +109,6 @@
                         ;
                         ;Memory addresses:
 0044          reset38_  EQU  0x0044
-0054          lbl0054   EQU  0x0054
 0078          reset2    EQU  0x0078
 0082          reset3    EQU  0x0082
 0091          reset4    EQU  0x0091
@@ -118,9 +117,6 @@
 0354          topOfVec  EQU  0x0354         ;Top of ROM based default contents for the vector table.
 041F          lbl041F   EQU  0x041F
 0456          lbl0456   EQU  0x0456
-0A13          lbl0A13   EQU  0x0A13
-0C08          lbl0C08   EQU  0x0C08
-0C11          lbl0C11   EQU  0x0C11
 1B00          vectors   EQU  0x1B00         ;Base address for interrupt vector table. This byte initialised to 0xD8.
 1B01          lbl1B01   EQU  0x1B01         ;Initialised to 0x06.
 1B02          lbl1B02   EQU  0x1B02         ;Initialised to 0x00.
@@ -202,8 +198,8 @@ C103          lblC103   EQU  0xC103
 0020                    ;* Load HL with 0x1B03.
 0020                    ;*
 0020                    ;* Called by:
-0020                    ;* 0x038F (0x0383 lbl0383)
 0020                    ;* 0x0091 (0x005F reset1: continuation of entry point after hardware reset.)
+0020                    ;* 0x038F (0x0383 lbl0383)
 0020                    ;****************
 0020 21031B   reset20:  LD   HL,lbl1B03
 0023 C9                 RET
@@ -265,21 +261,21 @@ C103          lblC103   EQU  0xC103
 006A D5                 PUSH DE             ;copy vector table base address to IX-register.
 006B DDE1               POP  IX
 006D 210003             LD   HL,orgVec      ;Copy default values for vector table from ROM to RAM.
-0070 015400             LD   BC,lbl0054
+0070 015400             LD   BC,vecSize
 0073 EDB0               LDIR
 0075 AF                 XOR  A              ;Initialize data and stack (0x1B54..0x1BFF) with 0x00.
 0076 06AC               LD   B,0xAC
 0078 12       reset2:   LD   (DE),A
 0079 13                 INC  DE
 007A 10FC               DJNZ reset2-$
-007C 01080C             LD   BC,lbl0C08     ;Initialise 12 IO-devices at port08..SIO_B_C by ...
+007C 01080C             LD   BC,c12ports    ;Initialise 12 IO-devices at port08..SIO_B_C by ...
 007F 210F1B             LD   HL,ioInit      ; sending byte pairs from 0x1B0F..0x1B26
 0082 EDA3     reset3:   OUTI
 0084 EDA3               OUTI
 0086 0C                 INC  C
 0087 10F9               DJNZ reset3-$
 0089 CDF202             CALL iniSioB        ;Initialize SIO channel B.
-008C 01110C             LD   BC,lbl0C11     ;Initialize SIO channel A with 12 bytes from 0x1B24..0x1B2F.
+008C 01110C             LD   BC,cIniP11     ;Initialize SIO channel A with 12 bytes from 0x1B24..0x1B2F.
 008F EDB3               OTIR
 0091 E7       reset4:   RST  reset20        ;Load HL with 0x1B03.
 0092 23                 INC  HL             ;....... with 0x1B04.
@@ -449,14 +445,14 @@ C103          lblC103   EQU  0xC103
 02F2                    ;* 0x0089 (0x005F reset1: continuation of entry point after hardware reset.)
 02F2                    ;****************
 02F2 211A1B   iniSioB:  LD   HL,ioReset     ;Initialize SIO channel B with bytes from 0x1B1A..0x1B23.
-02F5 01130A             LD   BC,lbl0A13
+02F5 01130A             LD   BC,cIniP13
 02F8 EDB3               OTIR
 02FA CF                 RST  reset8         ;pop BC and set Carry.
-02FB DD355A             DEC  (IX+90)
-02FE C0                 RET  NZ
-02FF D7                 RST  reset10        ;pop BC and increment DE module 128
-0300                                        ;0xD8 = RET C is executed always after reset 8 (DEC and reset10 do not affect Carry).
-0300 D8       orgVec:   RET  C
+02FB DD355A             DEC  (IX+90)        ;Decrement counter at 0x1B90.
+02FE C0                 RET  NZ             ;It was initialized to 0, so first time round we return immediately.
+02FF D7                 RST  reset10        ;pop BC and increment DE module 128.
+0300 D8       orgVec:   RET  C              ;0300-0354 ROM based default contents for the interrupt vector table.
+0301                                        ;RET C is executed always after reset 8 (DEC and reset10 do not affect Carry).
 0301 0600               LD   B,0x00
 0303 04                 INC  B
 0304 80                 ADD  A,B
@@ -858,7 +854,6 @@ counter =1B90:
 iniSioB =02F2: 0089
 ioInit  =1B0F: 007F
 ioReset =1B1A: 02F2
-lbl0054 =0054: 0070
 lbl00A1 =00A1: 0309
 lbl0317 =0317: 0312
 lbl0321 =0321: 031B
@@ -869,9 +864,6 @@ lbl038D =038D: 0387
 lbl041F =041F: 0322
 lbl0456 =0456: 0392
 lbl0671 =0671: 009B
-lbl0A13 =0A13: 02F5
-lbl0C08 =0C08: 007C
-lbl0C11 =0C11: 008C
 lbl1B01 =1B01:
 lbl1B02 =1B02:
 lbl1B03 =1B03: 0020
@@ -898,7 +890,7 @@ topOfVec=0354:
 vectors =1B00: 0064 0098
 
 Constants reference list:
-c12ports=0C08:
-cIniP11 =0C11:
-cIniP13 =0A13:
-vecSize =0054:
+c12ports=0C08: 007C
+cIniP11 =0C11: 008C
+cIniP13 =0A13: 02F5
+vecSize =0054: 0070
