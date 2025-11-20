@@ -13,7 +13,7 @@ public class TestWriteOutput extends DasmZ80 {
 	ArrayList<AssemblyCode> decoded = new ArrayList<AssemblyCode>();
 
 	Symbols symbols = new Symbols();
-	Symbol entryPoint = symbols.getOrMakeSymbol("__start", SymbolType.entryPoint, new Integer(0), "0");
+	Symbol entryPoint = symbols.getOrMakeSymbol("__start", SymbolType.entryPoint, Integer.valueOf(0), "0");
 
 	ArrayList<Byte> bytes0x00 = new ArrayList<Byte>();
 	bytes0x00.add((byte) 0x00);
